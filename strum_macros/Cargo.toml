@@ -1,0 +1,12 @@
+[package]
+name = "strum_macros"
+version = "0.1.0"
+authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "*"
+syn = "*"
+strum = { path = "../strum" }

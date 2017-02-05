@@ -1,0 +1,6 @@
+[package]
+name = "strum"
+version = "0.1.0"
+authors = ["Peter Glotfelty <glotfelty.2@osu.edu>"]
+
+[dependencies]
