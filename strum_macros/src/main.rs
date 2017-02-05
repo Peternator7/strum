@@ -1,10 +1,11 @@
 #[macro_use]
-extern crate macro_test;
+extern crate strum_macros;
 extern crate strum;
 
+use std::fmt::Debug;
 use strum::IntoEnumIterator;
 
-#[derive(Debug,Eq,PartialEq,FromString,EnumIter,EnumHelp)]
+#[derive(Debug,Eq,PartialEq,EnumString,EnumIter,EnumHelp)]
 enum Color {
     Red(usize),
     Blue { hue: usize },
@@ -12,25 +13,15 @@ enum Color {
     Yellow,
 }
 
-#[derive(EnumHelp)]
-enum Gender {
-    #[strum(serialize="-b",serialize="-boy", help="I'm a boy")]
-    Boy(usize),
-    Girl(char),
+fn debug_enum<E, F, I: Iterator<Item = E>>(pred: F)
+    where E: IntoEnumIterator<Iterator = I>,
+          F: Fn(E)
+{
+    for e in E::iter() {
+        pred(e);
+    }
 }
 
 pub fn main() {
-    println!("Hello world");
-
-    for color in Color::iter() {
-        if let Some(msg) = color.get_help() {
-            println!("{}", msg);
-        }
-
-        if let Some(msg) = color.get_detailed_help() {
-            println!("{}", msg);
-        }
-    }
-
-    println!("{}", (Gender::Boy(1)).get_help().unwrap());
+    debug_enum::<Color, _, _>(|color| println!("{:?}", color.get_detailed_help()));
 }

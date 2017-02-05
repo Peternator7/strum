@@ -7,7 +7,7 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use syn::Attribute;
 
-#[proc_macro_derive(FromString,attributes(strum))]
+#[proc_macro_derive(EnumString,attributes(strum))]
 pub fn from_string(input: TokenStream) -> TokenStream {
     let s = input.to_string();
     let ast = syn::parse_derive_input(&s).unwrap();
@@ -17,21 +17,20 @@ pub fn from_string(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_derive(EnumIter,attributes(strum))]
-pub fn unit_enum_iter(input: TokenStream) -> TokenStream {
+pub fn enum_iter(input: TokenStream) -> TokenStream {
     let s = input.to_string();
     let ast = syn::parse_derive_input(&s).unwrap();
 
-    let toks = enum_iter(&ast);
-    println!("{:?}", toks);
+    let toks = enum_iter_inner(&ast);
     toks.parse().unwrap()
 }
 
 #[proc_macro_derive(EnumHelp,attributes(strum))]
-pub fn unit_enum_help_messages(input: TokenStream) -> TokenStream {
+pub fn enum_help_messages(input: TokenStream) -> TokenStream {
     let s = input.to_string();
     let ast = syn::parse_derive_input(&s).unwrap();
 
-    let toks = enum_help(&ast);
+    let toks = enum_help_inner(&ast);
     toks.parse().unwrap()
 }
 
@@ -128,7 +127,7 @@ fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     }
 }
 
-fn enum_iter(ast: &syn::DeriveInput) -> quote::Tokens {
+fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
     let variants = match ast.body {
         syn::Body::Enum(ref v) => v,
@@ -198,7 +197,7 @@ fn enum_iter(ast: &syn::DeriveInput) -> quote::Tokens {
     }
 }
 
-fn enum_help(ast: &syn::DeriveInput) -> quote::Tokens {
+fn enum_help_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
     let variants = match ast.body {
         syn::Body::Enum(ref v) => v,
@@ -209,13 +208,13 @@ fn enum_help(ast: &syn::DeriveInput) -> quote::Tokens {
     let mut detailed_arms = Vec::new();
     let enabled = variants.iter().filter(|variant| !is_disabled(&variant.attrs));
     for variant in enabled {
-        let mut help = extract_attrs(&variant.attrs, "strum", "help");
+        let mut messages = extract_attrs(&variant.attrs, "strum", "message");
         let ident = &variant.ident;
-        if help.len() > 1 {
-            panic!("More than one help message on {}::{}", name, ident);
+        if messages.len() > 1 {
+            panic!("More than one message on {}::{}", name, ident);
         }
 
-        if let Some(msg) = help.pop() {
+        if let Some(msg) = messages.pop() {
             use syn::VariantData::*;
             let params = match variant.data {
                 Unit => quote::Ident::from(""),
@@ -240,14 +239,14 @@ fn enum_help(ast: &syn::DeriveInput) -> quote::Tokens {
     arms.push(quote!{ _ => None });
     detailed_arms.push(quote!{ _ => None });
     quote!{
-        impl #name {
-            pub fn get_help(&self) -> Option<&str> {
+        impl strum::EnumMessages for #name {
+            fn get_message(&self) -> Option<&str> {
                 match self {
                     #(#arms),*
                 }
             }
 
-            pub fn get_detailed_help(&self) -> Option<&str> {
+            fn get_detailed_message(&self) -> Option<&str> {
                 match self {
                     #(#detailed_arms),*
                 }
