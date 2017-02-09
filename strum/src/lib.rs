@@ -72,7 +72,8 @@ pub trait IntoEnumIterator {
 
 /// EnumMessages can be auto implemented by `strum_macros`. This trait is designed
 /// to allow associating a piece of text with specific variants automatically.
-pub trait EnumMessages {
-    fn get_message(&self) -> &str;
-    fn get_detailed_message(&self) -> &str;
+pub trait EnumMessage {
+    fn get_message(&self) -> Option<&str>;
+    fn get_detailed_message(&self) -> Option<&str>;
+    fn get_serializations(&self) -> &[&str];
 }

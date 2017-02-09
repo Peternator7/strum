@@ -1,3 +1,5 @@
+//! The strum_macros crate should be use in coordination with the `strum` crate.
+
 extern crate strum;
 extern crate syn;
 #[macro_use]
@@ -22,15 +24,16 @@ pub fn enum_iter(input: TokenStream) -> TokenStream {
     let ast = syn::parse_derive_input(&s).unwrap();
 
     let toks = enum_iter_inner(&ast);
+    println!("{}", toks);
     toks.parse().unwrap()
 }
 
-#[proc_macro_derive(EnumHelp,attributes(strum))]
-pub fn enum_help_messages(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(EnumMessage,attributes(strum))]
+pub fn enum_messages(input: TokenStream) -> TokenStream {
     let s = input.to_string();
     let ast = syn::parse_derive_input(&s).unwrap();
 
-    let toks = enum_help_inner(&ast);
+    let toks = enum_message_inner(&ast);
     toks.parse().unwrap()
 }
 
@@ -58,6 +61,15 @@ fn extract_attrs<'a>(attrs: &'a [Attribute], attr: &str, prop: &str) -> Vec<&'a 
         }).collect()
 }
 
+fn unique_attr<'a>(attrs: &'a [Attribute], attr: &str, prop: &str) -> Option<&'a str> {
+    let mut curr = extract_attrs(attrs, attr, prop);
+    if curr.len() > 1 {
+        panic!("More than one property: {} found on variant", prop);
+    }
+
+    curr.pop()
+}
+
 fn is_disabled(attrs: &[Attribute]) -> bool {
     let v = extract_attrs(attrs, "strum", "disabled");
     match v.len() {
@@ -69,11 +81,14 @@ fn is_disabled(attrs: &[Attribute]) -> bool {
 
 fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.body {
         syn::Body::Enum(ref v) => v,
         _ => panic!("FromString only works on Enums"),
     };
 
+    let mut has_default = false;
+    let mut default = quote! { _ => Err(strum::ParseError::VariantNotFound) };
     let mut arms = Vec::new();
     for variant in variants {
         use syn::VariantData::*;
@@ -82,6 +97,27 @@ fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
         // Look at all the serialize attributes.
         let mut attrs = extract_attrs(&variant.attrs, "strum", "serialize");
         if is_disabled(&variant.attrs) {
+            continue;
+        }
+
+        if let Some("true") = unique_attr(&variant.attrs, "strum", "default") {
+            if has_default {
+                panic!("Can't have multiple default variants");
+            }
+
+            if let Tuple(ref fields) = variant.data {
+                if fields.len() != 1 {
+                    panic!("Default only works on unit structs with a single String parameter");
+                }
+
+                default = quote!{
+                    default => Ok(#name::#ident (default.into()))
+                };
+            } else {
+                panic!("Default only works on unit structs with a single String parameter");
+            }
+
+            has_default = true;
             continue;
         }
 
@@ -114,11 +150,13 @@ fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
 
         arms.push(quote!{ #(#attrs)|* => Ok(#name::#ident #params) });
     }
-    arms.push(quote! { _ => Err(strum::ParseError::VariantNotFound) });
+
+    arms.push(default);
+
     quote!{
-        impl std::str::FromStr for #name {
+        impl #impl_generics std::str::FromStr for #name #ty_generics #where_clause {
             type Err = strum::ParseError;
-            fn from_str(s: &str) -> Result<#name,strum::ParseError> {
+            fn from_str(s: &str) -> Result<#name #ty_generics,strum::ParseError> {
                 match s {
                     #(#arms),*
                 }
@@ -129,6 +167,19 @@ fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
 
 fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
+    let gen = &ast.generics;
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
+    if gen.lifetimes.len() > 0 {
+        panic!("Enum Iterator isn't supported on Enums with lifetimes. The resulting enums would \
+                be unbounded.");
+    }
+
+    let phantom_data = if gen.ty_params.len() > 0 {
+        quote!{ #ty_generics}
+    } else {
+        quote! { < () > }
+    };
+
     let variants = match ast.body {
         syn::Body::Enum(ref v) => v,
         _ => panic!("EnumIter only works on Enums"),
@@ -168,23 +219,25 @@ fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     arms.push(quote! { _ => None });
     let iter_name = quote::Ident::from(&*format!("{}Iter", name));
     quote!{
-        struct #iter_name {
+        struct #iter_name #ty_generics {
             idx: usize,
+            marker: std::marker::PhantomData #phantom_data,
         }
 
-        impl strum::IntoEnumIterator for #name {
-            type Iterator = #iter_name;
-            fn iter() -> #iter_name {
+        impl #impl_generics strum::IntoEnumIterator for #name #ty_generics #where_clause {
+            type Iterator = #iter_name #ty_generics;
+            fn iter() -> #iter_name #ty_generics {
                 #iter_name {
                     idx:0,
+                    marker: std::marker::PhantomData,
                 }
             }
         }
         
-        impl Iterator for #iter_name {
-            type Item = #name;
+        impl #impl_generics Iterator for #iter_name #ty_generics #where_clause {
+            type Item = #name #ty_generics;
             
-            fn next(&mut self) -> Option<#name> {
+            fn next(&mut self) -> Option<#name #ty_generics> {
                 use std::default::Default;
                 let output = match self.idx {
                     #(#arms),*
@@ -197,8 +250,9 @@ fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     }
 }
 
-fn enum_help_inner(ast: &syn::DeriveInput) -> quote::Tokens {
+fn enum_message_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.body {
         syn::Body::Enum(ref v) => v,
         _ => panic!("EnumHelp only works on Enums"),
@@ -206,40 +260,66 @@ fn enum_help_inner(ast: &syn::DeriveInput) -> quote::Tokens {
 
     let mut arms = Vec::new();
     let mut detailed_arms = Vec::new();
+    let mut serializations = Vec::new();
+
     let enabled = variants.iter().filter(|variant| !is_disabled(&variant.attrs));
     for variant in enabled {
-        let mut messages = extract_attrs(&variant.attrs, "strum", "message");
+        let messages = unique_attr(&variant.attrs, "strum", "message");
+        let detailed_messages = unique_attr(&variant.attrs, "strum", "detailed_message");
         let ident = &variant.ident;
-        if messages.len() > 1 {
-            panic!("More than one message on {}::{}", name, ident);
-        }
 
-        if let Some(msg) = messages.pop() {
-            use syn::VariantData::*;
-            let params = match variant.data {
-                Unit => quote::Ident::from(""),
-                Tuple(..) => quote::Ident::from("(..)"),
-                Struct(..) => quote::Ident::from("{{..}}"),
-            };
+        use syn::VariantData::*;
+        let params = match variant.data {
+            Unit => quote::Ident::from(""),
+            Tuple(..) => quote::Ident::from("(..)"),
+            Struct(..) => quote::Ident::from("{..}"),
+        };
+
+        if let Some(msg) = messages {
+            let params = params.clone();
 
             // Push the simple message.
-            arms.push(quote!{ &#name::#ident #params => Some(#msg) });
+            let tokens = quote!{ &#name::#ident #params => Some(#msg) };
+            arms.push(tokens.clone());
 
-            // Create the more complex message.
-            let mut serialize = extract_attrs(&variant.attrs, "strum", "serialize");
-            if serialize.len() == 0 {
-                serialize.push(ident.as_ref());
+            if detailed_messages.is_none() {
+                detailed_arms.push(tokens);
+            }
+        }
+
+        if let Some(msg) = detailed_messages {
+            let params = params.clone();
+            // Push the simple message.
+            detailed_arms.push(quote!{ &#name::#ident #params => Some(#msg) });
+        }
+
+        // Handle the serializations
+        {
+            let mut serialization_variants = extract_attrs(&variant.attrs, "strum", "serialize");
+            if serialization_variants.len() == 0 {
+                serialization_variants.push(ident.as_ref());
             }
 
-            let detailed_msg = format!("{}: {}", serialize.join(", "), msg);
-            detailed_arms.push(quote!{&#name::#ident #params => Some(#detailed_msg) });
+            let count = serialization_variants.len();
+            serializations.push(quote!{
+                &#name::#ident #params => {
+                    static ARR: [&'static str; #count] = [#(#serialization_variants),*];
+                    &ARR
+                }
+            });
         }
     }
 
-    arms.push(quote!{ _ => None });
-    detailed_arms.push(quote!{ _ => None });
+    if arms.len() < variants.len() {
+        arms.push(quote!{ _ => None });
+    }
+
+    if detailed_arms.len() < variants.len() {
+        detailed_arms.push(quote!{ _ => None });
+    }
+
     quote!{
-        impl strum::EnumMessages for #name {
+        impl #impl_generics strum::EnumMessage for #name #ty_generics #where_clause {
             fn get_message(&self) -> Option<&str> {
                 match self {
                     #(#arms),*
@@ -249,6 +329,12 @@ fn enum_help_inner(ast: &syn::DeriveInput) -> quote::Tokens {
             fn get_detailed_message(&self) -> Option<&str> {
                 match self {
                     #(#detailed_arms),*
+                }
+            }
+
+            fn get_serializations(&self) -> &[&str] {
+                match self {
+                    #(#serializations),*
                 }
             }
         }

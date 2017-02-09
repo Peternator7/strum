@@ -9,4 +9,4 @@ proc-macro = true
 [dependencies]
 quote = "*"
 syn = "*"
-strum = { git = "https://github.com/Peternator7/strum" }
+strum = { path = "../strum" }
