@@ -4,5 +4,5 @@ version = "0.1.0"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 
 [dependencies]
-strum = { git = "https://github.com/Peternator7/strum" }
-strum_macros = { git = "https://github.com/Peternator7/strum" }
+strum = { path = "../strum" }
+strum_macros = { path = "../strum_macros" }

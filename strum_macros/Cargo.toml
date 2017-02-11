@@ -5,8 +5,8 @@ authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 
 [lib]
 proc-macro = true
+name = "strum_macros"
 
 [dependencies]
 quote = "*"
 syn = "*"
-strum = { git = "https://github.com/Peternator7/strum" }

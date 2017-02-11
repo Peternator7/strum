@@ -3,4 +3,8 @@ name = "strum"
 version = "0.1.0"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 
-[dependencies]
+[dev-dependencies]
+strum_macros = { path = "../strum_macros" }
+
+[lib]
+name = "strum"

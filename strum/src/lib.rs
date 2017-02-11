@@ -18,23 +18,24 @@
 //!
 //! And you need to add these to the root of your project, either lib.rs or main.rs.
 //!
-//! ```dontrun
+//! ```rust
 //! // Strum contains all the trait definitions
 //! extern crate strum;
 //! #[macro_use]
 //! extern crate strum_macros;
 //!
 //! // Import the traits we use into scope.
-//! use strum::*;
+//! use strum::{IntoEnumIterator, EnumMessage};
 //!
 //! #[derive(EnumString,EnumIter,EnumMessage)]
 //! pub enum Color {
 //!     Red,
 //!     #[strum(serialize="b", serialize="blue", serialize="verboseblue")]
 //!     Blue,
-//!     #[strum(help="This is the color yellow")]
+//!     #[strum(message="This is the color yellow")]
 //!     Yellow
 //! }
+//! # fn main() {}
 //! ```
 //!
 //! # Strum Macros
@@ -44,30 +45,41 @@
 //! 1. `EnumString`: EnumString derives `std::str::FromStr` on the enum. Let's look an example of how the code is generated to
 //!     see what various attributes do to generated code.
 //!
-//!     ```dontrun
+//!     ```
+//!     # extern crate strum;
+//!     # #[macro_use] extern crate strum_macros;
 //!     #[derive(EnumString)]
 //!     enum Color {
 //!         Red,
-//!         Green { range:usize }, // The Default value will be inserted into range.
-//!         #[strum(serialize="blue",serialize="b")] // We can match on multiple different patterns.
+//!
+//!         // The Default value will be inserted into range if we match "Green".
+//!         Green { range:usize },
+//!
+//!         // We can match on multiple different patterns.
+//!         #[strum(serialize="blue",serialize="b")]
 //!         Blue(usize),
-//!         #[strum(disabled="true")] // Notice that we can disable certain variants from being found.
+//!
+//!         // Notice that we can disable certain variants from being found
+//!         #[strum(disabled="true")]
 //!         Yellow,
 //!     }
 //!
-//!     // The generated code will look like:
+//!     /*
+//!     //The generated code will look like:
 //!     impl std::str::FromStr for Color {
 //!         type Err = strum::ParseError;
 //!
-//!         fn from_str(s: &str) -> Result<#name #ty_generics,strum::ParseError> {
+//!         fn from_str(s: &str) -> Result<Color, strum::ParseError> {
 //!             match s {
 //!                 "Red" => Ok(Color::Red),
-//!                 "Green" => Ok(Green { range:Default::default(); }),
-//!                 "blue" | "b" => Ok(Blue(Default::default())),
+//!                 "Green" => Ok(Color::Green { range:Default::default() }),
+//!                 "blue" | "b" => Ok(Color::Blue(Default::default())),
 //!                 _ => Err(strum::ParseError::VariantNotFound),
 //!             }
 //!         }
 //!     }
+//!     */
+//!     # fn main() {}
 //!     ```
 //!
 //!     Notice how "Green" and "Blue" don't match on the associated data. That is intentional as parsing the input string
@@ -82,9 +94,12 @@
 //!     of that to avoid potential naming collisions with this plugin. `EnumIter` implements the type `strum::IntoEnumIter` for
 //!     your enum. This let's you write code like:
 //!
-//!     ```dontrun
+//!     ```rust
+//!     # extern crate strum;
+//!     # #[macro_use] extern crate strum_macros;
+//!     # use std::fmt::Debug;
 //!     // You need to bring the type into scope to use it!!!
-//!     use strum::IntoEnumIter;
+//!     use strum::IntoEnumIterator;
 //!
 //!     #[derive(EnumIter,Debug)]
 //!     enum Color {
@@ -94,16 +109,27 @@
 //!         Yellow,
 //!     }
 //!
-//!     // Generically print out all variants of an enum.
-//!     // The 2nd bound is unpleasent looking, but can always be inferred.
-//!     fn debug_enum<E,I:Iterator<Item=E>>() where E: IntoEnumIter<Iterator=I> {
+//!     // It's simple to iterate over the variants of an enum.
+//!     fn simple_example() {
+//!         for color in Color::iter() {
+//!             println!("My favorite color is {:?}", color);
+//!         }
+//!     }
+//!
+//!     // Iterating over any enum requires 2 type parameters
+//!     // A 3rd is used in this example to allow passing a predicate
+//!     fn generic_iterator<E, I, F>(pred: F)
+//!                         where E: IntoEnumIterator<Iterator=I>,
+//!                               I: Iterator<Item=E>,
+//!                               F: Fn(E) {
 //!         for e in E::iter() {
-//!             println!("{:?}", e);
+//!             pred(e)
 //!         }
 //!     }
 //!
 //!     fn main() {
-//!         debug_enum<Color,_>();
+//!         simple_example();
+//!         generic_iterator::<Color,_, _>(|color| println!("{:?}", color));
 //!     }
 //!     ```
 //!
@@ -116,7 +142,9 @@
 //!     You can also provided a `#[strum(detailed_message="Here is a detailed message")]` attribute to create a
 //!     seperate more detailed message than the first. Here's what code will be generated for you:
 //!
-//!     ```dontrun
+//!     ```rust
+//!     # extern crate strum;
+//!     # #[macro_use] extern crate strum_macros;
 //!     // You need to bring the type into scope to use it!!!
 //!     use strum::EnumMessage;
 //!
@@ -130,12 +158,13 @@
 //!         Blue(usize),
 //!     }
 //!
+//!     /*
 //!     // Generated code
 //!     impl EnumMessage for Color {
 //!         fn get_message(&self) -> Option<&str> {
 //!             match self {
 //!                 &Color::Red => Some("Red"),
-//!                 &Color::Green => Some("Simply Green"),
+//!                 &Color::Green {..} => Some("Simply Green"),
 //!                 _ => None
 //!             }
 //!         }
@@ -143,28 +172,30 @@
 //!         fn get_detailed_message(&self) -> Option<&str> {
 //!             match self {
 //!                 &Color::Red => Some("This is very red"),
-//!                 &Color::Green => Some("Simply Green"),
+//!                 &Color::Green {..}=> Some("Simply Green"),
 //!                 _ => None
 //!             }
 //!         }
 //!
-//!         fn get_serializations(&self) -> Option<&str> {
+//!         fn get_serializations(&self) -> &[&str] {
 //!             match self {
 //!                 &Color::Red => {
 //!                     static ARR: [&'static str; 1] = ["Red"];
 //!                     &ARR
 //!                 },
-//!                 &Color::Green => {
+//!                 &Color::Green {..}=> {
 //!                     static ARR: [&'static str; 1] = ["Green"];
 //!                     &ARR
 //!                 },
-//!                 &Color::Blue => {
+//!                 &Color::Blue (..) => {
 //!                     static ARR: [&'static str; 2] = ["b", "blue"];
 //!                     &ARR
 //!                 },
 //!             }
 //!         }
 //!     }
+//!     */
+//!     # fn main() {}
 //!     ```
 //!
 //! # Using Strum Attributes
@@ -178,13 +209,13 @@
 //! - `default`: Can be set on a single variant in an enum of the form `Variant(T)` where `T: From<&str>`.
 //!    This tells the plugin when it's generating the code for `FromStr()` to generate
 //!
-//!     ```dontrun
+//!     ```ignore
 //!     default => Ok(Variant(default.into()))
 //!     ```
 //!
 //!     as the last line of the match statement instead of generating the usual code which is:
 //!
-//!     ```dontrun
+//!     ```ignore
 //!     _ => Err(strum::ParseError::VariantNotFound)
 //!     ```
 //!
@@ -205,33 +236,54 @@
 //!
 //! Using `EnumMessage` for quickly implementing `Error`
 //!
-//! ```dontrun
+//! ```rust
+//! extern crate strum;
+//! #[macro_use]
+//! extern crate strum_macros;
+//! # use std::error::Error;
+//! # use std::fmt::*;
+//! use strum::EnumMessage;
+//!
 //! #[derive(Debug, EnumMessage)]
 //! enum ServerError {
-//!     #[strum(message="There was an error in the network connection")]
+//!     #[strum(message="A network error occured")]
+//!     #[strum(detailed_message="Try checking your connection.")]
 //!     NetworkError,
-//!     #[strum(message="Could read the user input")]
+//!     #[strum(message="User input error.")]
+//!     #[strum(detailed_message="There was an error parsing user input. Please try again.")]
 //!     InvalidUserInputError,
+//! }
+//!
+//! impl Display for ServerError {
+//!     fn fmt(&self, f: &mut Formatter) -> Result {
+//!         write!(f, "{}", self.get_message().unwrap())
+//!     }
 //! }
 //!
 //! impl Error for ServerError {
 //!     fn description(&self) -> &str {
-//!         self.get_message().unwrap()
+//!         self.get_detailed_message().unwrap()
 //!     }
 //! }
+//! # fn main() {}
 //! ```
 //!
 //! Using `EnumString` to tokenize a series of inputs:
 //!
-//! ```dontrun
+//! ```rust
+//! extern crate strum;
+//! #[macro_use]
+//! extern crate strum_macros;
+//! use std::str::FromStr;
+//!
 //! #[derive(Debug, EnumString)]
 //! enum Tokens {
 //!     #[strum(serialize="function")]
 //!     Function,
-//!     #[strum(serialize="("))]
-//!     OpenParen
-//!     #[strum(serialize=")"))]
-//!     CloseParen
+//!     #[strum(serialize="(")]
+//!     OpenParen,
+//!     #[strum(serialize=")")]
+//!     CloseParen,
 //!     #[strum(default="true")]
 //!     Ident(String)
 //! }
@@ -247,8 +299,28 @@
 
 /// The ParseError enum is a collection of all the possible reasons
 /// an enum can fail to parse from a string.
+#[derive(Debug,Clone,Copy,Eq,PartialEq,Hash)]
 pub enum ParseError {
     VariantNotFound,
+}
+
+impl std::fmt::Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        match self {
+            &ParseError::VariantNotFound => write!(f, "Matching variant not found"),
+        }
+    }
+}
+
+impl std::error::Error for ParseError {
+    fn description(&self) -> &str {
+        match self {
+            &ParseError::VariantNotFound => {
+                "Unable to find a variant of the given enum matching the string given. Matching \
+                 can be extended with the Serialize attribute and is case sensitive."
+            }
+        }
+    }
 }
 
 /// This trait designates that an `Enum` can be iterated over. It can

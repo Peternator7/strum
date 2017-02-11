@@ -1,6 +1,5 @@
 //! The strum_macros crate should be use in coordination with the `strum` crate.
 
-extern crate strum;
 extern crate syn;
 #[macro_use]
 extern crate quote;
@@ -24,7 +23,6 @@ pub fn enum_iter(input: TokenStream) -> TokenStream {
     let ast = syn::parse_derive_input(&s).unwrap();
 
     let toks = enum_iter_inner(&ast);
-    println!("{}", toks);
     toks.parse().unwrap()
 }
 
@@ -156,7 +154,7 @@ fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     quote!{
         impl #impl_generics std::str::FromStr for #name #ty_generics #where_clause {
             type Err = strum::ParseError;
-            fn from_str(s: &str) -> Result<#name #ty_generics,strum::ParseError> {
+            fn from_str(s: &str) -> Result< #name #ty_generics , strum::ParseError> {
                 match s {
                     #(#arms),*
                 }
@@ -169,6 +167,8 @@ fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
     let gen = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
+    let vis = &ast.vis;
+
     if gen.lifetimes.len() > 0 {
         panic!("Enum Iterator isn't supported on Enums with lifetimes. The resulting enums would \
                 be unbounded.");
@@ -219,7 +219,7 @@ fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     arms.push(quote! { _ => None });
     let iter_name = quote::Ident::from(&*format!("{}Iter", name));
     quote!{
-        struct #iter_name #ty_generics {
+        #vis struct #iter_name #ty_generics {
             idx: usize,
             marker: std::marker::PhantomData #phantom_data,
         }
@@ -262,8 +262,7 @@ fn enum_message_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let mut detailed_arms = Vec::new();
     let mut serializations = Vec::new();
 
-    let enabled = variants.iter().filter(|variant| !is_disabled(&variant.attrs));
-    for variant in enabled {
+    for variant in variants {
         let messages = unique_attr(&variant.attrs, "strum", "message");
         let detailed_messages = unique_attr(&variant.attrs, "strum", "detailed_message");
         let ident = &variant.ident;
@@ -274,6 +273,27 @@ fn enum_message_inner(ast: &syn::DeriveInput) -> quote::Tokens {
             Tuple(..) => quote::Ident::from("(..)"),
             Struct(..) => quote::Ident::from("{..}"),
         };
+
+        // You can't disable getting the serializations.
+        {
+            let mut serialization_variants = extract_attrs(&variant.attrs, "strum", "serialize");
+            if serialization_variants.len() == 0 {
+                serialization_variants.push(ident.as_ref());
+            }
+
+            let count = serialization_variants.len();
+            serializations.push(quote!{
+                &#name::#ident #params => {
+                    static ARR: [&'static str; #count] = [#(#serialization_variants),*];
+                    &ARR
+                }
+            });
+        }
+
+        // But you can disable the messages.
+        if is_disabled(&variant.attrs) {
+            continue;
+        }
 
         if let Some(msg) = messages {
             let params = params.clone();
@@ -291,22 +311,6 @@ fn enum_message_inner(ast: &syn::DeriveInput) -> quote::Tokens {
             let params = params.clone();
             // Push the simple message.
             detailed_arms.push(quote!{ &#name::#ident #params => Some(#msg) });
-        }
-
-        // Handle the serializations
-        {
-            let mut serialization_variants = extract_attrs(&variant.attrs, "strum", "serialize");
-            if serialization_variants.len() == 0 {
-                serialization_variants.push(ident.as_ref());
-            }
-
-            let count = serialization_variants.len();
-            serializations.push(quote!{
-                &#name::#ident #params => {
-                    static ARR: [&'static str; #count] = [#(#serialization_variants),*];
-                    &ARR
-                }
-            });
         }
     }
 
