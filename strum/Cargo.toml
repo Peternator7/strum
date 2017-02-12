@@ -8,9 +8,12 @@ description = "Helpful macros for working with enums and strings"
 keywords = ["enum", "string", "macros", "proc-macros"]
 categories = ["development-tools::procedural-macro-helpers", "parsing"]
 
-documentation = "https://github.com/Peternator7/strum"
+documentation = "https://docs.rs/strum/badge.svg"
 homepage = "https://github.com/Peternator7/strum"
 readme = "../README.md"
 
 [dev-dependencies]
 strum_macros = { git = "https://github.com/Peternator7/strum" }
+
+[badges]
+travis-ci = { repository = "Peternator7/strum" }
