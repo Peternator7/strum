@@ -1,5 +1,9 @@
 # Strum
 
+[![Build Status](https://travis-ci.org/Peternator7/strum.svg?branch=master)](https://travis-ci.org/Peternator7/strum)
+[![Latest Version](https://img.shields.io/crates/v/strum.svg)](https://crates.io/crates/strum)
+[![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/strum/badge.svg)
+
 Strum is a set of macros and traits for working with
 enums and strings easier in Rust.
 
