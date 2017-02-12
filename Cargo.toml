@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "strum",
+    "strum_macros",
+    "strum_tests",
+]

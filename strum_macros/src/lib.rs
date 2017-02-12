@@ -1,4 +1,11 @@
-//! The strum_macros crate should be use in coordination with the `strum` crate.
+//! # Strum
+//!
+//! Strum is a set of macros and traits for working with
+//! enums and strings easier in Rust.
+//!
+//! # Documentation
+//!
+//! The documentation for this crate is found in the `strum` crate.
 
 extern crate syn;
 #[macro_use]
