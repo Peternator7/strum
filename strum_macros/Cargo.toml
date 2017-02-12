@@ -2,6 +2,15 @@
 name = "strum_macros"
 version = "0.1.0"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
+license = "MIT"
+
+description = "Helpful macros for working with enums and strings"
+keywords = ["enum", "string", "macros", "proc-macros"]
+categories = ["development-tools::procedural-macro-helpers", "parsing"]
+
+documentation = "https://docs.rs/strum"
+homepage = "https://github.com/Peternator7/strum"
+readme = "../README.md"
 
 [lib]
 proc-macro = true
