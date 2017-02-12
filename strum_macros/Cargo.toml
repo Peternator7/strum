@@ -17,5 +17,5 @@ proc-macro = true
 name = "strum_macros"
 
 [dependencies]
-quote = "*"
-syn = "*"
+quote = "0.3.12"
+syn = "0.11.4"
