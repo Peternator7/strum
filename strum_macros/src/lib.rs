@@ -111,7 +111,7 @@ fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     };
 
     let mut has_default = false;
-    let mut default = quote! { _ => Err(strum::ParseError::VariantNotFound) };
+    let mut default = quote! { _ => ::std::result::Result::Err(::strum::ParseError::VariantNotFound) };
     let mut arms = Vec::new();
     for variant in variants {
         use syn::VariantData::*;
@@ -134,7 +134,7 @@ fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
                 }
 
                 default = quote!{
-                    default => Ok(#name::#ident (default.into()))
+                    default => ::std::result::Result::Ok(#name::#ident (default.into()))
                 };
             } else {
                 panic!("Default only works on unit structs with a single String parameter");
@@ -171,15 +171,15 @@ fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
             }
         };
 
-        arms.push(quote!{ #(#attrs)|* => Ok(#name::#ident #params) });
+        arms.push(quote!{ #(#attrs)|* => ::std::result::Result::Ok(#name::#ident #params) });
     }
 
     arms.push(default);
 
     quote!{
-        impl #impl_generics std::str::FromStr for #name #ty_generics #where_clause {
-            type Err = strum::ParseError;
-            fn from_str(s: &str) -> Result< #name #ty_generics , strum::ParseError> {
+        impl #impl_generics ::std::str::FromStr for #name #ty_generics #where_clause {
+            type Err = ::strum::ParseError;
+            fn from_str(s: &str) -> ::std::result::Result< #name #ty_generics , Self::Err> {
                 match s {
                     #(#arms),*
                 }
@@ -238,15 +238,15 @@ fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
             }
         };
 
-        arms.push(quote!{#idx => Some(#name::#ident #params)});
+        arms.push(quote!{#idx => ::std::option::Option::Some(#name::#ident #params)});
     }
 
-    arms.push(quote! { _ => None });
+    arms.push(quote! { _ => ::std::option::Option::None });
     let iter_name = quote::Ident::from(&*format!("{}Iter", name));
     quote!{
         #vis struct #iter_name #ty_generics {
             idx: usize,
-            marker: std::marker::PhantomData #phantom_data,
+            marker: ::std::marker::PhantomData #phantom_data,
         }
 
         impl #impl_generics strum::IntoEnumIterator for #name #ty_generics #where_clause {
@@ -324,7 +324,7 @@ fn enum_message_inner(ast: &syn::DeriveInput) -> quote::Tokens {
             let params = params.clone();
 
             // Push the simple message.
-            let tokens = quote!{ &#name::#ident #params => Some(#msg) };
+            let tokens = quote!{ &#name::#ident #params => ::std::option::Option::Some(#msg) };
             arms.push(tokens.clone());
 
             if detailed_messages.is_none() {
@@ -335,27 +335,27 @@ fn enum_message_inner(ast: &syn::DeriveInput) -> quote::Tokens {
         if let Some(msg) = detailed_messages {
             let params = params.clone();
             // Push the simple message.
-            detailed_arms.push(quote!{ &#name::#ident #params => Some(#msg) });
+            detailed_arms.push(quote!{ &#name::#ident #params => ::std::option::Option::Some(#msg) });
         }
     }
 
     if arms.len() < variants.len() {
-        arms.push(quote!{ _ => None });
+        arms.push(quote!{ _ => ::std::option::Option::None });
     }
 
     if detailed_arms.len() < variants.len() {
-        detailed_arms.push(quote!{ _ => None });
+        detailed_arms.push(quote!{ _ => ::std::option::Option::None });
     }
 
     quote!{
-        impl #impl_generics strum::EnumMessage for #name #ty_generics #where_clause {
-            fn get_message(&self) -> Option<&str> {
+        impl #impl_generics ::strum::EnumMessage for #name #ty_generics #where_clause {
+            fn get_message(&self) -> ::std::option::Option<&str> {
                 match self {
                     #(#arms),*
                 }
             }
 
-            fn get_detailed_message(&self) -> Option<&str> {
+            fn get_detailed_message(&self) -> ::std::option::Option<&str> {
                 match self {
                     #(#detailed_arms),*
                 }
