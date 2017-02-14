@@ -14,6 +14,7 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use syn::Attribute;
+use std::env;
 
 #[proc_macro_derive(EnumString,attributes(strum))]
 pub fn from_string(input: TokenStream) -> TokenStream {
@@ -21,6 +22,7 @@ pub fn from_string(input: TokenStream) -> TokenStream {
     let ast = syn::parse_derive_input(&s).unwrap();
 
     let toks = from_string_inner(&ast);
+    debug_print_generated(&ast, &toks);
     toks.parse().unwrap()
 }
 
@@ -30,6 +32,7 @@ pub fn enum_iter(input: TokenStream) -> TokenStream {
     let ast = syn::parse_derive_input(&s).unwrap();
 
     let toks = enum_iter_inner(&ast);
+    debug_print_generated(&ast, &toks);
     toks.parse().unwrap()
 }
 
@@ -39,7 +42,22 @@ pub fn enum_messages(input: TokenStream) -> TokenStream {
     let ast = syn::parse_derive_input(&s).unwrap();
 
     let toks = enum_message_inner(&ast);
+    debug_print_generated(&ast, &toks);
     toks.parse().unwrap()
+}
+
+fn debug_print_generated(ast: &syn::DeriveInput, toks: &quote::Tokens) {
+    let ident = ast.ident.as_ref();
+    let debug = env::var("STRUM_DEBUG");
+    if let Ok(s) = debug {
+        if s == "1" {
+            println!("{}", toks);
+        }
+
+        if s == ident {
+            println!("{}", toks);
+        }
+    }
 }
 
 fn extract_attrs<'a>(attrs: &'a [Attribute], attr: &str, prop: &str) -> Vec<&'a str> {

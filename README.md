@@ -280,6 +280,12 @@ fn main() {
 }
 ```
 
+# Debugging
+
+To see the generated code, set the DEBUG_STRUM environment variable before compiling your code.
+`DEBUG_STRUM=1` will dump all of the generated code for every type. `DEBUG_STRUM=YourType` will
+only dump the code generated on a type named `YourType`.
+
 # Name
 
 Strum is short for STRing enUM because it's a library for augmenting enums with additional
