@@ -111,7 +111,8 @@ fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     };
 
     let mut has_default = false;
-    let mut default = quote! { _ => ::std::result::Result::Err(::strum::ParseError::VariantNotFound) };
+    let mut default =
+        quote! { _ => ::std::result::Result::Err(::strum::ParseError::VariantNotFound) };
     let mut arms = Vec::new();
     for variant in variants {
         use syn::VariantData::*;
@@ -200,7 +201,9 @@ fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     }
 
     let phantom_data = if gen.ty_params.len() > 0 {
-        quote!{ #ty_generics}
+        let g = gen.ty_params.iter().map(|param| &param.ident).collect::<Vec<_>>();
+        // quote!{ #ty_generics}
+        quote!{ < ( #(#g),* ) > }
     } else {
         quote! { < () > }
     };
