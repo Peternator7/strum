@@ -64,9 +64,9 @@
 //!     /*
 //!     //The generated code will look like:
 //!     impl ::std::str::FromStr for Color {
-//!         type Err = strum::ParseError;
+//!         type Err = ::strum::ParseError;
 //!
-//!         fn from_str(s: &str) -> Result<Color, Self::Error> {
+//!         fn from_str(s: &str) -> ::std::result::Result<Color, Self::Error> {
 //!             match s {
 //!                 "Red" => ::std::result::Result::Ok(Color::Red),
 //!                 "Green" => ::std::result::Result::Ok(Color::Green { range:Default::default() }),
@@ -282,16 +282,10 @@
 //!
 //! # Debugging
 //!
-//! To see the generated code, set the DEBUG_STRUM environment variable before compiling your code.
-//! `DEBUG_STRUM=1` will dump all of the generated code for every type. `DEBUG_STRUM=YourType` will
+//! To see the generated code, set the STRUM_DEBUG environment variable before compiling your code.
+//! `STRUM_DEBUG=1` will dump all of the generated code for every type. `STRUM_DEBUG=YourType` will
 //! only dump the code generated on a type named YourType.
 //!
-//! # Name
-//!
-//! Strum is short for STRing enUM because it's a library for augmenting enums with additional
-//! information through strings.
-//!
-//! Strumming is also a very whimsical motion, much like writing Rust code.
 
 /// The ParseError enum is a collection of all the possible reasons
 /// an enum can fail to parse from a string.
@@ -302,6 +296,8 @@ pub enum ParseError {
 
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        // We could use our macro here, but this way we don't take a dependency on the
+        // macros crate.
         match self {
             &ParseError::VariantNotFound => write!(f, "Matching variant not found"),
         }

@@ -74,3 +74,14 @@ enum Lifetime<'a> {
 fn lifetime_test() {
     assert_eq!(Lifetime::Life(""), Lifetime::from_str("Life").unwrap());
 }
+
+#[derive(Debug,Eq,PartialEq,EnumString)]
+enum Generic<T: Default> {
+    Gen(T),
+    None,
+}
+
+#[test]
+fn generic_test() {
+    assert_eq!(Generic::Gen(""), Generic::from_str("Gen").unwrap());
+}

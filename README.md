@@ -27,6 +27,19 @@ extern crate strum;
 extern crate strum_macros;
 ```
 
+# Contributing
+
+Thanks for your interest in contributing. The project is divided into 3 parts, the traits are in the 
+`/strum` folder. The procedural macros are in the `/strum_macros` folder, and the integration tests are 
+in `/strum_tests`. Tests are still a work in progress, but they should be added in the test project to 
+verify that the macros are working correctly with the trait definitions.
+
+# Debugging
+
+To see the generated code, set the STRUM_DEBUG environment variable before compiling your code.
+`STRUM_DEBUG=1` will dump all of the generated code for every type. `STRUM_DEBUG=YourType` will
+only dump the code generated on a type named `YourType`.
+
 # Strum Macros
 
 Strum has implemented the following macros:
@@ -269,20 +282,7 @@ fn main() {
                           Tokens::OpenParen,
                           Tokens::CloseParen]);
 }
-```
-
-# Contributing
-
-Thanks for your interest in contributing. The project is divided into 3 parts, the traits are in the 
-`/strum` folder. The procedural macros are in the `/strum_macros` folder, and the integration tests are 
-in `/strum_tests`. Tests are still a work in progress, but they should be added in the test project to 
-verify that the macros are working correctly with the trait definitions.
-
-# Debugging
-
-To see the generated code, set the DEBUG_STRUM environment variable before compiling your code.
-`DEBUG_STRUM=1` will dump all of the generated code for every type. `DEBUG_STRUM=YourType` will
-only dump the code generated on a type named `YourType`.
+``
 
 # Name
 
