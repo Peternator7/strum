@@ -63,14 +63,14 @@ Strum has implemented the following macros:
     /*
     //The generated code will look like:
     impl std::str::FromStr for Color {
-        type Err = strum::ParseError;
+        type Err = ::strum::ParseError;
 
-        fn from_str(s: &str) -> Result<Color, strum::ParseError> {
+        fn from_str(s: &str) -> ::std::result::Result<Color, Self::Error> {
             match s {
-                "Red" => Ok(Color::Red),
-                "Green" => Ok(Color::Green { range:Default::default() }),
-                "blue" | "b" => Ok(Color::Blue(Default::default())),
-                _ => Err(strum::ParseError::VariantNotFound),
+                "Red" => ::std::result::Result::Ok(Color::Red),
+                "Green" => ::std::result::Result::Ok(Color::Green { range:Default::default() }),
+                "blue" | "b" => ::std::result::Result::Ok(Color::Blue(Default::default())),
+                _ => ::std::result::Result::Err(::strum::ParseError::VariantNotFound),
             }
         }
     }
@@ -136,19 +136,19 @@ Strum has implemented the following macros:
 
     /*
     // Generated code
-    impl EnumMessage for Color {
-        fn get_message(&self) -> Option<&str> {
+    impl ::strum::EnumMessage for Color {
+        fn get_message(&self) -> ::std::option::Option<&str> {
             match self {
-                &Color::Red => Some("Red"),
-                &Color::Green {..} => Some("Simply Green"),
+                &Color::Red => ::std::option::Option::Some("Red"),
+                &Color::Green {..} => ::std::option::Option::Some("Simply Green"),
                 _ => None
             }
         }
 
-        fn get_detailed_message(&self) -> Option<&str> {
+        fn get_detailed_message(&self) -> ::std::option::Option<&str> {
             match self {
-                &Color::Red => Some("This is very red"),
-                &Color::Green {..}=> Some("Simply Green"),
+                &Color::Red => ::std::option::Some("This is very red"),
+                &Color::Green {..}=> ::std::option::Some("Simply Green"),
                 _ => None
             }
         }
@@ -270,6 +270,13 @@ fn main() {
                           Tokens::CloseParen]);
 }
 ```
+
+# Contributing
+
+Thanks for your interest in contributing. The project is divided into 3 parts, the traits are in the 
+`/strum` folder. The procedural macros are in the `/strum_macros` folder, and the integration tests are 
+in `/strum_tests`. Tests are still a work in progress, but they should be added in the test project to 
+verify that the macros are working correctly with the trait definitions.
 
 # Debugging
 
