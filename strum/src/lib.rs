@@ -388,3 +388,10 @@ pub trait EnumMessage {
     fn get_detailed_message(&self) -> Option<&str>;
     fn get_serializations(&self) -> &[&str];
 }
+
+///
+///
+///
+pub trait EnumProperty {
+    fn get_str(&self, &str) -> Option<&'static str>;
+}
