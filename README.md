@@ -31,8 +31,8 @@ extern crate strum_macros;
 
 Thanks for your interest in contributing. The project is divided into 3 parts, the traits are in the 
 `/strum` folder. The procedural macros are in the `/strum_macros` folder, and the integration tests are 
-in `/strum_tests`. Tests are still a work in progress, but they should be added in the test project to 
-verify that the macros are working correctly with the trait definitions.
+in `/strum_tests`. If you are adding additional features to `strum` or `strum_macros`, you should make sure 
+to run the tests and add new integration tests to make sure the features work as expected.
 
 # Debugging
 
@@ -186,6 +186,47 @@ Strum has implemented the following macros:
     */
     ```
 
+    
+ 4.  `EnumProperty`: Enables the encoding of arbitary constants into enum variants. This method
+     currently only supports adding additional string values. Other types of literals are still
+     experimental in the rustc compiler. The generated code works by nesting match statements.
+     The first match statement matches on the type of the enum, and the inner match statement
+     matches on the name of the property requested. This design works well for enums with a small
+     number of variants and properties, but scales linearly with the number of variants so may not
+     be the best choice in all situations.
+
+     Here's an example:
+
+     ```rust
+     # extern crate strum;
+     # #[macro_use] extern crate strum_macros;
+     # use std::fmt::Debug;
+     // You need to bring the type into scope to use it!!!
+     use strum::EnumProperty;
+
+     #[derive(EnumProperty,Debug)]
+     enum Color {
+         #[strum(props(Red="255",Blue="255",Green="255"))]
+         White,
+         #[strum(props(Red="0",Blue="0",Green="0"))]
+         Black,
+         #[strum(props(Red="0",Blue="255",Green="0"))]
+         Blue,
+         #[strum(props(Red="255",Blue="0",Green="0"))]
+         Red,
+         #[strum(props(Red="0",Blue="0",Green="255"))]
+         Green,
+     }
+
+     fn main() {
+         let my_color = Color::Red;
+         let display = format!("My color is {:?}. It's RGB is {},{},{}", my_color
+                                                        , my_color.get_str("Red").unwrap()
+                                                        , my_color.get_str("Green").unwrap()
+                                                        , my_color.get_str("Blue").unwrap());
+     }
+     ```
+
 # Additional Attributes
 
 Strum supports several custom attributes to modify the generated code. Custom attributes are
@@ -216,6 +257,8 @@ applied to a variant by adding #[strum(parameter="value")] to the variant.
 
 - `detailed_message=".."`: Adds a more detailed message to a variant. If this value is omitted, then
    `message` will be used in it's place.
+
+- `props(key="value")`: Enables associating additional information with a given variant.
 
 # Examples
 
