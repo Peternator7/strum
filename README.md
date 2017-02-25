@@ -187,7 +187,7 @@ Strum has implemented the following macros:
     ```
 
     
- 4.  `EnumProperty`: Enables the encoding of arbitary constants into enum variants. This method
+4.  `EnumProperty`: Enables the encoding of arbitary constants into enum variants. This method
      currently only supports adding additional string values. Other types of literals are still
      experimental in the rustc compiler. The generated code works by nesting match statements.
      The first match statement matches on the type of the enum, and the inner match statement
@@ -221,9 +221,9 @@ Strum has implemented the following macros:
      fn main() {
          let my_color = Color::Red;
          let display = format!("My color is {:?}. It's RGB is {},{},{}", my_color
-                                                        , my_color.get_str("Red").unwrap()
-                                                        , my_color.get_str("Green").unwrap()
-                                                        , my_color.get_str("Blue").unwrap());
+                                                , my_color.get_str("Red").unwrap()
+                                                , my_color.get_str("Green").unwrap()
+                                                , my_color.get_str("Blue").unwrap());
      }
      ```
 
