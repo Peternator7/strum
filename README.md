@@ -45,7 +45,8 @@ only dump the code generated on a type named `YourType`.
 Strum has implemented the following macros:
 
 1. `EnumString`: auto-derives `std::str::FromStr` on the enum. Each variant of the enum will match on it's
-    own name. This can be overridden using `serialize="DifferentName"` on the attribute as shown below.
+    own name. This can be overridden using `serialize="DifferentName"` or `to_string="DifferentName"`
+    on the attribute as shown below.
     Multiple deserializations can be added to the same variant. If the variant contains additional data,
     they will be set to their default values upon deserialization.
 
@@ -95,11 +96,44 @@ Strum has implemented the following macros:
     is potentially an expensive operation. If you do need that behavior, consider the more powerful
     Serde library for your serialization.
 
-2. `EnumIter`: iterate over the variants of an Enum. Any additional data on your variants will be
+2. `ToString`: prints out the given enum variant as a string. This enables you to perform round trip
+    style conversions from enum into string and back again for unit style variants. `ToString` chooses
+    which serialization to used based on the following criteria:
+
+    1. If there is a `to_string` property, this value will be used. There can only be one per variant.
+    2. Of the various `serialize` properties, the value with the longest length is chosen. If that
+       behavior isn't desired, you should use `to_string`.
+    3. The name of the variant will be used if there are no `serialize` or `to_string` attributes.
+
+    ```rust
+    // You need to bring the type into scope to use it!!!
+    use std::string::ToString;
+
+    #[derive(ToString,Debug)]
+    enum Color {
+        #[strum(serialize="redred")]
+        Red,
+        Green { range:usize },
+        Blue(usize),
+        Yellow,
+    }
+
+    // It's simple to iterate over the variants of an enum.
+    fn debug_colors() {
+        let red = Color::Red;
+        assert_eq!(String::from("redred"), red.to_string());
+    }
+
+    fn main() {
+        debug_colors();
+    }
+    ```
+
+3. `EnumIter`: iterate over the variants of an Enum. Any additional data on your variants will be
     set to `Default::default()`. The macro implements `strum::IntoEnumIter` on your enum and
     creates a new type called `YourEnumIter` that is the iterator object. You cannot derive
     `EnumIter` on any type with a lifetime bound (`<'a>`) because the iterator would surely
-    create [unbounded lifetimes] (https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
+    create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
 
     ```rust
     // You need to bring the type into scope to use it!!!
@@ -125,7 +159,7 @@ Strum has implemented the following macros:
     }
     ```
 
-3. `EnumMessage`: encode strings into the enum itself. This macro implements
+4. `EnumMessage`: encode strings into the enum itself. This macro implements
     the `strum::EnumMessage` trait. `EnumMessage` looks for
     `#[strum(message="...")]` attributes on your variants.
     You can also provided a `detailed_message="..."` attribute to create a
@@ -187,7 +221,7 @@ Strum has implemented the following macros:
     ```
 
     
-4.  `EnumProperty`: Enables the encoding of arbitary constants into enum variants. This method
+5.  `EnumProperty`: Enables the encoding of arbitary constants into enum variants. This method
      currently only supports adding additional string values. Other types of literals are still
      experimental in the rustc compiler. The generated code works by nesting match statements.
      The first match statement matches on the type of the enum, and the inner match statement
@@ -234,6 +268,9 @@ applied to a variant by adding #[strum(parameter="value")] to the variant.
 
 - `serialize="..."`: Changes the text that `FromStr()` looks for when parsing a string. This attribute can
    be applied multiple times to an element and the enum variant will be parsed if any of them match.
+
+- `to_string="..."`: Similar to `serialize`. This value will be included when using `FromStr()`. More importantly,
+   this specifies what text to use when calling `variant.to_string()` with the `ToString` derivation.
 
 - `default="true"`: Applied to a single variant of an enum. The variant must be a Tuple-like
    variant with a single piece of data that can be create from a `&str` i.e. `T: From<&str>`.
