@@ -12,6 +12,8 @@ enum Color {
     Yellow,
     #[strum(default="true")]
     Green(String),
+    #[strum(to_string="purp")]
+    Purple,
 }
 
 #[test]
@@ -28,6 +30,11 @@ fn color_value() {
 fn color_serialize() {
     assert_eq!(Color::Yellow, Color::from_str("y").unwrap());
     assert_eq!(Color::Yellow, Color::from_str("yellow").unwrap());
+}
+
+#[test]
+fn color_to_string() {
+    assert_eq!(Color::Purple, Color::from_str("purp").unwrap());
 }
 
 #[test]

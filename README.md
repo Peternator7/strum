@@ -133,7 +133,7 @@ Strum has implemented the following macros:
     set to `Default::default()`. The macro implements `strum::IntoEnumIter` on your enum and
     creates a new type called `YourEnumIter` that is the iterator object. You cannot derive
     `EnumIter` on any type with a lifetime bound (`<'a>`) because the iterator would surely
-    create [unbounded lifetimes] (https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
+    create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
 
     ```rust
     // You need to bring the type into scope to use it!!!
@@ -268,6 +268,9 @@ applied to a variant by adding #[strum(parameter="value")] to the variant.
 
 - `serialize="..."`: Changes the text that `FromStr()` looks for when parsing a string. This attribute can
    be applied multiple times to an element and the enum variant will be parsed if any of them match.
+
+- `to_string="..."`: Similar to `serialize`. This value will be included when using `FromStr()`. More importantly,
+   this specifies what text to use when calling `variant.to_string()` with the `ToString` derivation.
 
 - `default="true"`: Applied to a single variant of an enum. The variant must be a Tuple-like
    variant with a single piece of data that can be create from a `&str` i.e. `T: From<&str>`.
