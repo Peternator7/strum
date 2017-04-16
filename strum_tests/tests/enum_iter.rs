@@ -39,7 +39,9 @@ enum Complicated<U: Default, V: Default> {
 #[test]
 fn complicated_test() {
     let results = Complicated::iter().collect::<Vec<_>>();
-    let expected = vec![Complicated::A(0), Complicated::B { v: String::new() }, Complicated::C];
+    let expected = vec![Complicated::A(0),
+                        Complicated::B { v: String::new() },
+                        Complicated::C];
 
     assert_eq!(expected, results);
 }
