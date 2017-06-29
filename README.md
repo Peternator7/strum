@@ -29,9 +29,9 @@ extern crate strum_macros;
 
 # Contributing
 
-Thanks for your interest in contributing. The project is divided into 3 parts, the traits are in the 
-`/strum` folder. The procedural macros are in the `/strum_macros` folder, and the integration tests are 
-in `/strum_tests`. If you are adding additional features to `strum` or `strum_macros`, you should make sure 
+Thanks for your interest in contributing. The project is divided into 3 parts, the traits are in the
+`/strum` folder. The procedural macros are in the `/strum_macros` folder, and the integration tests are
+in `/strum_tests`. If you are adding additional features to `strum` or `strum_macros`, you should make sure
 to run the tests and add new integration tests to make sure the features work as expected.
 
 # Debugging
@@ -194,8 +194,8 @@ Strum has implemented the following macros:
 
         fn get_detailed_message(&self) -> ::std::option::Option<&str> {
             match self {
-                &Color::Red => ::std::option::Some("This is very red"),
-                &Color::Green {..}=> ::std::option::Some("Simply Green"),
+                &Color::Red => ::std::option::Option::Some("This is very red"),
+                &Color::Green {..}=> ::std::option::Option::Some("Simply Green"),
                 _ => None
             }
         }
@@ -220,7 +220,7 @@ Strum has implemented the following macros:
     */
     ```
 
-    
+
 5.  `EnumProperty`: Enables the encoding of arbitary constants into enum variants. This method
      currently only supports adding additional string values. Other types of literals are still
      experimental in the rustc compiler. The generated code works by nesting match statements.
