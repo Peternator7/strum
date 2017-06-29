@@ -362,7 +362,7 @@ fn main() {
                           Tokens::OpenParen,
                           Tokens::CloseParen]);
 }
-``
+```
 
 # Name
 
