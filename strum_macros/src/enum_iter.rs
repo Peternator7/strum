@@ -74,12 +74,12 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
             marker: ::std::marker::PhantomData #phantom_data,
         }
 
-        impl #impl_generics strum::IntoEnumIterator for #name #ty_generics #where_clause {
+        impl #impl_generics ::strum::IntoEnumIterator for #name #ty_generics #where_clause {
             type Iterator = #iter_name #ty_generics;
             fn iter() -> #iter_name #ty_generics {
                 #iter_name {
                     idx:0,
-                    marker: std::marker::PhantomData,
+                    marker: ::std::marker::PhantomData,
                 }
             }
         }
