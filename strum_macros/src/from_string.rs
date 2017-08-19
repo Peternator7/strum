@@ -23,6 +23,7 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
         // Look at all the serialize attributes.
         let mut attrs = extract_attrs(&variant.attrs, "strum", "serialize");
         attrs.extend(extract_attrs(&variant.attrs, "strum", "to_string"));
+        attrs.extend(extract_attrs(&variant.attrs, "strum", "as_str"));
         if is_disabled(&variant.attrs) {
             continue;
         }
