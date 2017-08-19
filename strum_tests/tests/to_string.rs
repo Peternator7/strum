@@ -7,7 +7,7 @@ use std::string::ToString;
 
 #[derive(Debug,Eq,PartialEq,EnumString,ToString)]
 enum Color {
-    #[strum(to_string="RedRed")]
+    #[strum(to_string="RedRed", as_str="redred")]
     Red,
     #[strum(serialize="b", to_string="blue")]
     Blue { hue: usize },
@@ -15,6 +15,8 @@ enum Color {
     Yellow,
     #[strum(default="true")]
     Green(String),
+    #[strum(serialize="w", as_str="white")]
+    White,
 }
 
 #[test]
@@ -35,6 +37,13 @@ fn to_yellow_string() {
 
 #[test]
 fn to_red_string() {
+    assert_eq!(String::from("RedRed"), (Color::Red).to_string());
     assert_eq!(Color::Red,
                Color::from_str((Color::Red).to_string().as_ref()).unwrap());
+}
+
+#[test]
+fn to_white_string() {
+    assert_eq!(Color::White,
+               Color::from_str((Color::White).to_string().as_ref()).unwrap());
 }
