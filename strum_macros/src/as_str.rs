@@ -22,9 +22,7 @@ pub fn as_str_inner(ast: &syn::DeriveInput) -> quote::Tokens {
         }
 
         // Look at all the serialize attributes.
-        let output = if let Some(n) = unique_attr(&variant.attrs, "strum", "as_str") {
-            n
-        } else if let Some(n) = unique_attr(&variant.attrs, "strum", "to_string") {
+        let output = if let Some(n) = unique_attr(&variant.attrs, "strum", "to_string") {
             n
         } else {
             let mut attrs = extract_attrs(&variant.attrs, "strum", "serialize");

@@ -6,7 +6,7 @@ use std::str::FromStr;
 
 #[derive(Debug,Eq,PartialEq,EnumString,AsStr)]
 enum Color {
-    #[strum(to_string="RedRed", as_str="redred")]
+    #[strum(to_string="RedRed")]
     Red,
     #[strum(serialize="b", to_string="blue")]
     Blue { hue: usize },
@@ -23,7 +23,7 @@ fn color_simple() {
 
 #[test]
 fn as_red_str() {
-    assert_eq!("redred",
+    assert_eq!("RedRed",
                (Color::Red).as_ref());
     assert_eq!(Color::Red,
                Color::from_str((Color::Red).as_ref()).unwrap());

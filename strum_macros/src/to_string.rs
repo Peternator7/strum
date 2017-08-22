@@ -24,8 +24,6 @@ pub fn to_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
         // Look at all the serialize attributes.
         let output = if let Some(n) = unique_attr(&variant.attrs, "strum", "to_string") {
             n
-        } else if let Some(n) = unique_attr(&variant.attrs, "strum", "as_str") {
-            n
         } else {
             let mut attrs = extract_attrs(&variant.attrs, "strum", "serialize");
             // We always take the longest one. This is arbitary, but is *mostly* deterministic
