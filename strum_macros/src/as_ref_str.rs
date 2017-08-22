@@ -22,6 +22,8 @@ pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> quote::Tokens {
         }
 
         // Look at all the serialize attributes.
+        // Use `to_string` attribute (not `as_ref_str` or something) to keep things consistent
+        // (i.e. always `enum.as_ref().to_string() == enum.to_string()`).
         let output = if let Some(n) = unique_attr(&variant.attrs, "strum", "to_string") {
             n
         } else {
