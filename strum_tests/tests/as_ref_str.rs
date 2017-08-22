@@ -4,7 +4,7 @@ extern crate strum_macros;
 
 use std::str::FromStr;
 
-#[derive(Debug,Eq,PartialEq,EnumString,AsStr)]
+#[derive(Debug,Eq,PartialEq,EnumString,AsRefStr)]
 enum Color {
     #[strum(to_string="RedRed")]
     Red,

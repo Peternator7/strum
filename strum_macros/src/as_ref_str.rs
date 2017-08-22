@@ -4,12 +4,12 @@ use syn;
 
 use helpers::{unique_attr, extract_attrs, is_disabled};
 
-pub fn as_str_inner(ast: &syn::DeriveInput) -> quote::Tokens {
+pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.body {
         syn::Body::Enum(ref v) => v,
-        _ => panic!("AsStr only works on Enums"),
+        _ => panic!("AsRefStr only works on Enums"),
     };
 
     let mut arms = Vec::new();

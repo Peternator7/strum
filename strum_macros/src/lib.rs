@@ -13,7 +13,7 @@ extern crate quote;
 extern crate proc_macro;
 
 mod helpers;
-mod as_str;
+mod as_ref_str;
 mod to_string;
 mod from_string;
 mod enum_iter;
@@ -47,12 +47,12 @@ pub fn from_string(input: TokenStream) -> TokenStream {
     toks.parse().unwrap()
 }
 
-#[proc_macro_derive(AsStr,attributes(strum))]
-pub fn as_str(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(AsRefStr,attributes(strum))]
+pub fn as_ref_str(input: TokenStream) -> TokenStream {
     let s = input.to_string();
     let ast = syn::parse_derive_input(&s).unwrap();
 
-    let toks = as_str::as_str_inner(&ast);
+    let toks = as_ref_str::as_ref_str_inner(&ast);
     debug_print_generated(&ast, &toks);
     toks.parse().unwrap()
 }
