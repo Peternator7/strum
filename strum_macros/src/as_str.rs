@@ -47,7 +47,7 @@ pub fn as_str_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     }
 
     if arms.len() < variants.len() {
-        arms.push(quote!{ _ => panic!("to_string() called on disabled variant.")})
+        arms.push(quote!{ _ => panic!("AsRef<str>::as_ref() called on disabled variant.")})
     }
 
     quote!{
