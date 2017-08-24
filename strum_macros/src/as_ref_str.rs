@@ -4,12 +4,12 @@ use syn;
 
 use helpers::{unique_attr, extract_attrs, is_disabled};
 
-pub fn to_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
+pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.body {
         syn::Body::Enum(ref v) => v,
-        _ => panic!("ToString only works on Enums"),
+        _ => panic!("AsRefStr only works on Enums"),
     };
 
     let mut arms = Vec::new();
@@ -22,6 +22,8 @@ pub fn to_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
         }
 
         // Look at all the serialize attributes.
+        // Use `to_string` attribute (not `as_ref_str` or something) to keep things consistent
+        // (i.e. always `enum.as_ref().to_string() == enum.to_string()`).
         let output = if let Some(n) = unique_attr(&variant.attrs, "strum", "to_string") {
             n
         } else {
@@ -41,16 +43,16 @@ pub fn to_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
             Struct(..) => quote::Ident::from("{..}"),
         };
 
-        arms.push(quote!{ #name::#ident #params => ::std::string::String::from(#output) });
+        arms.push(quote!{ #name::#ident #params => #output });
     }
 
     if arms.len() < variants.len() {
-        arms.push(quote!{ _ => panic!("to_string() called on disabled variant.")})
+        arms.push(quote!{ _ => panic!("AsRef<str>::as_ref() called on disabled variant.")})
     }
 
     quote!{
-        impl #impl_generics ::std::string::ToString for #name #ty_generics #where_clause {
-            fn to_string(&self) -> ::std::string::String {
+        impl #impl_generics ::std::convert::AsRef<str> for #name #ty_generics #where_clause {
+            fn as_ref(&self) -> &str {
                 match *self {
                     #(#arms),*
                 }

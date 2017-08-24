@@ -35,6 +35,7 @@ fn to_yellow_string() {
 
 #[test]
 fn to_red_string() {
+    assert_eq!(String::from("RedRed"), (Color::Red).to_string());
     assert_eq!(Color::Red,
                Color::from_str((Color::Red).to_string().as_ref()).unwrap());
 }
