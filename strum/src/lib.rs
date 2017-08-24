@@ -117,7 +117,11 @@
 //!    fn main () { debug_colors(); }
 //!    ```
 //!
-//! 3. `EnumIter`: iterate over the variants of an Enum. Any additional data on your variants will be
+//! 3. `AsRefStr`: this derive implements `AsRef<str>` on your enum using the same rules as
+//!    `ToString` for determining what string is returned. The difference is that `as_ref()` returns
+//!     a `&str` instead of a `String` so you don't allocate any additional memory with each call.
+//!
+//! 4. `EnumIter`: iterate over the variants of an Enum. Any additional data on your variants will be
 //!     set to `Default::default()`. The macro implements `strum::IntoEnumIter` on your enum and
 //!     creates a new type called `YourEnumIter` that is the iterator object. You cannot derive
 //!     `EnumIter` on any type with a lifetime bound (`<'a>`) because the iterator would surely
@@ -150,7 +154,7 @@
 //!     }
 //!     ```
 //!
-//! 4. `EnumMessage`: encode strings into the enum itself. This macro implements
+//! 5. `EnumMessage`: encode strings into the enum itself. This macro implements
 //!     the `strum::EnumMessage` trait. `EnumMessage` looks for
 //!     `#[strum(message="...")]` attributes on your variants.
 //!     You can also provided a `detailed_message="..."` attribute to create a
@@ -214,7 +218,7 @@
 //!     # fn main() {}
 //!     ```
 //!
-//! 5. `EnumProperty`: Enables the encoding of arbitary constants into enum variants. This method
+//! 6. `EnumProperty`: Enables the encoding of arbitary constants into enum variants. This method
 //!     currently only supports adding additional string values. Other types of literals are still
 //!     experimental in the rustc compiler. The generated code works by nesting match statements.
 //!     The first match statement matches on the type of the enum, and the inner match statement

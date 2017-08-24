@@ -1,6 +1,6 @@
 [package]
 name = "strum_macros"
-version = "0.6.1"
+version = "0.8.0"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 license = "MIT"
 
