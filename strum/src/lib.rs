@@ -66,7 +66,7 @@
 //!     impl ::std::str::FromStr for Color {
 //!         type Err = ::strum::ParseError;
 //!
-//!         fn from_str(s: &str) -> ::std::result::Result<Color, Self::Error> {
+//!         fn from_str(s: &str) -> ::std::result::Result<Color, Self::Err> {
 //!             match s {
 //!                 "Red" => ::std::result::Result::Ok(Color::Red),
 //!                 "Green" => ::std::result::Result::Ok(Color::Green { range:Default::default() }),
