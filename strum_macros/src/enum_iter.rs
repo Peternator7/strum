@@ -66,6 +66,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
         arms.push(quote!{#idx => ::std::option::Option::Some(#name::#ident #params)});
     }
 
+    let variant_count = arms.len();
     arms.push(quote! { _ => ::std::option::Option::None });
     let iter_name = quote::Ident::from(&*format!("{}Iter", name));
     quote!{
@@ -94,6 +95,17 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
 
                 self.idx += 1;
                 output
+            }
+
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                let t = #variant_count - self.idx;
+                (t, Some(t))
+            }
+        }
+
+        impl #impl_generics ExactSizeIterator for #iter_name #ty_generics #where_clause {
+            fn len(&self) -> usize {
+                self.size_hint().0
             }
         }
     }

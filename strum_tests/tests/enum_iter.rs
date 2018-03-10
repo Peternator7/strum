@@ -45,3 +45,18 @@ fn complicated_test() {
 
     assert_eq!(expected, results);
 }
+
+#[test]
+fn len_test() {
+    let mut i = Complicated::<(),()>::iter();
+    assert_eq!(3, i.len());
+    i.next();
+    
+    assert_eq!(2, i.len());
+    i.next();
+
+    assert_eq!(1, i.len());
+    i.next();
+
+    assert_eq!(0, i.len());
+}

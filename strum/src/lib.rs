@@ -84,14 +84,16 @@
 //!     is potentially an expensive operation. If you do need that behavior, consider the more powerful
 //!     Serde library for your serialization.
 //!
-//! 2. `ToString`: prints out the given enum variant as a string. This enables you to perform round trip
-//!    style conversions from enum into string and back again for unit style variants. `ToString` chooses
-//!    which serialization to used based on the following criteria:
+//! 2. `Display`, `ToString`: both derives print out the given enum variant. This enables you to perform round trip
+//!    style conversions from enum into string and back again for unit style variants. `ToString` and `Display`
+//!    choose which serialization to used based on the following criteria:
 //!
 //!    1. If there is a `to_string` property, this value will be used. There can only be one per variant.
 //!    2. Of the various `serialize` properties, the value with the longest length is chosen. If that
 //!       behavior isn't desired, you should use `to_string`.
 //!    3. The name of the variant will be used if there are no `serialize` or `to_string` attributes.
+//!
+//!    **`Display` should be preferred to `ToString`. All types that implement `::std::fmt::Display` have a default `ToString` implementation.**
 //!
 //!    ```rust
 //!    # extern crate strum;
@@ -99,7 +101,7 @@
 //!    // You need to bring the type into scope to use it!!!
 //!    use std::string::ToString;
 //!
-//!    #[derive(ToString, Debug)]
+//!    #[derive(Display, Debug)]
 //!    enum Color {
 //!        #[strum(serialize="redred")]
 //!        Red,
@@ -123,8 +125,8 @@
 //!
 //! 4. `EnumIter`: iterate over the variants of an Enum. Any additional data on your variants will be
 //!     set to `Default::default()`. The macro implements `strum::IntoEnumIter` on your enum and
-//!     creates a new type called `YourEnumIter` that is the iterator object. You cannot derive
-//!     `EnumIter` on any type with a lifetime bound (`<'a>`) because the iterator would surely
+//!     creates a new type called `YourEnumIter` that implements both `Iterator` and `ExactSizeIterator`.
+//!     You cannot derive `EnumIter` on any type with a lifetime bound (`<'a>`) because the iterator would surely
 //!     create [unbounded lifetimes] (https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
 //!
 //!     ```rust

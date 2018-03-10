@@ -14,8 +14,8 @@ Cargo.toml. Strum_macros contains the macros needed to derive all the traits in 
 
 ```toml
 [dependencies]
-strum = "0.8.0"
-strum_macros = "0.8.0"
+strum = "0.9.0"
+strum_macros = "0.9.0"
 ```
 
 And add these lines to the root of your project, either lib.rs or main.rs.
@@ -96,14 +96,16 @@ Strum has implemented the following macros:
     is potentially an expensive operation. If you do need that behavior, consider the more powerful
     Serde library for your serialization.
 
-2. `ToString`: prints out the given enum variant as a string. This enables you to perform round trip
-    style conversions from enum into string and back again for unit style variants. `ToString` chooses
-    which serialization to used based on the following criteria:
+2. `Display` / `ToString`: prints out the given enum. This enables you to perform round trip
+    style conversions from enum into string and back again for unit style variants. `ToString` and 
+    `Display` choose which serialization to used based on the following criteria:
 
     1. If there is a `to_string` property, this value will be used. There can only be one per variant.
     2. Of the various `serialize` properties, the value with the longest length is chosen. If that
        behavior isn't desired, you should use `to_string`.
     3. The name of the variant will be used if there are no `serialize` or `to_string` attributes.
+
+    **`ToString` exists for legacy reasons. You should prefer using `Display`. All types that implement `std::fmt::Display` have a default implementation of `ToString`.**
 
     ```rust
     // You need to bring the type into scope to use it!!!

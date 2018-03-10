@@ -5,7 +5,7 @@ extern crate strum_macros;
 use std::str::FromStr;
 use std::string::ToString;
 
-#[derive(Debug,Eq,PartialEq,EnumString,ToString)]
+#[derive(Debug,Eq,PartialEq, EnumString, ToString)]
 enum Color {
     #[strum(to_string="RedRed")]
     Red,
@@ -15,11 +15,6 @@ enum Color {
     Yellow,
     #[strum(default="true")]
     Green(String),
-}
-
-#[test]
-fn color_simple() {
-    assert_eq!(Color::Red, Color::from_str("RedRed").unwrap());
 }
 
 #[test]

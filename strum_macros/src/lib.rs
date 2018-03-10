@@ -7,6 +7,8 @@
 //!
 //! The documentation for this crate is found in the `strum` crate.
 
+#![recursion_limit="128"]
+
 extern crate syn;
 #[macro_use]
 extern crate quote;
@@ -14,6 +16,7 @@ extern crate proc_macro;
 
 mod helpers;
 mod as_ref_str;
+mod display;
 mod to_string;
 mod from_string;
 mod enum_iter;
@@ -63,6 +66,16 @@ pub fn to_string(input: TokenStream) -> TokenStream {
     let ast = syn::parse_derive_input(&s).unwrap();
 
     let toks = to_string::to_string_inner(&ast);
+    debug_print_generated(&ast, &toks);
+    toks.parse().unwrap()
+}
+
+#[proc_macro_derive(Display,attributes(strum))]
+pub fn display(input: TokenStream) -> TokenStream {
+    let s = input.to_string();
+    let ast = syn::parse_derive_input(&s).unwrap();
+
+    let toks = display::display_inner(&ast);
     debug_print_generated(&ast, &toks);
     toks.parse().unwrap()
 }
