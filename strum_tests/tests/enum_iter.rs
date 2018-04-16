@@ -60,3 +60,37 @@ fn len_test() {
 
     assert_eq!(0, i.len());
 }
+
+#[test]
+fn clone_test() {
+    let mut i = Week::iter();
+    i.next();
+    i.next();
+
+    let mut i_cloned = i.clone();
+
+    assert_eq!(Some(Week::Tuesday), i.next());
+    assert_eq!(Some(Week::Tuesday), i_cloned.next());
+
+    i.next();
+    i.next();
+
+    assert_eq!(Some(Week::Friday), i.next());
+    assert_eq!(Some(Week::Wednesday), i_cloned.next());
+}
+
+#[test]
+fn cycle_test() {
+    let results = Week::iter().cycle().take(10).collect::<Vec<_>>();
+    let expected = vec![Week::Sunday,
+                        Week::Monday,
+                        Week::Tuesday,
+                        Week::Wednesday,
+                        Week::Thursday,
+                        Week::Friday,
+                        Week::Saturday,
+                        Week::Sunday,
+                        Week::Monday,
+                        Week::Tuesday];
+    assert_eq!(expected, results);
+}

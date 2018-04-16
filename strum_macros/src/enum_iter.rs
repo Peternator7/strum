@@ -108,5 +108,14 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
                 self.size_hint().0
             }
         }
+
+        impl #impl_generics Clone for #iter_name #ty_generics #where_clause {
+            fn clone(&self) -> #iter_name #ty_generics {
+                #iter_name {
+                    idx: self.idx,
+                    marker: self.marker.clone(),
+                }
+            }
+        }
     }
 }
