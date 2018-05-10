@@ -1,7 +1,7 @@
 use quote;
 use syn;
 
-use helpers::is_disabled;
+use helpers::{extract_meta, is_disabled};
 
 pub fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
@@ -29,7 +29,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let mut arms = Vec::new();
     let enabled = variants
         .iter()
-        .filter(|variant| !is_disabled(&variant.attrs));
+        .filter(|variant| !is_disabled(&extract_meta(&variant.attrs)));
 
     for (idx, variant) in enabled.enumerate() {
         use syn::Fields::*;

@@ -2,7 +2,7 @@
 use quote;
 use syn;
 
-use helpers::{unique_attr, extract_attrs, is_disabled};
+use helpers::{unique_attr, extract_attrs, extract_meta, is_disabled};
 
 pub fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
@@ -19,15 +19,16 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     for variant in variants {
         use syn::Fields::*;
         let ident = &variant.ident;
+        let meta = extract_meta(&variant.attrs);
 
         // Look at all the serialize attributes.
-        let mut attrs = extract_attrs(&variant.attrs, "strum", "serialize");
-        attrs.extend(extract_attrs(&variant.attrs, "strum", "to_string"));
-        if is_disabled(&variant.attrs) {
+        let mut attrs = extract_attrs(&meta, "strum", "serialize");
+        attrs.extend(extract_attrs(&meta, "strum", "to_string"));
+        if is_disabled(&meta) {
             continue;
         }
 
-        if unique_attr(&variant.attrs, "strum", "default").map_or(false, |s| s == "true") {
+        if unique_attr(&meta, "strum", "default").map_or(false, |s| s == "true") {
             if has_default {
                 panic!("Can't have multiple default variants");
             }

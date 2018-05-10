@@ -2,7 +2,7 @@
 use quote;
 use syn;
 
-use helpers::{unique_attr, extract_attrs, is_disabled};
+use helpers::{unique_attr, extract_attrs, extract_meta, is_disabled};
 
 pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
@@ -16,18 +16,19 @@ pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     for variant in variants {
         use syn::Fields::*;
         let ident = &variant.ident;
+        let meta = extract_meta(&variant.attrs);
 
-        if is_disabled(&variant.attrs) {
+        if is_disabled(&meta) {
             continue;
         }
 
         // Look at all the serialize attributes.
         // Use `to_string` attribute (not `as_ref_str` or something) to keep things consistent
         // (i.e. always `enum.as_ref().to_string() == enum.to_string()`).
-        let output = if let Some(n) = unique_attr(&variant.attrs, "strum", "to_string") {
+        let output = if let Some(n) = unique_attr(&meta, "strum", "to_string") {
             n
         } else {
-            let mut attrs = extract_attrs(&variant.attrs, "strum", "serialize");
+            let mut attrs = extract_attrs(&meta, "strum", "serialize");
             // We always take the longest one. This is arbitary, but is *mostly* deterministic
             attrs.sort_by_key(|s| s.len());
             if let Some(n) = attrs.pop() {

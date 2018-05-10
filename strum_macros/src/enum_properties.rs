@@ -1,14 +1,14 @@
 use quote;
 use syn;
+use syn::Meta;
 
-use helpers::is_disabled;
+use helpers::{extract_meta, is_disabled};
 
-fn extract_properties(ast: &syn::Variant) -> Vec<(syn::Ident, syn::Lit)> {
-    use syn::{Meta, MetaList, MetaNameValue, NestedMeta};
-    ast.attrs.iter()
-        .filter_map(|attribute| attribute.interpret_meta())
-        .filter_map(|meta| match meta {
-            Meta::List(MetaList { ident, nested, .. }) => {
+fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Ident, &syn::Lit)> {
+    use syn::{MetaList, MetaNameValue, NestedMeta};
+    meta.iter()
+        .filter_map(|meta| match *meta {
+            Meta::List(MetaList { ref ident, ref nested, .. }) => {
                 if ident == "strum" {
                     Some(nested)
                 } else {
@@ -18,8 +18,8 @@ fn extract_properties(ast: &syn::Variant) -> Vec<(syn::Ident, syn::Lit)> {
             _ => None,
         })
         .flat_map(|prop| prop)
-        .filter_map(|prop| match prop {
-            NestedMeta::Meta(Meta::List(MetaList { ident, nested, .. })) => {
+        .filter_map(|prop| match *prop {
+            NestedMeta::Meta(Meta::List(MetaList { ref ident, ref nested, .. })) => {
                 if ident == "props" {
                     Some(nested)
                 } else {
@@ -30,8 +30,8 @@ fn extract_properties(ast: &syn::Variant) -> Vec<(syn::Ident, syn::Lit)> {
         })
         .flat_map(|prop| prop)
         // Only look at key value pairs
-        .filter_map(|prop| match prop {
-            NestedMeta::Meta(Meta::NameValue(MetaNameValue { ident, lit, .. })) => {
+        .filter_map(|prop| match *prop {
+            NestedMeta::Meta(Meta::NameValue(MetaNameValue { ref ident, ref lit, .. })) => {
                 Some((ident, lit))
             },
             _ => None,
@@ -50,11 +50,12 @@ pub fn enum_properties_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let mut arms = Vec::new();
     for variant in variants {
         let ident = &variant.ident;
+        let meta = extract_meta(&variant.attrs);
         let mut string_arms = Vec::new();
         let mut bool_arms = Vec::new();
         let mut num_arms = Vec::new();
         // But you can disable the messages.
-        if is_disabled(&variant.attrs) {
+        if is_disabled(&meta) {
             continue;
         }
 
@@ -65,7 +66,7 @@ pub fn enum_properties_inner(ast: &syn::DeriveInput) -> quote::Tokens {
             Named(..) => quote!{ {..} },
         };
 
-        for (key, value) in extract_properties(&variant) {
+        for (key, value) in extract_properties(&meta) {
             use syn::Lit::*;
             let key = key.as_ref();
             match value {
