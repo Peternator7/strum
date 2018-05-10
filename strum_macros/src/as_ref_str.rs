@@ -7,14 +7,14 @@ use helpers::{unique_attr, extract_attrs, is_disabled};
 pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
-    let variants = match ast.body {
-        syn::Body::Enum(ref v) => v,
+    let variants = match ast.data {
+        syn::Data::Enum(ref v) => &v.variants,
         _ => panic!("AsRefStr only works on Enums"),
     };
 
     let mut arms = Vec::new();
     for variant in variants {
-        use syn::VariantData::*;
+        use syn::Fields::*;
         let ident = &variant.ident;
 
         if is_disabled(&variant.attrs) {
@@ -29,18 +29,18 @@ pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> quote::Tokens {
         } else {
             let mut attrs = extract_attrs(&variant.attrs, "strum", "serialize");
             // We always take the longest one. This is arbitary, but is *mostly* deterministic
-            attrs.sort_by_key(|s| -(s.len() as isize));
-            if let Some(n) = attrs.first() {
+            attrs.sort_by_key(|s| s.len());
+            if let Some(n) = attrs.pop() {
                 n
             } else {
-                ident.as_ref()
+                ident.to_string()
             }
         };
 
-        let params = match variant.data {
-            Unit => quote::Ident::from(""),
-            Tuple(..) => quote::Ident::from("(..)"),
-            Struct(..) => quote::Ident::from("{..}"),
+        let params = match variant.fields {
+            Unit => quote!{},
+            Unnamed(..) => quote!{ (..) },
+            Named(..) => quote!{ {..} },
         };
 
         arms.push(quote!{ #name::#ident #params => #output });

@@ -6,8 +6,8 @@ use helpers::{unique_attr, extract_attrs, is_disabled};
 pub fn enum_message_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
-    let variants = match ast.body {
-        syn::Body::Enum(ref v) => v,
+    let variants = match ast.data {
+        syn::Data::Enum(ref v) => &v.variants,
         _ => panic!("EnumMessage only works on Enums"),
     };
 
@@ -20,18 +20,18 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> quote::Tokens {
         let detailed_messages = unique_attr(&variant.attrs, "strum", "detailed_message");
         let ident = &variant.ident;
 
-        use syn::VariantData::*;
-        let params = match variant.data {
-            Unit => quote::Ident::from(""),
-            Tuple(..) => quote::Ident::from("(..)"),
-            Struct(..) => quote::Ident::from("{..}"),
+        use syn::Fields::*;
+        let params = match variant.fields {
+            Unit => quote!{},
+            Unnamed(..) => quote!{ (..) },
+            Named(..) => quote!{ {..} },
         };
 
         // You can't disable getting the serializations.
         {
             let mut serialization_variants = extract_attrs(&variant.attrs, "strum", "serialize");
             if serialization_variants.len() == 0 {
-                serialization_variants.push(ident.as_ref());
+                serialization_variants.push(ident.to_string());
             }
 
             let count = serialization_variants.len();

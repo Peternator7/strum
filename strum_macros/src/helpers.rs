@@ -1,32 +1,37 @@
 
-use syn;
 use syn::Attribute;
 
-pub fn extract_attrs<'a>(attrs: &'a [Attribute], attr: &str, prop: &str) -> Vec<&'a str> {
+pub fn extract_attrs(attrs: &[Attribute], attr: &str, prop: &str) -> Vec<String> {
+    use syn::{Lit, Meta, MetaNameValue, NestedMeta};
     attrs.iter()
+        .filter_map(|attribute| attribute.interpret_meta())
         // Get all the attributes with our tag on them.
-        .filter_map(|attribute| {
-            use syn::MetaItem::*;
-            if let List(ref i, ref nested) = attribute.value {
-                if i == attr { Some(nested) } else { None }
-            } else {
-                None
-            }
+        .filter_map(|meta| match meta {
+            Meta::List(metalist) => {
+                if metalist.ident == attr {
+                    Some(metalist.nested)
+                } else {
+                    None
+                }
+            },
+            _ => None,
         })
         .flat_map(|nested| nested)
         // Get all the inner elements as long as they start with ser.
-        .filter_map(|attribute| {
-            use syn::NestedMetaItem::*;
-            use syn::MetaItem::*;
-            if let &MetaItem(NameValue(ref i, syn::Lit::Str(ref s, ..))) = attribute {
-                if i == prop { Some(&**s) } else { None }
-            } else {
-                None
-            }
-        }).collect()
+        .filter_map(|meta| match meta {
+            NestedMeta::Meta(Meta::NameValue(MetaNameValue { ident, lit: Lit::Str(s), .. })) => {
+                if ident == prop {
+                    Some(s.value())
+                } else {
+                    None
+                }
+            },
+            _ => None,
+        })
+        .collect()
 }
 
-pub fn unique_attr<'a>(attrs: &'a [Attribute], attr: &str, prop: &str) -> Option<&'a str> {
+pub fn unique_attr(attrs: &[Attribute], attr: &str, prop: &str) -> Option<String> {
     let mut curr = extract_attrs(attrs, attr, prop);
     if curr.len() > 1 {
         panic!("More than one property: {} found on variant", prop);
