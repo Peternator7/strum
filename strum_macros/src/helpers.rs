@@ -1,32 +1,46 @@
 
-use syn;
-use syn::Attribute;
+use syn::{Attribute, Meta};
 
-pub fn extract_attrs<'a>(attrs: &'a [Attribute], attr: &str, prop: &str) -> Vec<&'a str> {
+pub fn extract_meta(attrs: &[Attribute]) -> Vec<Meta> {
     attrs.iter()
+        .filter_map(|attribute| attribute.interpret_meta())
+        .collect()
+}
+
+pub fn extract_attrs(meta: &[Meta], attr: &str, prop: &str) -> Vec<String> {
+    use syn::{Lit, MetaNameValue, NestedMeta};
+    meta.iter()
         // Get all the attributes with our tag on them.
-        .filter_map(|attribute| {
-            use syn::MetaItem::*;
-            if let List(ref i, ref nested) = attribute.value {
-                if i == attr { Some(nested) } else { None }
-            } else {
-                None
-            }
+        .filter_map(|meta| match *meta {
+            Meta::List(ref metalist) => {
+                if metalist.ident == attr {
+                    Some(&metalist.nested)
+                } else {
+                    None
+                }
+            },
+            _ => None,
         })
         .flat_map(|nested| nested)
         // Get all the inner elements as long as they start with ser.
-        .filter_map(|attribute| {
-            use syn::NestedMetaItem::*;
-            use syn::MetaItem::*;
-            if let &MetaItem(NameValue(ref i, syn::Lit::Str(ref s, ..))) = attribute {
-                if i == prop { Some(&**s) } else { None }
-            } else {
-                None
-            }
-        }).collect()
+        .filter_map(|meta| match *meta {
+            NestedMeta::Meta(Meta::NameValue(MetaNameValue {
+                ref ident,
+                lit: Lit::Str(ref s),
+                ..
+            })) => {
+                if ident == prop {
+                    Some(s.value())
+                } else {
+                    None
+                }
+            },
+            _ => None,
+        })
+        .collect()
 }
 
-pub fn unique_attr<'a>(attrs: &'a [Attribute], attr: &str, prop: &str) -> Option<&'a str> {
+pub fn unique_attr(attrs: &[Meta], attr: &str, prop: &str) -> Option<String> {
     let mut curr = extract_attrs(attrs, attr, prop);
     if curr.len() > 1 {
         panic!("More than one property: {} found on variant", prop);
@@ -35,7 +49,7 @@ pub fn unique_attr<'a>(attrs: &'a [Attribute], attr: &str, prop: &str) -> Option
     curr.pop()
 }
 
-pub fn is_disabled(attrs: &[Attribute]) -> bool {
+pub fn is_disabled(attrs: &[Meta]) -> bool {
     let v = extract_attrs(attrs, "strum", "disabled");
     match v.len() {
         0 => false,

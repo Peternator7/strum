@@ -2,13 +2,13 @@
 use quote;
 use syn;
 
-use helpers::{unique_attr, extract_attrs, is_disabled};
+use helpers::{unique_attr, extract_attrs, extract_meta, is_disabled};
 
 pub fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
-    let variants = match ast.body {
-        syn::Body::Enum(ref v) => v,
+    let variants = match ast.data {
+        syn::Data::Enum(ref v) => &v.variants,
         _ => panic!("FromString only works on Enums"),
     };
 
@@ -17,23 +17,24 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
         quote! { _ => ::std::result::Result::Err(::strum::ParseError::VariantNotFound) };
     let mut arms = Vec::new();
     for variant in variants {
-        use syn::VariantData::*;
+        use syn::Fields::*;
         let ident = &variant.ident;
+        let meta = extract_meta(&variant.attrs);
 
         // Look at all the serialize attributes.
-        let mut attrs = extract_attrs(&variant.attrs, "strum", "serialize");
-        attrs.extend(extract_attrs(&variant.attrs, "strum", "to_string"));
-        if is_disabled(&variant.attrs) {
+        let mut attrs = extract_attrs(&meta, "strum", "serialize");
+        attrs.extend(extract_attrs(&meta, "strum", "to_string"));
+        if is_disabled(&meta) {
             continue;
         }
 
-        if let Some("true") = unique_attr(&variant.attrs, "strum", "default") {
+        if unique_attr(&meta, "strum", "default").map_or(false, |s| s == "true") {
             if has_default {
                 panic!("Can't have multiple default variants");
             }
 
-            if let Tuple(ref fields) = variant.data {
-                if fields.len() != 1 {
+            if let Unnamed(ref fields) = variant.fields {
+                if fields.unnamed.len() != 1 {
                     panic!("Default only works on unit structs with a single String parameter");
                 }
 
@@ -50,30 +51,19 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
 
         // If we don't have any custom variants, add the default name.
         if attrs.len() == 0 {
-            attrs.push(ident.as_ref());
+            attrs.push(ident.to_string());
         }
 
-        let params = match variant.data {
-            Unit => quote::Ident::from(""),
-            Tuple(ref fields) => {
-                let default = fields
-                    .iter()
-                    .map(|_| "Default::default()")
-                    .collect::<Vec<_>>()
-                    .join(", ");
-
-                quote::Ident::from(&*format!("({})", default))
+        let params = match variant.fields {
+            Unit => quote!{},
+            Unnamed(ref fields) => {
+                let defaults = ::std::iter::repeat(quote!(Default::default()))
+                    .take(fields.unnamed.len());
+                quote! { (#(#defaults),*) }
             }
-            Struct(ref fields) => {
-                let default = fields
-                    .iter()
-                    .map(|field| {
-                             format!("{}:{}", field.ident.as_ref().unwrap(), "Default::default()")
-                         })
-                    .collect::<Vec<_>>()
-                    .join(", ");
-
-                quote::Ident::from(&*format!("{{{}}}", default))
+            Named(ref fields) => {
+                let fields = fields.named.iter().map(|field| field.ident.unwrap());
+                quote! { {#(#fields: Default::default()),*} }
             }
         };
 

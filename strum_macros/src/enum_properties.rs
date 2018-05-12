@@ -1,41 +1,40 @@
 use quote;
 use syn;
+use syn::Meta;
 
-use helpers::is_disabled;
+use helpers::{extract_meta, is_disabled};
 
-fn extract_properties(ast: &syn::Variant) -> Vec<(&syn::Ident, &syn::Lit)> {
-    use syn::*;
-    ast.attrs
-        .iter()
-        .filter_map(|attr| {
-            // Look for all the strum attributes
-            if let &Attribute { value: MetaItem::List(ref ident, ref nested), .. } = attr {
+fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Ident, &syn::Lit)> {
+    use syn::{MetaList, MetaNameValue, NestedMeta};
+    meta.iter()
+        .filter_map(|meta| match *meta {
+            Meta::List(MetaList { ref ident, ref nested, .. }) => {
                 if ident == "strum" {
-                    return Option::Some(nested);
+                    Some(nested)
+                } else {
+                    None
                 }
-            }
-
-            Option::None
+            },
+            _ => None,
         })
         .flat_map(|prop| prop)
-        .filter_map(|prop| {
-            // Look for all the recursive property attributes
-            if let &NestedMetaItem::MetaItem(MetaItem::List(ref ident, ref nested)) = prop {
+        .filter_map(|prop| match *prop {
+            NestedMeta::Meta(Meta::List(MetaList { ref ident, ref nested, .. })) => {
                 if ident == "props" {
-                    return Option::Some(nested);
+                    Some(nested)
+                } else {
+                    None
                 }
-            }
-
-            Option::None
+            },
+            _ => None,
         })
         .flat_map(|prop| prop)
-        .filter_map(|prop| {
-            // Only look at key value pairs
-            if let &NestedMetaItem::MetaItem(MetaItem::NameValue(ref ident, ref value)) = prop {
-                return Option::Some((ident, value));
-            }
-
-            Option::None
+        // Only look at key value pairs
+        .filter_map(|prop| match *prop {
+            NestedMeta::Meta(Meta::NameValue(MetaNameValue { ref ident, ref lit, .. })) => {
+                Some((ident, lit))
+            },
+            _ => None,
         })
         .collect()
 }
@@ -43,33 +42,34 @@ fn extract_properties(ast: &syn::Variant) -> Vec<(&syn::Ident, &syn::Lit)> {
 pub fn enum_properties_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
-    let variants = match ast.body {
-        syn::Body::Enum(ref v) => v,
+    let variants = match ast.data {
+        syn::Data::Enum(ref v) => &v.variants,
         _ => panic!("EnumProp only works on Enums"),
     };
 
     let mut arms = Vec::new();
     for variant in variants {
         let ident = &variant.ident;
+        let meta = extract_meta(&variant.attrs);
         let mut string_arms = Vec::new();
         let mut bool_arms = Vec::new();
         let mut num_arms = Vec::new();
         // But you can disable the messages.
-        if is_disabled(&variant.attrs) {
+        if is_disabled(&meta) {
             continue;
         }
 
-        use syn::VariantData::*;
-        let params = match variant.data {
-            Unit => quote::Ident::from(""),
-            Tuple(..) => quote::Ident::from("(..)"),
-            Struct(..) => quote::Ident::from("{..}"),
+        use syn::Fields::*;
+        let params = match variant.fields {
+            Unit => quote!{},
+            Unnamed(..) => quote!{ (..) },
+            Named(..) => quote!{ {..} },
         };
 
-        for (key, value) in extract_properties(&variant) {
+        for (key, value) in extract_properties(&meta) {
             use syn::Lit::*;
             let key = key.as_ref();
-            match *value {
+            match value {
                 Str(ref s, ..) => {
                     string_arms.push(quote!{ #key => ::std::option::Option::Some( #s )})
                 }
