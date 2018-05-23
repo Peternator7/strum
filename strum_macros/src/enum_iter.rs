@@ -54,6 +54,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     arms.push(quote! { _ => ::std::option::Option::None });
     let iter_name = syn::parse_str::<syn::Ident>(&format!("{}Iter", name)).unwrap();
     quote!{
+        #[allow(missing_docs)]
         #vis struct #iter_name #ty_generics {
             idx: usize,
             marker: ::std::marker::PhantomData #phantom_data,
