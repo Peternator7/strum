@@ -48,12 +48,22 @@ pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> quote::Tokens {
     }
 
     if arms.len() < variants.len() {
-        arms.push(quote!{ _ => panic!("AsRef<str>::as_ref() called on disabled variant.")})
+        arms.push(quote!{
+            _ => panic!("AsRef::<str>::as_ref() or AsStaticRef::<str>::as_static() \
+                         called on disabled variant.")
+        })
     }
 
+    let arms = &arms;
     quote!{
         impl #impl_generics ::std::convert::AsRef<str> for #name #ty_generics #where_clause {
             fn as_ref(&self) -> &str {
+                ::strum::AsStaticRef::as_static(self)
+            }
+        }
+
+        impl #impl_generics ::strum::AsStaticRef<str> for #name #ty_generics #where_clause {
+            fn as_static(&self) -> &'static str {
                 match *self {
                     #(#arms),*
                 }

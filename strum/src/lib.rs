@@ -515,3 +515,13 @@ pub trait EnumProperty {
         Option::None
     }
 }
+
+
+/// A cheap reference-to-reference conversion. Used to convert a value to a
+/// reference value with `'static` lifetime within generic code.
+pub trait AsStaticRef<T>
+where
+    T: ?Sized,
+{
+    fn as_static(&self) -> &'static T;
+}
