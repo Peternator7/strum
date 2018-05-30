@@ -1,9 +1,9 @@
-use quote;
+use proc_macro2::TokenStream;
 use syn;
 
 use helpers::{extract_meta, is_disabled};
 
-pub fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
+pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
@@ -42,7 +42,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> quote::Tokens {
                 quote! { (#(#defaults),*) }
             }
             Named(ref fields) => {
-                let fields = fields.named.iter().map(|field| field.ident.unwrap());
+                let fields = fields.named.iter().map(|field| field.ident.as_ref().unwrap());
                 quote! { {#(#fields: ::std::default::Default::default()),*} }
             }
         };

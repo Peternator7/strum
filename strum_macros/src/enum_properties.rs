@@ -1,4 +1,4 @@
-use quote;
+use proc_macro2::TokenStream;
 use syn;
 use syn::Meta;
 
@@ -39,7 +39,7 @@ fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Ident, &syn::Lit)> {
         .collect()
 }
 
-pub fn enum_properties_inner(ast: &syn::DeriveInput) -> quote::Tokens {
+pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.data {
@@ -68,7 +68,7 @@ pub fn enum_properties_inner(ast: &syn::DeriveInput) -> quote::Tokens {
 
         for (key, value) in extract_properties(&meta) {
             use syn::Lit::*;
-            let key = key.as_ref();
+            let key = key.to_string();
             match value {
                 Str(ref s, ..) => {
                     string_arms.push(quote!{ #key => ::std::option::Option::Some( #s )})
