@@ -1,10 +1,9 @@
-
-use quote;
+use proc_macro2::TokenStream;
 use syn;
 
 use helpers::{unique_attr, extract_attrs, extract_meta, is_disabled};
 
-pub fn to_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
+pub fn to_string_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.data {

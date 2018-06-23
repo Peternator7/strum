@@ -1,10 +1,9 @@
-
-use quote;
+use proc_macro2::TokenStream;
 use syn;
 
 use helpers::{unique_attr, extract_attrs, extract_meta, is_disabled};
 
-pub fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
+pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.data {
@@ -62,7 +61,7 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> quote::Tokens {
                 quote! { (#(#defaults),*) }
             }
             Named(ref fields) => {
-                let fields = fields.named.iter().map(|field| field.ident.unwrap());
+                let fields = fields.named.iter().map(|field| field.ident.as_ref().unwrap());
                 quote! { {#(#fields: Default::default()),*} }
             }
         };

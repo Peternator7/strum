@@ -17,5 +17,6 @@ proc-macro = true
 name = "strum_macros"
 
 [dependencies]
-quote = "0.5.2"
-syn = { version = "0.13.7", features = ["parsing"] }
+proc-macro2 = "0.4"
+quote = "0.6"
+syn = { version = "0.14", features = ["parsing"] }
