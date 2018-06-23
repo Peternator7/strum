@@ -13,8 +13,8 @@ homepage = "https://github.com/Peternator7/strum"
 readme = "../README.md"
 
 [dev-dependencies]
-# strum_macros = "0.9.1"
-strum_macros = { path = "../strum_macros" }
+strum_macros = "0.9.1"
+# strum_macros = { path = "../strum_macros" }
 
 
 [badges]
