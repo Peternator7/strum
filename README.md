@@ -14,8 +14,8 @@ Cargo.toml. Strum_macros contains the macros needed to derive all the traits in 
 
 ```toml
 [dependencies]
-strum = "0.9.0"
-strum_macros = "0.9.0"
+strum = "0.9.1"
+strum_macros = "0.9.1"
 ```
 
 And add these lines to the root of your project, either lib.rs or main.rs.
@@ -134,6 +134,35 @@ Strum has implemented the following macros:
 3. `AsRefStr`: this derive implements `AsRef<str>` on your enum using the same rules as 
    `ToString` for determining what string is returned. The difference is that `as_ref()` returns 
     a `&str` instead of a `String` so you don't allocate any additional memory with each call.
+
+4. `AsStaticStr`: this is similar to `AsRefStr`, but returns a `'static` reference to a string which is helpful
+   in some scenarios. This macro implements `strum::AsStaticRef<str>` which adds a method `.to_static()` that 
+   returns a `&'static str`.
+
+   ```rust
+   extern crate strum;
+   #[macro_use] extern crate strum_macros;
+   
+   use strum::AsStaticRef;
+
+   #[derive(AsStaticStr)]
+   enum State<'a> {
+       Initial(&'a str),
+       Finished
+   }
+
+   fn print_state<'a>(s:&'a str) {
+       let state = State::Initial(s);
+       // The following won't work because the lifetime is incorrect so we can use.as_static() instead.
+       // let wrong: &'static str = state.as_ref();
+       let right: &'static str = state.as_static();
+       println!("{}", right); 
+   }
+
+   fn main() {
+       print_state(&"hello world".to_string())
+   }
+   ```
 
 4. `EnumIter`: iterate over the variants of an Enum. Any additional data on your variants will be
     set to `Default::default()`. The macro implements `strum::IntoEnumIter` on your enum and

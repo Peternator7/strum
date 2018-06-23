@@ -1,6 +1,6 @@
 [package]
 name = "strum_tests"
-version = "0.9.0"
+version = "0.9.1"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 
 [dependencies]
