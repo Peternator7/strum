@@ -3,15 +3,14 @@ use syn;
 
 use helpers::{unique_attr, extract_attrs, extract_meta, is_disabled};
 
-pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> TokenStream {
+fn get_arms(ast: &syn::DeriveInput) -> Vec<TokenStream> {
     let name = &ast.ident;
-    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
+    let mut arms = Vec::new();
     let variants = match ast.data {
         syn::Data::Enum(ref v) => &v.variants,
-        _ => panic!("AsRefStr only works on Enums"),
+        _ => panic!("This macro only works on Enums"),
     };
 
-    let mut arms = Vec::new();
     for variant in variants {
         use syn::Fields::*;
         let ident = &variant.ident;
@@ -53,14 +52,29 @@ pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> TokenStream {
         })
     }
 
-    let arms = &arms;
+    arms
+}
+
+pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
+    let arms = get_arms(ast);
     quote!{
         impl #impl_generics ::std::convert::AsRef<str> for #name #ty_generics #where_clause {
             fn as_ref(&self) -> &str {
-                ::strum::AsStaticRef::as_static(self)
+                match *self {
+                    #(#arms),*
+                }
             }
         }
+    }
+}
 
+pub fn as_static_str_inner(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
+    let arms = get_arms(ast);
+    quote!{
         impl #impl_generics ::strum::AsStaticRef<str> for #name #ty_generics #where_clause {
             fn as_static(&self) -> &'static str {
                 match *self {
