@@ -1,5 +1,4 @@
 cd ./strum
-cargo build --verbose
 cargo test --verbose
 
 cd ..
@@ -9,7 +8,6 @@ cargo test --verbose --features "disable-display"
 
 cd ..
 cd ./strum_tests
-cargo build --verbose
 cargo test --verbose
 
 cd ..

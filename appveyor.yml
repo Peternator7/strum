@@ -122,7 +122,7 @@ test_script:
   - cargo test --verbose %cargoflags%
   - cd ..
   - cd .\strum_macros
-  - cargo build --verbose %cargoflags%
+  - cargo test --verbose %cargoflags%
   - cargo test --verbose --feature disable-display %cargoflags%
   - cd ..
   - cd .\strum_tests
