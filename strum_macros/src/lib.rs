@@ -17,6 +17,7 @@ extern crate proc_macro2;
 
 mod helpers;
 mod as_ref_str;
+#[cfg(not(feature = "disable-display"))]
 mod display;
 mod to_string;
 mod from_string;
@@ -76,6 +77,7 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
+#[cfg(not(feature = "disable-display"))]
 #[proc_macro_derive(Display,attributes(strum))]
 pub fn display(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();

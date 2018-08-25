@@ -20,3 +20,7 @@ name = "strum_macros"
 proc-macro2 = "0.4"
 quote = "0.6"
 syn = { version = "0.14", features = ["parsing"] }
+
+[features]
+default = []
+disable-display = []
