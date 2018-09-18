@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use helpers::{unique_attr, extract_attrs, extract_meta, is_disabled};
+use helpers::{extract_attrs, extract_meta, is_disabled, unique_attr};
 
 pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -56,12 +56,15 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
         let params = match variant.fields {
             Unit => quote!{},
             Unnamed(ref fields) => {
-                let defaults = ::std::iter::repeat(quote!(Default::default()))
-                    .take(fields.unnamed.len());
+                let defaults =
+                    ::std::iter::repeat(quote!(Default::default())).take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
             Named(ref fields) => {
-                let fields = fields.named.iter().map(|field| field.ident.as_ref().unwrap());
+                let fields = fields
+                    .named
+                    .iter()
+                    .map(|field| field.ident.as_ref().unwrap());
                 quote! { {#(#fields: Default::default()),*} }
             }
         };

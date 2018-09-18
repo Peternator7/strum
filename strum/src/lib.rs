@@ -124,14 +124,14 @@
 //!     a borrowed `str` instead of a `String` so you can save an allocation.
 //!
 //! 4. `AsStaticStr`: this is similar to `AsRefStr`, but returns a `'static` reference to a string which is helpful
-//!    in some scenarios. This macro implements `strum::AsStaticRef<str>` which adds a method `.as_static()` that 
+//!    in some scenarios. This macro implements `strum::AsStaticRef<str>` which adds a method `.as_static()` that
 //!    returns a `&'static str`.
-//! 
+//!
 //!    ```rust
 //!    # extern crate strum;
 //!    # #[macro_use] extern crate strum_macros;
 //!    use strum::AsStaticRef;
-//! 
+//!
 //!    #[derive(AsStaticStr)]
 //!    enum State<'a> {
 //!        Initial(&'a str),
@@ -143,14 +143,14 @@
 //!        // The following won't work because the lifetime is incorrect so we can use.as_static() instead.
 //!        // let wrong: &'static str = state.as_ref();
 //!        let right: &'static str = state.as_static();
-//!        println!("{}", right); 
+//!        println!("{}", right);
 //!    }
-//! 
+//!
 //!    fn main() {
 //!        print_state(&"hello world".to_string())
 //!    }
 //!    ```
-//! 
+//!
 //! 4. `EnumIter`: iterate over the variants of an Enum. Any additional data on your variants will be
 //!     set to `Default::default()`. The macro implements `strum::IntoEnumIter` on your enum and
 //!     creates a new type called `YourEnumIter` that implements both `Iterator` and `ExactSizeIterator`.
@@ -402,7 +402,7 @@
 
 /// The ParseError enum is a collection of all the possible reasons
 /// an enum can fail to parse from a string.
-#[derive(Debug,Clone,Copy,Eq,PartialEq,Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum ParseError {
     VariantNotFound,
 }
@@ -543,7 +543,6 @@ pub trait EnumProperty {
         Option::None
     }
 }
-
 
 /// A cheap reference-to-reference conversion. Used to convert a value to a
 /// reference value with `'static` lifetime within generic code.

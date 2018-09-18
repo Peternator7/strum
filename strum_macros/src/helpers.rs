@@ -1,8 +1,8 @@
-
 use syn::{Attribute, Meta};
 
 pub fn extract_meta(attrs: &[Attribute]) -> Vec<Meta> {
-    attrs.iter()
+    attrs
+        .iter()
         .filter_map(|attribute| attribute.interpret_meta())
         .collect()
 }
@@ -18,10 +18,9 @@ pub fn extract_attrs(meta: &[Meta], attr: &str, prop: &str) -> Vec<String> {
                 } else {
                     None
                 }
-            },
+            }
             _ => None,
-        })
-        .flat_map(|nested| nested)
+        }).flat_map(|nested| nested)
         // Get all the inner elements as long as they start with ser.
         .filter_map(|meta| match *meta {
             NestedMeta::Meta(Meta::NameValue(MetaNameValue {
@@ -34,10 +33,9 @@ pub fn extract_attrs(meta: &[Meta], attr: &str, prop: &str) -> Vec<String> {
                 } else {
                     None
                 }
-            },
+            }
             _ => None,
-        })
-        .collect()
+        }).collect()
 }
 
 pub fn unique_attr(attrs: &[Meta], attr: &str, prop: &str) -> Option<String> {

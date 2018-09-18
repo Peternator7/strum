@@ -3,15 +3,15 @@ extern crate strum;
 extern crate strum_macros;
 
 #[allow(dead_code)]
-#[derive(Debug,Eq,PartialEq,EnumString,ToString)]
+#[derive(Debug, Eq, PartialEq, EnumString, ToString)]
 enum Color {
-    #[strum(to_string="RedRed")]
+    #[strum(to_string = "RedRed")]
     Red,
-    #[strum(serialize="b", to_string="blue")]
+    #[strum(serialize = "b", to_string = "blue")]
     Blue { hue: usize },
-    #[strum(serialize="y",serialize="yellow")]
+    #[strum(serialize = "y", serialize = "yellow")]
     Yellow,
-    #[strum(disabled="true")]
+    #[strum(disabled = "true")]
     Green(String),
 }
 
