@@ -9,6 +9,7 @@
 
 #![recursion_limit = "128"]
 
+extern crate heck;
 extern crate syn;
 #[macro_use]
 extern crate quote;
@@ -16,6 +17,7 @@ extern crate proc_macro;
 extern crate proc_macro2;
 
 mod as_ref_str;
+mod case_style;
 mod display;
 mod enum_iter;
 mod enum_messages;

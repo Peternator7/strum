@@ -1,4 +1,7 @@
-use syn::{Attribute, Meta};
+use heck::{CamelCase, KebabCase, MixedCase, ShoutySnakeCase, SnakeCase, TitleCase};
+use syn::{Attribute, Ident, Meta};
+
+use case_style::CaseStyle;
 
 pub fn extract_meta(attrs: &[Attribute]) -> Vec<Meta> {
     attrs
@@ -53,5 +56,21 @@ pub fn is_disabled(attrs: &[Meta]) -> bool {
         0 => false,
         1 => v[0] == "true",
         _ => panic!("Can't have multiple values for 'disabled'"),
+    }
+}
+
+pub fn convert_case(ident: &Ident, case_style: Option<CaseStyle>) -> String {
+    let ident_string = ident.to_string();
+    if let Some(case_style) = case_style {
+        match case_style {
+            CaseStyle::CamelCase => ident_string.to_camel_case(),
+            CaseStyle::KebabCase => ident_string.to_kebab_case(),
+            CaseStyle::MixedCase => ident_string.to_mixed_case(),
+            CaseStyle::ShoutySnakeCase => ident_string.to_shouty_snake_case(),
+            CaseStyle::SnakeCase => ident_string.to_snake_case(),
+            CaseStyle::TitleCase => ident_string.to_title_case(),
+        }
+    } else {
+        ident_string
     }
 }

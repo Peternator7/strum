@@ -48,6 +48,33 @@ fn color_default() {
 }
 
 #[derive(Debug, Eq, PartialEq, EnumString)]
+#[strum(serialize_all = "snake_case")]
+enum Brightness {
+    DarkBlack,
+    Dim {
+        glow: usize,
+    },
+    #[strum(serialize = "Bright")]
+    BrightWhite,
+}
+
+#[test]
+fn brightness_serialize_all() {
+    assert_eq!(
+        Brightness::DarkBlack,
+        Brightness::from_str("dark_black").unwrap()
+    );
+    assert_eq!(
+        Brightness::Dim { glow: 0 },
+        Brightness::from_str("dim").unwrap()
+    );
+    assert_eq!(
+        Brightness::BrightWhite,
+        Brightness::from_str("Bright").unwrap()
+    );
+}
+
+#[derive(Debug, Eq, PartialEq, EnumString)]
 enum Week {
     Sunday,
     Monday,
