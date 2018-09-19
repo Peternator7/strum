@@ -5,8 +5,10 @@
 ### Added
 
 * Serialization case can be controlled using `#[strum(serialize_all = "snake_case")]`. ([#21][#21])
+* `#[derive(EnumDiscriminants)]` generates enum with variants without fields. ([#33][#33])
 
 [#21]: https://github.com/Peternator7/strum/issues/21
+[#33]: https://github.com/Peternator7/strum/issues/33
 
 ## 0.10.0
 
