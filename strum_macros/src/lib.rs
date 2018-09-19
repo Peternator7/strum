@@ -19,6 +19,7 @@ extern crate proc_macro2;
 mod as_ref_str;
 mod case_style;
 mod display;
+mod enum_discriminants;
 mod enum_iter;
 mod enum_messages;
 mod enum_properties;
@@ -110,6 +111,18 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     let ast = syn::parse(input).unwrap();
 
     let toks = enum_properties::enum_properties_inner(&ast);
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
+#[proc_macro_derive(
+    EnumDiscriminants,
+    attributes(strum, strum_discriminants_derive)
+)]
+pub fn enum_discriminants(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse(input).unwrap();
+
+    let toks = enum_discriminants::enum_discriminants_inner(&ast);
     debug_print_generated(&ast, &toks);
     toks.into()
 }

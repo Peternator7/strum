@@ -10,6 +10,27 @@ pub fn extract_meta(attrs: &[Attribute]) -> Vec<Meta> {
         .collect()
 }
 
+pub fn extract_meta_attrs<'meta>(meta: &'meta [Meta], attr: &str) -> Vec<&'meta Ident> {
+    use syn::NestedMeta;
+    meta.iter()
+        // Get all the attributes with our tag on them.
+        .filter_map(|meta| match *meta {
+            Meta::List(ref metalist) => {
+                if metalist.ident == attr {
+                    Some(&metalist.nested)
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        }).flat_map(|nested| nested)
+        // Get all the inner elements as long as they start with ser.
+        .filter_map(|meta| match *meta {
+            NestedMeta::Meta(Meta::Word(ref ident)) => Some(ident),
+            _ => None,
+        }).collect()
+}
+
 pub fn extract_attrs(meta: &[Meta], attr: &str, prop: &str) -> Vec<String> {
     use syn::{Lit, MetaNameValue, NestedMeta};
     meta.iter()
