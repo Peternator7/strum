@@ -31,6 +31,15 @@ pub fn extract_meta_attrs<'meta>(meta: &'meta [Meta], attr: &str) -> Vec<&'meta 
         }).collect()
 }
 
+pub fn unique_meta_attr<'meta>(attrs: &'meta [Meta], attr: &str) -> Option<&'meta Ident> {
+    let mut curr = extract_meta_attrs(attrs, attr);
+    if curr.len() > 1 {
+        panic!("More than one `{}` attribute found on type", attr);
+    }
+
+    curr.pop()
+}
+
 pub fn extract_attrs(meta: &[Meta], attr: &str, prop: &str) -> Vec<String> {
     use syn::{Lit, MetaNameValue, NestedMeta};
     meta.iter()

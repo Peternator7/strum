@@ -84,3 +84,20 @@ enum WithDefault {
 fn with_default_test() {
     assert!(WithDefaultDiscriminants::A != WithDefaultDiscriminants::B);
 }
+
+#[allow(dead_code)]
+#[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
+#[strum_discriminants_derive(EnumIter)]
+#[strum_discriminants_name(EnumBoo)]
+enum Renamed {
+    Variant0(bool),
+    Variant1(i32),
+}
+
+#[test]
+fn renamed_test() {
+    let discriminants = EnumBoo::iter().collect::<Vec<_>>();
+    let expected = vec![EnumBoo::Variant0, EnumBoo::Variant1];
+
+    assert_eq!(expected, discriminants);
+}

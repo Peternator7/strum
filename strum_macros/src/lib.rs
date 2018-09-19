@@ -117,7 +117,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 
 #[proc_macro_derive(
     EnumDiscriminants,
-    attributes(strum, strum_discriminants_derive)
+    attributes(strum, strum_discriminants_derive, strum_discriminants_name)
 )]
 pub fn enum_discriminants(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
