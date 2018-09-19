@@ -296,6 +296,67 @@ Strum has implemented the following macros:
      }
      ```
 
+7. `EnumDiscriminants`: Given an enum named `MyEnum`, generates another enum called
+    `MyEnumDiscriminants` with the same variants, without any data fields. This is useful when you
+    wish to determine the variant of an enum from a String, but the variants contain any
+    non-`Default` fields. By default, the generated enum has the followign derives:
+    `Clone, Copy, Debug, PartialEq, Eq`. You can add additional derives using the
+    `#[strum_discriminants_derive(AdditionalDerive)]` attribute.
+
+    Here's an example:
+
+    ```rust
+    extern crate strum;
+    #[macro_use] extern crate strum_macros;
+
+    // Bring trait into scope
+    use std::str::FromStr;
+
+    #[derive(Debug)]
+    struct NonDefault;
+
+    #[allow(dead_code)]
+    #[derive(Debug, EnumDiscriminants)]
+    #[strum_discriminants_derive(EnumString)]
+    enum MyEnum {
+        Variant0(NonDefault),
+        Variant1 { a: NonDefault },
+    }
+
+    fn main() {
+        assert_eq!(
+            MyEnumDiscriminants::Variant0,
+            MyEnumDiscriminants::from_str("Variant0").unwrap()
+        );
+    }
+    ```
+
+    You can also rename the generated enum using the `#[strum_discriminants_name(OtherName)]`
+    attribute:
+
+    ```rust
+    extern crate strum;
+    #[macro_use] extern crate strum_macros;
+    // You need to bring the type into scope to use it!!!
+    use strum::IntoEnumIterator;
+
+    #[allow(dead_code)]
+    #[derive(Debug, EnumDiscriminants)]
+    #[strum_discriminants_derive(EnumIter)]
+    #[strum_discriminants_name(MyVariants)]
+    enum MyEnum {
+        Variant0(bool),
+        Variant1 { a: bool },
+    }
+
+    fn main() {
+        assert_eq!(
+            vec![MyVariants::Variant0, MyVariants::Variant1],
+            MyVariants::iter().collect::<Vec<_>>()
+        );
+    }
+    ```
+
 # Additional Attributes
 
 Strum supports several custom attributes to modify the generated code. At the enum level, the
