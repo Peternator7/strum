@@ -14,17 +14,13 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
     // Derives for the generated enum
     let type_meta = extract_meta(&ast.attrs);
-    let discriminant_attrs = unique_meta_list(type_meta.iter(), "strum_discriminants")
-        .map(|meta| extract_list_metas(meta).collect::<Vec<_>>());
-    let derives = discriminant_attrs.as_ref().map_or_else(
-        || vec![],
-        |meta| {
-            get_meta_list(meta.iter().map(|&m| m), "derive")
-                .flat_map(extract_list_metas)
-                .filter_map(get_meta_ident)
-                .collect::<Vec<_>>()
-        },
-    );
+    let discriminant_attrs = get_meta_list(type_meta.iter(), "strum_discriminants")
+        .flat_map(|meta| extract_list_metas(meta).collect::<Vec<_>>())
+        .collect::<Vec<&syn::Meta>>();
+    let derives = get_meta_list(discriminant_attrs.iter().map(|&m| m), "derive")
+        .flat_map(extract_list_metas)
+        .filter_map(get_meta_ident)
+        .collect::<Vec<_>>();
 
     let derives = quote! {
         #[derive(Clone, Copy, Debug, PartialEq, Eq, #(#derives),*)]
@@ -35,9 +31,8 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         &format!("{}Discriminants", name.to_string()),
         Span::call_site(),
     );
-    let discriminants_name = discriminant_attrs
-        .as_ref()
-        .and_then(|meta| unique_meta_list(meta.iter().map(|&m| m), "name"))
+
+    let discriminants_name = unique_meta_list(discriminant_attrs.iter().map(|&m| m), "name")
         .map(extract_list_metas)
         .and_then(|metas| metas.filter_map(get_meta_ident).next())
         .unwrap_or(&default_name);

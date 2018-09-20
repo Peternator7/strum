@@ -100,3 +100,21 @@ fn renamed_test() {
 
     assert_eq!(expected, discriminants);
 }
+
+#[allow(dead_code)]
+#[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
+#[strum_discriminants(name(SplitAttributesBoo), derive(Display))]
+#[strum_discriminants(derive(EnumIter))]
+enum SplitAttributes {
+    Variant0(bool),
+    Variant1(i32),
+}
+
+#[test]
+fn split_attributes_test() {
+    let discriminants = SplitAttributesBoo::iter().collect::<Vec<_>>();
+    let expected = vec![SplitAttributesBoo::Variant0, SplitAttributesBoo::Variant1];
+
+    assert_eq!(expected, discriminants);
+    assert_eq!("Variant0", format!("{}", SplitAttributesBoo::Variant0));
+}
