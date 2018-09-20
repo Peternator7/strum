@@ -1,5 +1,5 @@
 use heck::{CamelCase, KebabCase, MixedCase, ShoutySnakeCase, SnakeCase, TitleCase};
-use syn::{Attribute, Ident, Meta};
+use syn::{Attribute, Ident, Meta, MetaList};
 
 use case_style::CaseStyle;
 
@@ -10,57 +10,62 @@ pub fn extract_meta(attrs: &[Attribute]) -> Vec<Meta> {
         .collect()
 }
 
-/// Returns the `Meta` s that are `List`s, and match the given `attr` name.
+/// Returns the `MetaList`s with the given attr name.
 ///
-/// For example, `extract_meta_lists(metas, "strum")` returns both `#[strum(Something)]` and
-/// `#[strum(SomethingElse)]` for the following declaration.
+/// For example, `get_meta_list(type_meta.iter(), "strum_discriminant")` for the following snippet
+/// will return an iterator with `#[strum_discriminant(derive(EnumIter))]` and
+/// `#[strum_discriminant(name(MyEnumVariants))]`.
 ///
 /// ```rust,ignore
 /// #[derive(Debug)]
-/// #[strum(Something)]
-/// #[strum(SomethingElse)]
-/// struct MyStruct {}
+/// #[strum_discriminant(derive(EnumIter))]
+/// #[strum_discriminant(name(MyEnumVariants))]
+/// enum MyEnum { A }
 /// ```
-pub fn extract_meta_lists_refs<'meta>(metas: &[&'meta Meta], attr: &str) -> Vec<&'meta Meta> {
-    use syn::NestedMeta;
+pub fn get_meta_list<'meta, MetaIt>(
+    metas: MetaIt,
+    attr: &'meta str,
+) -> impl Iterator<Item = &'meta MetaList>
+where
+    MetaIt: Iterator<Item = &'meta Meta>,
+{
     metas
-        .iter()
         // Get all the attributes with our tag on them.
-        .filter_map(|meta| match *meta {
+        .filter_map(move |meta| match meta {
             Meta::List(ref metalist) => {
                 if metalist.ident == attr {
-                    Some(&metalist.nested)
+                    Some(metalist)
                 } else {
                     None
                 }
             }
             _ => None,
-        }).flat_map(|nested| nested)
-        .filter_map(|nested| match *nested {
-            NestedMeta::Meta(ref meta) => Some(meta),
-            _ => None,
-        }).collect()
+        })
 }
 
-pub fn extract_meta_lists<'meta>(metas: &'meta [Meta], attr: &str) -> Vec<&'meta Meta> {
-    extract_meta_lists_refs(&metas.iter().collect::<Vec<_>>(), attr)
-}
-
-pub fn unique_meta_list<'meta>(metas: &'meta [Meta], attr: &str) -> Option<&'meta Meta> {
-    let mut curr = extract_meta_lists(&metas, attr);
+pub fn unique_meta_list<'meta, MetaIt>(metas: MetaIt, attr: &'meta str) -> Option<&'meta MetaList>
+where
+    MetaIt: Iterator<Item = &'meta Meta>,
+{
+    let mut curr = get_meta_list(metas.into_iter(), attr).collect::<Vec<_>>();
     if curr.len() > 1 {
-        panic!(
-            "More than one `{}` attribute found on type, {:?}",
-            attr, curr
-        );
+        panic!("More than one `{}` attribute found on type", attr);
     }
 
     curr.pop()
 }
 
+pub fn extract_list_metas<'meta>(metalist: &'meta MetaList) -> impl Iterator<Item = &'meta Meta> {
+    use syn::NestedMeta;
+    metalist.nested.iter().filter_map(|nested| match *nested {
+        NestedMeta::Meta(ref meta) => Some(meta),
+        _ => None,
+    })
+}
+
 /// Returns the `Ident`s from the `Meta::List`s that match the given `attr` name.
 ///
-/// For example, `extract_meta_lists(something_metas, "Something")` returns `Abc`, `Def`, and `Ghi` for
+/// For example, `extract_meta_idents(something_metas, "Something")` returns `Abc`, `Def`, and `Ghi` for
 /// the following declaration.
 ///
 /// ```rust,ignore
@@ -68,25 +73,11 @@ pub fn unique_meta_list<'meta>(metas: &'meta [Meta], attr: &str) -> Option<&'met
 /// #[strum(Something(Abc, Def), Something(Ghi))]
 /// struct MyStruct {}
 /// ```
-pub fn extract_meta_idents<'meta>(metas: &[&'meta Meta], attr: &str) -> Vec<&'meta Ident> {
-    extract_meta_lists_refs(metas, attr)
-        .into_iter()
-        .filter_map(|meta| match *meta {
-            Meta::Word(ref ident) => Some(ident),
-            _ => None,
-        }).collect()
-}
-
-pub fn unique_meta_ident<'meta>(metas: &[&'meta Meta], attr: &str) -> Option<&'meta Ident> {
-    let mut curr = extract_meta_idents(metas, attr);
-    if curr.len() > 1 {
-        panic!(
-            "More than one `{}` attribute found on type: {:?}",
-            attr, curr
-        );
+pub fn get_meta_ident<'meta>(meta: &'meta Meta) -> Option<&'meta Ident> {
+    match *meta {
+        Meta::Word(ref ident) => Some(ident),
+        _ => None,
     }
-
-    curr.pop()
 }
 
 pub fn extract_attrs(meta: &[Meta], attr: &str, prop: &str) -> Vec<String> {

@@ -301,7 +301,7 @@ Strum has implemented the following macros:
     wish to determine the variant of an enum from a String, but the variants contain any
     non-`Default` fields. By default, the generated enum has the followign derives:
     `Clone, Copy, Debug, PartialEq, Eq`. You can add additional derives using the
-    `#[strum_discriminants_derive(AdditionalDerive)]` attribute.
+    `#[strum_discriminants(derive(AdditionalDerive))]` attribute.
 
     Here's an example:
 
@@ -317,7 +317,7 @@ Strum has implemented the following macros:
 
     #[allow(dead_code)]
     #[derive(Debug, EnumDiscriminants)]
-    #[strum_discriminants_derive(EnumString)]
+    #[strum_discriminants(derive(EnumString))]
     enum MyEnum {
         Variant0(NonDefault),
         Variant1 { a: NonDefault },
@@ -331,7 +331,7 @@ Strum has implemented the following macros:
     }
     ```
 
-    You can also rename the generated enum using the `#[strum_discriminants_name(OtherName)]`
+    You can also rename the generated enum using the `#[strum_discriminants(name(OtherName))]`
     attribute:
 
     ```rust
@@ -342,8 +342,8 @@ Strum has implemented the following macros:
 
     #[allow(dead_code)]
     #[derive(Debug, EnumDiscriminants)]
-    #[strum_discriminants_derive(EnumIter)]
-    #[strum_discriminants_name(MyVariants)]
+    #[strum_discriminants(derive(EnumIter))]
+    #[strum_discriminants(name(MyVariants))]
     enum MyEnum {
         Variant0(bool),
         Variant1 { a: bool },
