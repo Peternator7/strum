@@ -118,3 +118,30 @@ fn split_attributes_test() {
     assert_eq!(expected, discriminants);
     assert_eq!("Variant0", format!("{}", SplitAttributesBoo::Variant0));
 }
+
+#[allow(dead_code)]
+#[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
+#[strum_discriminants(
+    name(PassThroughBoo),
+    derive(Display, EnumIter, EnumString),
+    strum(serialize_all = "snake_case"),
+)]
+enum PassThrough {
+    DarkBlack(bool),
+    BrightWhite(i32),
+}
+
+#[test]
+fn arbitrary_attributes_pass_through() {
+    use std::str::FromStr;
+
+    let discriminants = PassThroughBoo::iter().collect::<Vec<_>>();
+    let expected = vec![PassThroughBoo::DarkBlack, PassThroughBoo::BrightWhite];
+
+    assert_eq!(expected, discriminants);
+    assert_eq!("dark_black", PassThroughBoo::DarkBlack.to_string());
+    assert_eq!(
+        PassThroughBoo::DarkBlack,
+        PassThroughBoo::from_str("dark_black").unwrap()
+    );
+}

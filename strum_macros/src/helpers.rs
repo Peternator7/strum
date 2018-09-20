@@ -10,6 +10,34 @@ pub fn extract_meta(attrs: &[Attribute]) -> Vec<Meta> {
         .collect()
 }
 
+pub fn filter_metas<'meta, MetaIt, F>(metas: MetaIt, filter: F) -> impl Iterator<Item = &'meta Meta>
+where
+    MetaIt: Iterator<Item = &'meta Meta>,
+    F: Fn(&Meta) -> bool,
+{
+    metas.filter_map(move |meta| if filter(meta) { Some(meta) } else { None })
+}
+
+pub fn filter_meta_lists<'meta, MetaIt, F>(
+    metas: MetaIt,
+    filter: F,
+) -> impl Iterator<Item = &'meta MetaList>
+where
+    MetaIt: Iterator<Item = &'meta Meta>,
+    F: Fn(&MetaList) -> bool,
+{
+    metas.filter_map(move |meta| match meta {
+        Meta::List(ref metalist) => {
+            if filter(metalist) {
+                Some(metalist)
+            } else {
+                None
+            }
+        }
+        _ => None,
+    })
+}
+
 /// Returns the `MetaList`s with the given attr name.
 ///
 /// For example, `get_meta_list(type_meta.iter(), "strum_discriminant")` for the following snippet
@@ -29,18 +57,7 @@ pub fn get_meta_list<'meta, MetaIt>(
 where
     MetaIt: Iterator<Item = &'meta Meta>,
 {
-    metas
-        // Get all the attributes with our tag on them.
-        .filter_map(move |meta| match meta {
-            Meta::List(ref metalist) => {
-                if metalist.ident == attr {
-                    Some(metalist)
-                } else {
-                    None
-                }
-            }
-            _ => None,
-        })
+    filter_meta_lists(metas, move |metalist| metalist.ident == attr)
 }
 
 pub fn unique_meta_list<'meta, MetaIt>(metas: MetaIt, attr: &'meta str) -> Option<&'meta MetaList>

@@ -1,7 +1,9 @@
 use proc_macro2::{Span, TokenStream};
 use syn;
 
-use helpers::{extract_list_metas, extract_meta, get_meta_ident, get_meta_list, unique_meta_list};
+use helpers::{
+    extract_list_metas, extract_meta, filter_metas, get_meta_ident, get_meta_list, unique_meta_list,
+};
 
 pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -37,6 +39,14 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         .and_then(|metas| metas.filter_map(get_meta_ident).next())
         .unwrap_or(&default_name);
 
+    // Pass through all other attributes
+    let pass_though_attributes =
+        filter_metas(discriminant_attrs.iter().map(|&m| m), |meta| match meta {
+            syn::Meta::List(ref metalist) => metalist.ident != "derive" && metalist.ident != "name",
+            _ => true,
+        }).map(|meta| quote! { #[ #meta ] })
+        .collect::<Vec<_>>();
+
     // Add the variants without fields, but exclude the `strum` meta item
     let mut discriminants = Vec::new();
     for variant in variants {
@@ -56,6 +66,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     quote!{
         /// Auto-generated discriminant enum variants
         #derives
+        #(#pass_though_attributes)*
         #vis enum #discriminants_name {
             #(#discriminants),*
         }
