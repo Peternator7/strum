@@ -6,7 +6,7 @@ use strum::IntoEnumIterator;
 
 #[allow(dead_code)]
 #[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
-#[strum_discriminants_derive(EnumIter)]
+#[strum_discriminants(derive(EnumIter))]
 enum Simple {
     Variant0,
     Variant1,
@@ -25,7 +25,7 @@ struct NonDefault;
 
 #[allow(dead_code)]
 #[derive(Debug, EnumDiscriminants)]
-#[strum_discriminants_derive(EnumIter)]
+#[strum_discriminants(derive(EnumIter))]
 enum WithFields {
     Variant0(NonDefault),
     Variant1 { a: NonDefault },
@@ -47,7 +47,7 @@ trait Bar {}
 
 #[allow(dead_code)]
 #[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
-#[strum_discriminants_derive(EnumIter)]
+#[strum_discriminants(derive(EnumIter))]
 enum Complicated<U: Foo, V: Bar> {
     /// With Docs
     A(U),
@@ -87,8 +87,7 @@ fn with_default_test() {
 
 #[allow(dead_code)]
 #[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
-#[strum_discriminants_derive(EnumIter)]
-#[strum_discriminants_name(EnumBoo)]
+#[strum_discriminants(name(EnumBoo), derive(EnumIter))]
 enum Renamed {
     Variant0(bool),
     Variant1(i32),

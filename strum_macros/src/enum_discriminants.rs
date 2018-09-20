@@ -1,7 +1,7 @@
 use proc_macro2::{Span, TokenStream};
 use syn;
 
-use helpers::{extract_meta, extract_meta_attrs, unique_meta_attr};
+use helpers::{extract_meta, extract_meta_idents, unique_meta_ident, unique_meta_list};
 
 pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -13,17 +13,21 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     let type_meta = extract_meta(&ast.attrs);
-    let discriminant_derives = extract_meta_attrs(&type_meta, "strum_discriminants_derive");
+    let discriminant_meta = unique_meta_list(&type_meta, "strum_discriminants");
+    let derives =
+        discriminant_meta.map_or_else(|| vec![], |meta| extract_meta_idents(&[meta], "derive"));
+
     let derives = quote! {
-        #[derive(Clone, Copy, Debug, PartialEq, Eq, #(#discriminant_derives),*)]
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, #(#derives),*)]
     };
 
     let default_name = syn::Ident::new(
         &format!("{}Discriminants", name.to_string()),
         Span::call_site(),
     );
-    let enum_discriminants_name =
-        unique_meta_attr(&type_meta, "strum_discriminants_name").unwrap_or(&default_name);
+    let discriminants_name = discriminant_meta
+        .map(|meta| unique_meta_ident(&[meta], "name").unwrap_or(&default_name))
+        .unwrap_or(&default_name);
 
     let mut discriminants = Vec::new();
     for variant in variants {
@@ -43,7 +47,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     quote!{
         /// Auto-generated discriminant enum variants
         #derives
-        #vis enum #enum_discriminants_name {
+        #vis enum #discriminants_name {
             #(#discriminants),*
         }
     }
