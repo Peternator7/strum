@@ -28,3 +28,30 @@ fn to_yellow_string() {
 fn to_red_string() {
     assert_eq!(String::from("RedRed"), format!("{}", Color::Red));
 }
+
+#[derive(Display, Debug, Eq, PartialEq)]
+#[strum(serialize_all = "snake_case")]
+enum Brightness {
+    DarkBlack,
+    Dim {
+        glow: usize,
+    },
+    #[strum(serialize = "bright")]
+    BrightWhite,
+}
+
+#[test]
+fn brightness_to_string() {
+    assert_eq!(
+        String::from("dark_black"),
+        Brightness::DarkBlack.to_string().as_ref()
+    );
+    assert_eq!(
+        String::from("dim"),
+        Brightness::Dim { glow: 0 }.to_string().as_ref()
+    );
+    assert_eq!(
+        String::from("bright"),
+        Brightness::BrightWhite.to_string().as_ref()
+    );
+}
