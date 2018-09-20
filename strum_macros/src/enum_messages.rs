@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use helpers::{unique_attr, extract_attrs, extract_meta, is_disabled};
+use helpers::{extract_attrs, extract_meta, is_disabled, unique_attr};
 
 pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;

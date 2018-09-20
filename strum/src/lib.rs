@@ -14,8 +14,8 @@
 //!
 //! ```toml
 //! [dependencies]
-//! strum = "0.9.0"
-//! strum_macros = "0.9.0"
+//! strum = "0.11.0"
+//! strum_macros = "0.11.0"
 //! ```
 //!
 //! And add these lines to the root of your project, either lib.rs or main.rs.
@@ -79,10 +79,10 @@
 //!     # fn main() {}
 //!     ```
 //!
-//!     Note that the implementation of `FromStr` only matches on the name of the variant.
-//!     Strum, where possible, avoids operations that have an unknown runtime cost, and parsing strings
-//!     is potentially an expensive operation. If you do need that behavior, consider the more powerful
-//!     Serde library for your serialization.
+//!     Note that the implementation of `FromStr` by default only matches on the name of the
+//!     variant. There is an option to match on different case conversions through the
+//!     `#[strum(serialize_all = "snake_case")]` type attribute. See the **Additional Attributes**
+//!     Section for more information on using this feature.
 //!
 //! 2. `Display`, `ToString`: both derives print out the given enum variant. This enables you to perform round trip
 //!    style conversions from enum into string and back again for unit style variants. `ToString` and `Display`
@@ -124,14 +124,14 @@
 //!     a borrowed `str` instead of a `String` so you can save an allocation.
 //!
 //! 4. `AsStaticStr`: this is similar to `AsRefStr`, but returns a `'static` reference to a string which is helpful
-//!    in some scenarios. This macro implements `strum::AsStaticRef<str>` which adds a method `.as_static()` that 
+//!    in some scenarios. This macro implements `strum::AsStaticRef<str>` which adds a method `.as_static()` that
 //!    returns a `&'static str`.
-//! 
+//!
 //!    ```rust
 //!    # extern crate strum;
 //!    # #[macro_use] extern crate strum_macros;
 //!    use strum::AsStaticRef;
-//! 
+//!
 //!    #[derive(AsStaticStr)]
 //!    enum State<'a> {
 //!        Initial(&'a str),
@@ -143,14 +143,14 @@
 //!        // The following won't work because the lifetime is incorrect so we can use.as_static() instead.
 //!        // let wrong: &'static str = state.as_ref();
 //!        let right: &'static str = state.as_static();
-//!        println!("{}", right); 
+//!        println!("{}", right);
 //!    }
-//! 
+//!
 //!    fn main() {
 //!        print_state(&"hello world".to_string())
 //!    }
 //!    ```
-//! 
+//!
 //! 4. `EnumIter`: iterate over the variants of an Enum. Any additional data on your variants will be
 //!     set to `Default::default()`. The macro implements `strum::IntoEnumIter` on your enum and
 //!     creates a new type called `YourEnumIter` that implements both `Iterator` and `ExactSizeIterator`.
@@ -293,8 +293,43 @@
 //!
 //! # Additional Attributes
 //!
-//! Strum supports several custom attributes to modify the generated code. Custom attributes are
-//! applied to a variant by adding #[strum(parameter="value")] to the variant.
+//! Strum supports several custom attributes to modify the generated code. At the enum level, the
+//! `#[strum(serialize_all = "snake_case")]` attribute can be used to change the case used when
+//! serializing to and deserializing from strings:
+//!
+//! ```rust
+//! extern crate strum;
+//! #[macro_use]
+//! extern crate strum_macros;
+//!
+//! #[derive(Debug, Eq, PartialEq, ToString)]
+//! #[strum(serialize_all = "snake_case")]
+//! enum Brightness {
+//!     DarkBlack,
+//!     Dim {
+//!         glow: usize,
+//!     },
+//!     #[strum(serialize = "bright")]
+//!     BrightWhite,
+//! }
+//!
+//! fn main() {
+//!     assert_eq!(
+//!         String::from("dark_black"),
+//!         Brightness::DarkBlack.to_string().as_ref()
+//!     );
+//!     assert_eq!(
+//!         String::from("dim"),
+//!         Brightness::Dim { glow: 0 }.to_string().as_ref()
+//!     );
+//!     assert_eq!(
+//!         String::from("bright"),
+//!         Brightness::BrightWhite.to_string().as_ref()
+//!     );
+//! }
+//! ```
+//!
+//! Custom attributes are applied to a variant by adding `#[strum(parameter="value")]` to the variant.
 //!
 //! - `serialize="..."`: Changes the text that `FromStr()` looks for when parsing a string. This attribute can
 //!    be applied multiple times to an element and the enum variant will be parsed if any of them match.
@@ -402,7 +437,7 @@
 
 /// The ParseError enum is a collection of all the possible reasons
 /// an enum can fail to parse from a string.
-#[derive(Debug,Clone,Copy,Eq,PartialEq,Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum ParseError {
     VariantNotFound,
 }
@@ -543,7 +578,6 @@ pub trait EnumProperty {
         Option::None
     }
 }
-
 
 /// A cheap reference-to-reference conversion. Used to convert a value to a
 /// reference value with `'static` lifetime within generic code.

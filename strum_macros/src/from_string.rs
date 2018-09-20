@@ -1,7 +1,8 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use helpers::{unique_attr, extract_attrs, extract_meta, is_disabled};
+use case_style::CaseStyle;
+use helpers::{convert_case, extract_attrs, extract_meta, is_disabled, unique_attr};
 
 pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -10,6 +11,10 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
         syn::Data::Enum(ref v) => &v.variants,
         _ => panic!("FromString only works on Enums"),
     };
+
+    let type_meta = extract_meta(&ast.attrs);
+    let case_style = unique_attr(&type_meta, "strum", "serialize_all")
+        .map(|style| CaseStyle::from(style.as_ref()));
 
     let mut has_default = false;
     let mut default =
@@ -48,20 +53,23 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
             continue;
         }
 
-        // If we don't have any custom variants, add the default name.
+        // If we don't have any custom variants, add the default serialized name.
         if attrs.len() == 0 {
-            attrs.push(ident.to_string());
+            attrs.push(convert_case(ident, case_style));
         }
 
         let params = match variant.fields {
             Unit => quote!{},
             Unnamed(ref fields) => {
-                let defaults = ::std::iter::repeat(quote!(Default::default()))
-                    .take(fields.unnamed.len());
+                let defaults =
+                    ::std::iter::repeat(quote!(Default::default())).take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
             Named(ref fields) => {
-                let fields = fields.named.iter().map(|field| field.ident.as_ref().unwrap());
+                let fields = fields
+                    .named
+                    .iter()
+                    .map(|field| field.ident.as_ref().unwrap());
                 quote! { {#(#fields: Default::default()),*} }
             }
         };

@@ -6,7 +6,7 @@ use strum::EnumProperty;
 
 #[derive(Debug, EnumProperty)]
 enum Test {
-    #[strum(props(key="value"))]
+    #[strum(props(key = "value"))]
     A,
     B,
 }

@@ -8,35 +8,40 @@ fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Ident, &syn::Lit)> {
     use syn::{MetaList, MetaNameValue, NestedMeta};
     meta.iter()
         .filter_map(|meta| match *meta {
-            Meta::List(MetaList { ref ident, ref nested, .. }) => {
+            Meta::List(MetaList {
+                ref ident,
+                ref nested,
+                ..
+            }) => {
                 if ident == "strum" {
                     Some(nested)
                 } else {
                     None
                 }
-            },
+            }
             _ => None,
-        })
-        .flat_map(|prop| prop)
+        }).flat_map(|prop| prop)
         .filter_map(|prop| match *prop {
-            NestedMeta::Meta(Meta::List(MetaList { ref ident, ref nested, .. })) => {
+            NestedMeta::Meta(Meta::List(MetaList {
+                ref ident,
+                ref nested,
+                ..
+            })) => {
                 if ident == "props" {
                     Some(nested)
                 } else {
                     None
                 }
-            },
+            }
             _ => None,
-        })
-        .flat_map(|prop| prop)
+        }).flat_map(|prop| prop)
         // Only look at key value pairs
         .filter_map(|prop| match *prop {
-            NestedMeta::Meta(Meta::NameValue(MetaNameValue { ref ident, ref lit, .. })) => {
-                Some((ident, lit))
-            },
+            NestedMeta::Meta(Meta::NameValue(MetaNameValue {
+                ref ident, ref lit, ..
+            })) => Some((ident, lit)),
             _ => None,
-        })
-        .collect()
+        }).collect()
 }
 
 pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {

@@ -2,15 +2,15 @@ extern crate strum;
 #[macro_use]
 extern crate strum_macros;
 
-#[derive(Debug,Eq,PartialEq, EnumString, Display)]
+#[derive(Debug, Eq, PartialEq, EnumString, Display)]
 enum Color {
-    #[strum(to_string="RedRed")]
+    #[strum(to_string = "RedRed")]
     Red,
-    #[strum(serialize="b", to_string="blue")]
+    #[strum(serialize = "b", to_string = "blue")]
     Blue { hue: usize },
-    #[strum(serialize="y", serialize="yellow")]
+    #[strum(serialize = "y", serialize = "yellow")]
     Yellow,
-    #[strum(default="true")]
+    #[strum(default = "true")]
     Green(String),
 }
 
@@ -27,4 +27,31 @@ fn to_yellow_string() {
 #[test]
 fn to_red_string() {
     assert_eq!(String::from("RedRed"), format!("{}", Color::Red));
+}
+
+#[derive(Display, Debug, Eq, PartialEq)]
+#[strum(serialize_all = "snake_case")]
+enum Brightness {
+    DarkBlack,
+    Dim {
+        glow: usize,
+    },
+    #[strum(serialize = "bright")]
+    BrightWhite,
+}
+
+#[test]
+fn brightness_to_string() {
+    assert_eq!(
+        String::from("dark_black"),
+        Brightness::DarkBlack.to_string().as_ref()
+    );
+    assert_eq!(
+        String::from("dim"),
+        Brightness::Dim { glow: 0 }.to_string().as_ref()
+    );
+    assert_eq!(
+        String::from("bright"),
+        Brightness::BrightWhite.to_string().as_ref()
+    );
 }

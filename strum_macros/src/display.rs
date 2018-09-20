@@ -1,7 +1,8 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use helpers::{unique_attr, extract_attrs, extract_meta, is_disabled};
+use case_style::CaseStyle;
+use helpers::{convert_case, extract_attrs, extract_meta, is_disabled, unique_attr};
 
 pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -10,6 +11,10 @@ pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
         syn::Data::Enum(ref v) => &v.variants,
         _ => panic!("Display only works on Enums"),
     };
+
+    let type_meta = extract_meta(&ast.attrs);
+    let case_style = unique_attr(&type_meta, "strum", "serialize_all")
+        .map(|style| CaseStyle::from(style.as_ref()));
 
     let mut arms = Vec::new();
     for variant in variants {
@@ -31,7 +36,7 @@ pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
             if let Some(n) = attrs.pop() {
                 n
             } else {
-                ident.to_string()
+                convert_case(ident, case_style)
             }
         };
 

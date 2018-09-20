@@ -7,25 +7,27 @@
 //!
 //! The documentation for this crate is found in the `strum` crate.
 
-#![recursion_limit="128"]
+#![recursion_limit = "128"]
 
+extern crate heck;
 extern crate syn;
 #[macro_use]
 extern crate quote;
 extern crate proc_macro;
 extern crate proc_macro2;
 
-mod helpers;
 mod as_ref_str;
+mod case_style;
 mod display;
-mod to_string;
-mod from_string;
 mod enum_iter;
 mod enum_messages;
 mod enum_properties;
+mod from_string;
+mod helpers;
+mod to_string;
 
-use std::env;
 use proc_macro2::TokenStream;
+use std::env;
 
 fn debug_print_generated(ast: &syn::DeriveInput, toks: &TokenStream) {
     let debug = env::var("STRUM_DEBUG");
@@ -40,7 +42,7 @@ fn debug_print_generated(ast: &syn::DeriveInput, toks: &TokenStream) {
     }
 }
 
-#[proc_macro_derive(EnumString,attributes(strum))]
+#[proc_macro_derive(EnumString, attributes(strum))]
 pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
@@ -49,7 +51,7 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-#[proc_macro_derive(AsRefStr,attributes(strum))]
+#[proc_macro_derive(AsRefStr, attributes(strum))]
 pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
@@ -58,7 +60,7 @@ pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-#[proc_macro_derive(AsStaticStr,attributes(strum))]
+#[proc_macro_derive(AsStaticStr, attributes(strum))]
 pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
@@ -67,7 +69,7 @@ pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     toks.into()
 }
 
-#[proc_macro_derive(ToString,attributes(strum))]
+#[proc_macro_derive(ToString, attributes(strum))]
 pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
@@ -76,7 +78,7 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-#[proc_macro_derive(Display,attributes(strum))]
+#[proc_macro_derive(Display, attributes(strum))]
 pub fn display(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
@@ -85,7 +87,7 @@ pub fn display(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-#[proc_macro_derive(EnumIter,attributes(strum))]
+#[proc_macro_derive(EnumIter, attributes(strum))]
 pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
@@ -94,7 +96,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-#[proc_macro_derive(EnumMessage,attributes(strum))]
+#[proc_macro_derive(EnumMessage, attributes(strum))]
 pub fn enum_messages(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
@@ -103,7 +105,7 @@ pub fn enum_messages(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     toks.into()
 }
 
-#[proc_macro_derive(EnumProperty,attributes(strum))]
+#[proc_macro_derive(EnumProperty, attributes(strum))]
 pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
