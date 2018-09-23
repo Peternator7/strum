@@ -8,6 +8,7 @@ use helpers::{
 pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let vis = &ast.vis;
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
     let variants = match ast.data {
         syn::Data::Enum(ref v) => &v.variants,
@@ -63,12 +64,40 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         discriminants.push(quote!{ #(#attrs)* #ident });
     }
 
+    // Add match arms for `From< TheEnum >
+    let arms = variants
+        .iter()
+        .map(|variant| {
+            let ident = &variant.ident;
+
+            use syn::Fields::*;
+            let params = match variant.fields {
+                Unit => quote!{},
+                Unnamed(ref _fields) => {
+                    quote! { (..) }
+                }
+                Named(ref _fields) => {
+                    quote! { { .. } }
+                }
+            };
+
+            quote! { #name::#ident #params => #discriminants_name::#ident }
+        }).collect::<Vec<_>>();
+
     quote!{
         /// Auto-generated discriminant enum variants
         #derives
         #(#pass_though_attributes)*
         #vis enum #discriminants_name {
             #(#discriminants),*
+        }
+
+        impl #impl_generics ::std::convert::From< #name #ty_generics > for #discriminants_name #where_clause {
+            fn from(s: #name #ty_generics) -> #discriminants_name {
+                match s {
+                    #(#arms),*
+                }
+            }
         }
     }
 }

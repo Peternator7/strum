@@ -145,3 +145,15 @@ fn arbitrary_attributes_pass_through() {
         PassThroughBoo::from_str("dark_black").unwrap()
     );
 }
+
+#[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
+enum EnumInto {
+    A(bool),
+    B(i32),
+}
+
+#[test]
+fn from_test() {
+    assert_eq!(EnumIntoDiscriminants::A, EnumInto::A(true).into());
+    assert_eq!(EnumIntoDiscriminants::B, EnumInto::B(1).into());
+}
