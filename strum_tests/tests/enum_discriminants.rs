@@ -157,3 +157,9 @@ fn from_test() {
     assert_eq!(EnumIntoDiscriminants::A, EnumInto::A(true).into());
     assert_eq!(EnumIntoDiscriminants::B, EnumInto::B(1).into());
 }
+
+#[test]
+fn from_ref_test() {
+    assert_eq!(EnumIntoDiscriminants::A, (&EnumInto::A(true)).into());
+    assert_eq!(EnumIntoDiscriminants::B, (&EnumInto::B(1)).into());
+}

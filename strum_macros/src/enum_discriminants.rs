@@ -8,7 +8,6 @@ use helpers::{
 pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let vis = &ast.vis;
-    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
     let variants = match ast.data {
         syn::Data::Enum(ref v) => &v.variants,
@@ -64,7 +63,25 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         discriminants.push(quote!{ #(#attrs)* #ident });
     }
 
-    // Add match arms for `From< TheEnum >
+    // Ideally:
+    //
+    // * For `Copy` types, we `impl From<TheEnum> for TheEnumDiscriminants`
+    // * For `!Copy` types, we `impl<'enum> From<&'enum TheEnum> for TheEnumDiscriminants`
+    //
+    // That way we ensure users are not able to pass a `Copy` type by reference. However, the
+    // `#[derive(..)]` attributes are not in the parsed tokens, so we are not able to check if a
+    // type is `Copy`, so we just implement both.
+    //
+    // See <https://github.com/dtolnay/syn/issues/433>
+    // ---
+    // let is_copy = unique_meta_list(type_meta.iter(), "derive")
+    //     .map(extract_list_metas)
+    //     .map(|metas| {
+    //         metas
+    //             .filter_map(get_meta_ident)
+    //             .any(|derive| derive.to_string() == "Copy")
+    //     }).unwrap_or(false);
+
     let arms = variants
         .iter()
         .map(|variant| {
@@ -83,6 +100,34 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
             quote! { #name::#ident #params => #discriminants_name::#ident }
         }).collect::<Vec<_>>();
+    let from_fn_body = quote! { match val { #(#arms),* } };
+
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
+    let impl_from = quote! {
+        impl #impl_generics ::std::convert::From< #name #ty_generics > for #discriminants_name #where_clause {
+            fn from(val: #name #ty_generics) -> #discriminants_name {
+                #from_fn_body
+            }
+        }
+    };
+    let impl_from_ref = {
+        let mut generics = ast.generics.clone();
+
+        let lifetime = parse_quote!('_enum);
+        let enum_life = quote! { & #lifetime };
+        generics.params.push(lifetime);
+
+        // Shadows the earlier `impl_generics`
+        let (impl_generics, _, _) = generics.split_for_impl();
+
+        quote! {
+            impl #impl_generics ::std::convert::From< #enum_life #name #ty_generics > for #discriminants_name #where_clause {
+                fn from(val: #enum_life #name #ty_generics) -> #discriminants_name {
+                    #from_fn_body
+                }
+            }
+        }
+    };
 
     quote!{
         /// Auto-generated discriminant enum variants
@@ -92,12 +137,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
             #(#discriminants),*
         }
 
-        impl #impl_generics ::std::convert::From< #name #ty_generics > for #discriminants_name #where_clause {
-            fn from(s: #name #ty_generics) -> #discriminants_name {
-                match s {
-                    #(#arms),*
-                }
-            }
-        }
+        #impl_from
+        #impl_from_ref
     }
 }
