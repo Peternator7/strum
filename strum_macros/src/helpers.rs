@@ -60,6 +60,11 @@ where
     filter_meta_lists(metas, move |metalist| metalist.ident == attr)
 }
 
+/// Returns the `MetaList` that matches the given name from the list of `Meta`s, or `None`.
+///
+/// # Panics
+///
+/// Panics if more than one `Meta` exists with the name.
 pub fn unique_meta_list<'meta, MetaIt>(metas: MetaIt, attr: &'meta str) -> Option<&'meta MetaList>
 where
     MetaIt: Iterator<Item = &'meta Meta>,
@@ -72,6 +77,7 @@ where
     curr.pop()
 }
 
+/// Returns an iterator of the `Meta`s from the given `MetaList`.
 pub fn extract_list_metas<'meta>(metalist: &'meta MetaList) -> impl Iterator<Item = &'meta Meta> {
     use syn::NestedMeta;
     metalist.nested.iter().filter_map(|nested| match *nested {
@@ -80,16 +86,7 @@ pub fn extract_list_metas<'meta>(metalist: &'meta MetaList) -> impl Iterator<Ite
     })
 }
 
-/// Returns the `Ident`s from the `Meta::List`s that match the given `attr` name.
-///
-/// For example, `extract_meta_idents(something_metas, "Something")` returns `Abc`, `Def`, and `Ghi` for
-/// the following declaration.
-///
-/// ```rust,ignore
-/// #[derive(Debug)]
-/// #[strum(Something(Abc, Def), Something(Ghi))]
-/// struct MyStruct {}
-/// ```
+/// Returns the `Ident` of the `Meta::Word`, or `None`.
 pub fn get_meta_ident<'meta>(meta: &'meta Meta) -> Option<&'meta Ident> {
     match *meta {
         Meta::Word(ref ident) => Some(ident),
