@@ -299,7 +299,7 @@ Strum has implemented the following macros:
 7. `EnumDiscriminants`: Given an enum named `MyEnum`, generates another enum called
     `MyEnumDiscriminants` with the same variants, without any data fields. This is useful when you
     wish to determine the variant of an enum from a String, but the variants contain any
-    non-`Default` fields. By default, the generated enum has the followign derives:
+    non-`Default` fields. By default, the generated enum has the following derives:
     `Clone, Copy, Debug, PartialEq, Eq`. You can add additional derives using the
     `#[strum_discriminants(derive(AdditionalDerive))]` attribute.
 
@@ -354,6 +354,29 @@ Strum has implemented the following macros:
             vec![MyVariants::Variant0, MyVariants::Variant1],
             MyVariants::iter().collect::<Vec<_>>()
         );
+    }
+    ```
+
+    The derived enum also has the following trait implementations:
+
+    * `impl From<MyEnum> for MyEnumDiscriminants`
+    * `impl<'_enum> From<&'_enum MyEnum> for MyEnumDiscriminants`
+
+    These allow you to get the *Discriminants* enum variant from the original enum:
+
+    ```rust
+    extern crate strum;
+    #[macro_use] extern crate strum_macros;
+
+    #[derive(Debug, EnumDiscriminants)]
+    #[strum_discriminants(name(MyVariants))]
+    enum MyEnum {
+        Variant0(bool),
+        Variant1 { a: bool },
+    }
+
+    fn main() {
+        assert_eq!(MyVariants::Variant0, MyEnum::Variant0(true).into());
     }
     ```
 
