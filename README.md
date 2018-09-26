@@ -14,8 +14,8 @@ Cargo.toml. Strum_macros contains the macros needed to derive all the traits in 
 
 ```toml
 [dependencies]
-strum = "0.10.0"
-strum_macros = "0.10.0"
+strum = "0.11.0"
+strum_macros = "0.11.0"
 ```
 
 And add these lines to the root of your project, either lib.rs or main.rs.
@@ -91,10 +91,10 @@ Strum has implemented the following macros:
     */
     ```
 
-    Note that the implementation of `FromStr` only matches on the name of the variant.
-    Strum, where possible, avoids operations that have an unknown runtime cost, and parsing strings
-    is potentially an expensive operation. If you do need that behavior, consider the more powerful
-    Serde library for your serialization.
+    Note that the implementation of `FromStr` by default only matches on the name of the
+    variant. There is an option to match on different case conversions through the
+    `#[strum(serialize_all = "snake_case")]` type attribute. See the **Additional Attributes**
+    Section for more information on using this feature.
 
 2. `Display` / `ToString`: prints out the given enum. This enables you to perform round trip
     style conversions from enum into string and back again for unit style variants. `ToString` and 
@@ -296,10 +296,129 @@ Strum has implemented the following macros:
      }
      ```
 
+7. `EnumDiscriminants`: Given an enum named `MyEnum`, generates another enum called
+    `MyEnumDiscriminants` with the same variants, without any data fields. This is useful when you
+    wish to determine the variant of an enum from a String, but the variants contain any
+    non-`Default` fields. By default, the generated enum has the following derives:
+    `Clone, Copy, Debug, PartialEq, Eq`. You can add additional derives using the
+    `#[strum_discriminants(derive(AdditionalDerive))]` attribute.
+
+    Here's an example:
+
+    ```rust
+    extern crate strum;
+    #[macro_use] extern crate strum_macros;
+
+    // Bring trait into scope
+    use std::str::FromStr;
+
+    #[derive(Debug)]
+    struct NonDefault;
+
+    #[allow(dead_code)]
+    #[derive(Debug, EnumDiscriminants)]
+    #[strum_discriminants(derive(EnumString))]
+    enum MyEnum {
+        Variant0(NonDefault),
+        Variant1 { a: NonDefault },
+    }
+
+    fn main() {
+        assert_eq!(
+            MyEnumDiscriminants::Variant0,
+            MyEnumDiscriminants::from_str("Variant0").unwrap()
+        );
+    }
+    ```
+
+    You can also rename the generated enum using the `#[strum_discriminants(name(OtherName))]`
+    attribute:
+
+    ```rust
+    extern crate strum;
+    #[macro_use] extern crate strum_macros;
+    // You need to bring the type into scope to use it!!!
+    use strum::IntoEnumIterator;
+
+    #[allow(dead_code)]
+    #[derive(Debug, EnumDiscriminants)]
+    #[strum_discriminants(derive(EnumIter))]
+    #[strum_discriminants(name(MyVariants))]
+    enum MyEnum {
+        Variant0(bool),
+        Variant1 { a: bool },
+    }
+
+    fn main() {
+        assert_eq!(
+            vec![MyVariants::Variant0, MyVariants::Variant1],
+            MyVariants::iter().collect::<Vec<_>>()
+        );
+    }
+    ```
+
+    The derived enum also has the following trait implementations:
+
+    * `impl From<MyEnum> for MyEnumDiscriminants`
+    * `impl<'_enum> From<&'_enum MyEnum> for MyEnumDiscriminants`
+
+    These allow you to get the *Discriminants* enum variant from the original enum:
+
+    ```rust
+    extern crate strum;
+    #[macro_use] extern crate strum_macros;
+
+    #[derive(Debug, EnumDiscriminants)]
+    #[strum_discriminants(name(MyVariants))]
+    enum MyEnum {
+        Variant0(bool),
+        Variant1 { a: bool },
+    }
+
+    fn main() {
+        assert_eq!(MyVariants::Variant0, MyEnum::Variant0(true).into());
+    }
+    ```
+
 # Additional Attributes
 
-Strum supports several custom attributes to modify the generated code. Custom attributes are
-applied to a variant by adding #[strum(parameter="value")] to the variant.
+Strum supports several custom attributes to modify the generated code. At the enum level, the
+`#[strum(serialize_all = "snake_case")]` attribute can be used to change the case used when
+serializing to and deserializing from strings:
+
+```rust
+extern crate strum;
+#[macro_use]
+extern crate strum_macros;
+
+#[derive(Debug, Eq, PartialEq, ToString)]
+#[strum(serialize_all = "snake_case")]
+enum Brightness {
+    DarkBlack,
+    Dim {
+        glow: usize,
+    },
+    #[strum(serialize = "bright")]
+    BrightWhite,
+}
+
+fn main() {
+    assert_eq!(
+        String::from("dark_black"),
+        Brightness::DarkBlack.to_string().as_ref()
+    );
+    assert_eq!(
+        String::from("dim"),
+        Brightness::Dim { glow: 0 }.to_string().as_ref()
+    );
+    assert_eq!(
+        String::from("bright"),
+        Brightness::BrightWhite.to_string().as_ref()
+    );
+}
+```
+
+Custom attributes are applied to a variant by adding `#[strum(parameter="value")]` to the variant.
 
 - `serialize="..."`: Changes the text that `FromStr()` looks for when parsing a string. This attribute can
    be applied multiple times to an element and the enum variant will be parsed if any of them match.

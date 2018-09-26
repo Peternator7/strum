@@ -4,17 +4,17 @@ extern crate strum_macros;
 
 use strum::EnumMessage;
 
-#[derive(Debug,Eq,PartialEq,EnumMessage)]
+#[derive(Debug, Eq, PartialEq, EnumMessage)]
 enum Pets {
-    #[strum(message="I'm a dog")]
+    #[strum(message = "I'm a dog")]
     Dog,
-    #[strum(message="I'm a cat")]
-    #[strum(detailed_message="I'm a very exquisite striped cat")]
+    #[strum(message = "I'm a cat")]
+    #[strum(detailed_message = "I'm a very exquisite striped cat")]
     Cat,
-    #[strum(detailed_message="My fish is named Charles McFish")]
+    #[strum(detailed_message = "My fish is named Charles McFish")]
     Fish,
     Bird,
-    #[strum(disabled="true")]
+    #[strum(disabled = "true")]
     Hamster,
 }
 
@@ -27,15 +27,19 @@ fn simple_message() {
 #[test]
 fn detailed_message() {
     assert_eq!("I'm a cat", (Pets::Cat).get_message().unwrap());
-    assert_eq!("I'm a very exquisite striped cat",
-               (Pets::Cat).get_detailed_message().unwrap());
+    assert_eq!(
+        "I'm a very exquisite striped cat",
+        (Pets::Cat).get_detailed_message().unwrap()
+    );
 }
 
 #[test]
 fn only_detailed_message() {
     assert_eq!(None, (Pets::Fish).get_message());
-    assert_eq!("My fish is named Charles McFish",
-               (Pets::Fish).get_detailed_message().unwrap());
+    assert_eq!(
+        "My fish is named Charles McFish",
+        (Pets::Fish).get_detailed_message().unwrap()
+    );
 }
 
 #[test]

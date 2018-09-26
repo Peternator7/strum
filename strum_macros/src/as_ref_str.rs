@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use helpers::{unique_attr, extract_attrs, extract_meta, is_disabled};
+use helpers::{extract_attrs, extract_meta, is_disabled, unique_attr};
 
 fn get_arms(ast: &syn::DeriveInput) -> Vec<TokenStream> {
     let name = &ast.ident;

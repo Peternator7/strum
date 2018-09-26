@@ -1,15 +1,15 @@
 #[macro_use]
 extern crate strum_macros;
 
-#[derive(Debug,Eq,PartialEq,AsRefStr)]
+#[derive(Debug, Eq, PartialEq, AsRefStr)]
 enum Color {
-    #[strum(to_string="RedRed")]
+    #[strum(to_string = "RedRed")]
     Red,
-    #[strum(serialize="b", to_string="blue")]
+    #[strum(serialize = "b", to_string = "blue")]
     Blue { hue: usize },
-    #[strum(serialize="y", serialize="yellow")]
+    #[strum(serialize = "y", serialize = "yellow")]
     Yellow,
-    #[strum(default="true")]
+    #[strum(default = "true")]
     Green(String),
 }
 

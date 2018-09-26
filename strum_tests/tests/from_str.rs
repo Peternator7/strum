@@ -4,15 +4,17 @@ extern crate strum_macros;
 
 use std::str::FromStr;
 
-#[derive(Debug,Eq,PartialEq,EnumString)]
+#[derive(Debug, Eq, PartialEq, EnumString)]
 enum Color {
     Red,
-    Blue { hue: usize },
-    #[strum(serialize="y",serialize="yellow")]
+    Blue {
+        hue: usize,
+    },
+    #[strum(serialize = "y", serialize = "yellow")]
     Yellow,
-    #[strum(default="true")]
+    #[strum(default = "true")]
     Green(String),
-    #[strum(to_string="purp")]
+    #[strum(to_string = "purp")]
     Purple,
 }
 
@@ -39,11 +41,40 @@ fn color_to_string() {
 
 #[test]
 fn color_default() {
-    assert_eq!(Color::Green(String::from("not found")),
-               Color::from_str("not found").unwrap());
+    assert_eq!(
+        Color::Green(String::from("not found")),
+        Color::from_str("not found").unwrap()
+    );
 }
 
-#[derive(Debug,Eq,PartialEq,EnumString)]
+#[derive(Debug, Eq, PartialEq, EnumString)]
+#[strum(serialize_all = "snake_case")]
+enum Brightness {
+    DarkBlack,
+    Dim {
+        glow: usize,
+    },
+    #[strum(serialize = "Bright")]
+    BrightWhite,
+}
+
+#[test]
+fn brightness_serialize_all() {
+    assert_eq!(
+        Brightness::DarkBlack,
+        Brightness::from_str("dark_black").unwrap()
+    );
+    assert_eq!(
+        Brightness::Dim { glow: 0 },
+        Brightness::from_str("dim").unwrap()
+    );
+    assert_eq!(
+        Brightness::BrightWhite,
+        Brightness::from_str("Bright").unwrap()
+    );
+}
+
+#[derive(Debug, Eq, PartialEq, EnumString)]
 enum Week {
     Sunday,
     Monday,
@@ -56,8 +87,10 @@ enum Week {
 
 #[test]
 fn week_not_found() {
-    assert_eq!(Result::Err(::strum::ParseError::VariantNotFound),
-               Week::from_str("Humpday"));
+    assert_eq!(
+        Result::Err(::strum::ParseError::VariantNotFound),
+        Week::from_str("Humpday")
+    );
 }
 
 #[test]
@@ -71,7 +104,7 @@ fn week_found() {
     assert_eq!(Result::Ok(Week::Saturday), Week::from_str("Saturday"));
 }
 
-#[derive(Debug,Eq,PartialEq,EnumString)]
+#[derive(Debug, Eq, PartialEq, EnumString)]
 enum Lifetime<'a> {
     Life(&'a str),
     None,
@@ -82,7 +115,7 @@ fn lifetime_test() {
     assert_eq!(Lifetime::Life(""), Lifetime::from_str("Life").unwrap());
 }
 
-#[derive(Debug,Eq,PartialEq,EnumString)]
+#[derive(Debug, Eq, PartialEq, EnumString)]
 enum Generic<T: Default> {
     Gen(T),
     None,

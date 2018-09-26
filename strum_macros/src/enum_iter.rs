@@ -10,8 +10,10 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
     let vis = &ast.vis;
 
     if gen.lifetimes().count() > 0 {
-        panic!("Enum Iterator isn't supported on Enums with lifetimes. The resulting enums would \
-                 be unbounded.");
+        panic!(
+            "Enum Iterator isn't supported on Enums with lifetimes. The resulting enums would \
+             be unbounded."
+        );
     }
 
     let phantom_data = if gen.type_params().count() > 0 {
@@ -42,7 +44,10 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
                 quote! { (#(#defaults),*) }
             }
             Named(ref fields) => {
-                let fields = fields.named.iter().map(|field| field.ident.as_ref().unwrap());
+                let fields = fields
+                    .named
+                    .iter()
+                    .map(|field| field.ident.as_ref().unwrap());
                 quote! { {#(#fields: ::std::default::Default::default()),*} }
             }
         };
