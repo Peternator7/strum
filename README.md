@@ -380,6 +380,11 @@ Strum has implemented the following macros:
     }
     ```
 
+8. `EnumCount`: for a given enum generates implementation of `strum::EnumCount`,
+    which returns number of variants via `strum::EnumCount::count` method,
+	also for given `enum MyEnum` generates `const MYENUM_COUNT: usize`
+	which gives the same value as `strum::EnumCount` (which is usefull for array sizes, etc.).
+
 # Additional Attributes
 
 Strum supports several custom attributes to modify the generated code. At the enum level, the
