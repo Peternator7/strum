@@ -669,3 +669,8 @@ where
 {
     fn as_static(&self) -> &'static T;
 }
+
+/// Number of variants in Enum
+pub trait EnumCount {
+    fn count() -> usize;
+}
