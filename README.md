@@ -14,8 +14,8 @@ Cargo.toml. Strum_macros contains the macros needed to derive all the traits in 
 
 ```toml
 [dependencies]
-strum = "0.11.0"
-strum_macros = "0.11.0"
+strum = "0.12.0"
+strum_macros = "0.12.0"
 ```
 
 And add these lines to the root of your project, either lib.rs or main.rs.
@@ -384,6 +384,29 @@ Strum has implemented the following macros:
     which returns number of variants via `strum::EnumCount::count` method,
 	also for given `enum MyEnum` generates `const MYENUM_COUNT: usize`
 	which gives the same value as `strum::EnumCount` (which is usefull for array sizes, etc.).
+
+    ```rust
+    extern crate strum;
+    #[macro_use] extern crate strum_macros;
+
+    #[derive(Debug, EnumCount, EnumIter)]
+    enum Week {
+        Sunday,
+        Monday,
+        Tuesday,
+        Wednesday,
+        Thursday,
+        Friday,
+        Saturday,
+    }
+
+    #[test]
+    fn main() {
+        assert_eq!(7, Week::count());
+        assert_eq!(Week::count(), WEEK_COUNT);
+        assert_eq!(Week::iter().count(), WEEK_COUNT);
+    }
+    ```
 
 # Additional Attributes
 

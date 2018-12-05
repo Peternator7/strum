@@ -372,6 +372,35 @@
 //!         assert_eq!(MyVariants::Variant0, MyEnum::Variant0(true).into());
 //!     }
 //!     ```
+//! 
+//! 8. `EnumCount`: for a given enum generates implementation of `strum::EnumCount`,
+//!    which returns number of variants via `strum::EnumCount::count` method,
+//!	also for given `enum MyEnum` generates `const MYENUM_COUNT: usize`
+//!	which gives the same value as `strum::EnumCount` (which is usefull for array sizes, etc.).
+//!
+//!    ```rust
+//!    extern crate strum;
+//!    #[macro_use] extern crate strum_macros;
+//!     
+//!    use strum::{IntoEnumIterator, EnumCount};
+//!
+//!    #[derive(Debug, EnumCount, EnumIter)]
+//!    enum Week {
+//!        Sunday,
+//!        Monday,
+//!        Tuesday,
+//!        Wednesday,
+//!        Thursday,
+//!        Friday,
+//!        Saturday,
+//!    }
+//!
+//!    fn main() {
+//!        assert_eq!(7, Week::count());
+//!        assert_eq!(Week::count(), WEEK_COUNT);
+//!        assert_eq!(Week::iter().count(), WEEK_COUNT);
+//!    }
+//!    ```
 //!
 //! # Additional Attributes
 //!
@@ -670,7 +699,8 @@ where
     fn as_static(&self) -> &'static T;
 }
 
-/// Number of variants in Enum
+/// A trait for capturing the number of variants in Enum. This trait can be autoderived by 
+/// `strum_macros`. 
 pub trait EnumCount {
     fn count() -> usize;
 }

@@ -1,6 +1,6 @@
 [package]
 name = "strum"
-version = "0.11.0"
+version = "0.12.0"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 license = "MIT"
 
@@ -13,7 +13,7 @@ homepage = "https://github.com/Peternator7/strum"
 readme = "../README.md"
 
 [dev-dependencies]
-strum_macros = { path = "../strum_macros", version = "0.11.0" }
+strum_macros = { path = "../strum_macros", version = "0.12.0" }
 
 [badges]
 travis-ci = { repository = "Peternator7/strum" }
