@@ -387,7 +387,10 @@ Strum has implemented the following macros:
 
     ```rust
     extern crate strum;
-    #[macro_use] extern crate strum_macros;
+    #[macro_use] 
+    extern crate strum_macros;
+
+    use strum::{IntoEnumIterator, EnumCount};
 
     #[derive(Debug, EnumCount, EnumIter)]
     enum Week {
@@ -400,7 +403,6 @@ Strum has implemented the following macros:
         Saturday,
     }
 
-    #[test]
     fn main() {
         assert_eq!(7, Week::count());
         assert_eq!(Week::count(), WEEK_COUNT);
