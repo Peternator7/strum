@@ -74,12 +74,32 @@ pub fn as_static_str_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let arms = get_arms(ast);
+
+    let mut generics = ast.generics.clone();
+    generics
+        .params
+        .push(syn::GenericParam::Lifetime(syn::LifetimeDef::new(
+            parse_quote!('_derivative_strum),
+        )));
+    let (impl_generics2, _, _) = generics.split_for_impl();
     quote!{
         impl #impl_generics ::strum::AsStaticRef<str> for #name #ty_generics #where_clause {
             fn as_static(&self) -> &'static str {
                 match *self {
                     #(#arms),*
                 }
+            }
+        }
+        impl #impl_generics ::std::convert::From<#name #ty_generics> for &'static str #where_clause {
+            fn from(x: #name #ty_generics) -> &'static str {
+                use strum::AsStaticRef;
+                x.as_static()
+            }
+        }
+        impl #impl_generics2 ::std::convert::From<&'_derivative_strum #name #ty_generics> for &'static str #where_clause {
+            fn from(x: &'_derivative_strum #name #ty_generics) -> &'static str {
+                use strum::AsStaticRef;
+                x.as_static()
             }
         }
     }
