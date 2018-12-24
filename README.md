@@ -14,8 +14,8 @@ Cargo.toml. Strum_macros contains the macros needed to derive all the traits in 
 
 ```toml
 [dependencies]
-strum = "0.12.0"
-strum_macros = "0.12.0"
+strum = "0.13.0"
+strum_macros = "0.13.0"
 ```
 
 And add these lines to the root of your project, either lib.rs or main.rs.
@@ -135,7 +135,35 @@ Strum has implemented the following macros:
    `ToString` for determining what string is returned. The difference is that `as_ref()` returns 
     a `&str` instead of a `String` so you don't allocate any additional memory with each call.
 
-4. `AsStaticStr`: this is similar to `AsRefStr`, but returns a `'static` reference to a string which is helpful
+4. `IntoStaticStr`: this trait implements `From<YourEnum>` and `From<&'a YourEnum>` for `&'static str`. This is
+   useful for turning an enum variant into a static string. The Rust `std` provides a blanket impl of the 
+   reverse direction - i.e. `impl Into<&'static str> for YourEnum`.
+
+   ```rust
+    extern crate strum;
+   #[macro_use] extern crate strum_macros;
+
+   #[derive(IntoStaticStr)]
+   enum State<'a> {
+       Initial(&'a str),
+       Finished
+   }
+
+   fn print_state<'a>(s:&'a str) {
+       let state = State::Initial(s);
+       // The following won't work because the lifetime is incorrect so we can use.as_static() instead.
+       // let wrong: &'static str = state.as_ref();
+       let right: &'static str = state.into();
+       println!("{}", right); 
+   }
+
+   fn main() {
+       print_state(&"hello world".to_string())
+   }
+   ``` 
+
+4. `AsStaticStr`:  **Deprecated since version 0.13.0. Prefer IntoStaticStr instead.**  
+   This is similar to `AsRefStr`, but returns a `'static` reference to a string which is helpful
    in some scenarios. This macro implements `strum::AsStaticRef<str>` which adds a method `.to_static()` that 
    returns a `&'static str`.
 
@@ -152,15 +180,8 @@ Strum has implemented the following macros:
    }
 
    fn print_state<'a>(s:&'a str) {
-       let state = State::Initial(s);
-       // The following won't work because the lifetime is incorrect so we can use.as_static() instead.
-       // let wrong: &'static str = state.as_ref();
-       let right: &'static str = state.as_static();
+       let right: &'static str = State::Initial(s).as_static();
        println!("{}", right); 
-   }
-
-   fn main() {
-       print_state(&"hello world".to_string())
    }
    ```
 

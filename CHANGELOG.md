@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.13.0
+
+### Added
+
+* Added a derive to implement `From<YourEnum>` for `&'static str`. This deprecates `AsStaticStr` since 
+  the new solution doesn't require a `strum` specific trait to use.
+
+## 0.12.0
 
 ### Added
 
