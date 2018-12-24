@@ -67,7 +67,16 @@ pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
-    let toks = as_ref_str::as_static_str_inner(&ast);
+    let toks = as_ref_str::as_static_str_inner(&ast, as_ref_str::GenerateTraitVariant::AsStaticStr);
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
+#[proc_macro_derive(IntoStaticStr, attributes(strum))]
+pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse(input).unwrap();
+
+    let toks = as_ref_str::as_static_str_inner(&ast, as_ref_str::GenerateTraitVariant::From);
     debug_print_generated(&ast, &toks);
     toks.into()
 }

@@ -5,7 +5,7 @@ extern crate strum_macros;
 use std::str::FromStr;
 use strum::AsStaticRef;
 
-#[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr)]
+#[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
 enum Color {
     #[strum(to_string = "RedRed")]
     Red,
@@ -41,20 +41,20 @@ fn as_green_str() {
     let _: &'static str = (Color::Green(String::default())).as_static();
 }
 
-#[derive(AsStaticStr)]
+#[derive(IntoStaticStr)]
 enum Foo<'a> {
     A,
     C(&'a i32),
 }
 
-#[derive(AsStaticStr)]
+#[derive(IntoStaticStr)]
 enum Boo<'a, T> {
     A(T),
     B,
     C(&'a i32),
 }
 
-#[derive(AsStaticStr)]
+#[derive(IntoStaticStr)]
 enum Moo<'a, T>
 where
     T: AsRef<str>,
