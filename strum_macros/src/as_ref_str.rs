@@ -70,16 +70,56 @@ pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> TokenStream {
     }
 }
 
-pub fn as_static_str_inner(ast: &syn::DeriveInput) -> TokenStream {
+pub enum GenerateTraitVariant {
+    AsStaticStr,
+    From,
+}
+
+pub fn as_static_str_inner(
+    ast: &syn::DeriveInput,
+    trait_variant: GenerateTraitVariant,
+) -> TokenStream {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let arms = get_arms(ast);
-    quote!{
-        impl #impl_generics ::strum::AsStaticRef<str> for #name #ty_generics #where_clause {
-            fn as_static(&self) -> &'static str {
-                match *self {
-                    #(#arms),*
+
+    let mut generics = ast.generics.clone();
+    generics
+        .params
+        .push(syn::GenericParam::Lifetime(syn::LifetimeDef::new(
+            parse_quote!('_derivative_strum),
+        )));
+    let (impl_generics2, _, _) = generics.split_for_impl();
+    let arms2 = arms.clone();
+    let arms3 = arms.clone();
+    match trait_variant {
+        GenerateTraitVariant::AsStaticStr => {
+            quote!{
+                impl #impl_generics ::strum::AsStaticRef<str> for #name #ty_generics #where_clause {
+                    fn as_static(&self) -> &'static str {
+                        match *self {
+                            #(#arms),*
+                        }
+                    }
                 }
+            }
+        }
+        GenerateTraitVariant::From => {
+            quote! {
+            impl #impl_generics ::std::convert::From<#name #ty_generics> for &'static str #where_clause {
+                fn from(x: #name #ty_generics) -> &'static str {
+                    match x {
+                        #(#arms2),*
+                    }
+                }
+            }
+            impl #impl_generics2 ::std::convert::From<&'_derivative_strum #name #ty_generics> for &'static str #where_clause {
+                fn from(x: &'_derivative_strum #name #ty_generics) -> &'static str {
+                    match *x {
+                        #(#arms3),*
+                    }
+                }
+            }
             }
         }
     }

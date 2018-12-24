@@ -5,7 +5,7 @@ extern crate strum_macros;
 use std::str::FromStr;
 use strum::AsStaticRef;
 
-#[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr)]
+#[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
 enum Color {
     #[strum(to_string = "RedRed")]
     Red,
@@ -39,4 +39,49 @@ fn as_yellow_str() {
 fn as_green_str() {
     assert_eq!("Green", (Color::Green(String::default())).as_ref());
     let _: &'static str = (Color::Green(String::default())).as_static();
+}
+
+#[derive(IntoStaticStr)]
+enum Foo<'a> {
+    A,
+    C(&'a i32),
+}
+
+#[derive(IntoStaticStr)]
+enum Boo<'a, T> {
+    A(T),
+    B,
+    C(&'a i32),
+}
+
+#[derive(IntoStaticStr)]
+enum Moo<'a, T>
+where
+    T: AsRef<str>,
+{
+    A(T),
+    B,
+    C(&'a i32),
+}
+
+#[test]
+fn test_into_static_str() {
+    assert_eq!("RedRed", <&'static str>::from(Color::Red));
+    assert_eq!("blue", <&'static str>::from(Color::Blue { hue: 0 }));
+    assert_eq!("yellow", <&'static str>::from(Color::Yellow));
+
+    assert_eq!("RedRed", <&'static str>::from(&Color::Red));
+    assert_eq!("blue", <&'static str>::from(&Color::Blue { hue: 0 }));
+    assert_eq!("yellow", <&'static str>::from(&Color::Yellow));
+
+    assert_eq!("A", <&'static str>::from(Foo::A));
+    assert_eq!("C", <&'static str>::from(Foo::C(&17)));
+
+    assert_eq!("A", <&'static str>::from(Boo::A(17)));
+    assert_eq!("B", <&'static str>::from(Boo::B::<i32>));
+    assert_eq!("C", <&'static str>::from(Boo::C::<i32>(&17)));
+
+    assert_eq!("A", <&'static str>::from(Moo::A::<String>("aaa".into())));
+    assert_eq!("B", <&'static str>::from(Moo::B::<String>));
+    assert_eq!("C", <&'static str>::from(Moo::C::<String>(&17)));
 }

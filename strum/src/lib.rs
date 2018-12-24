@@ -372,7 +372,7 @@
 //!         assert_eq!(MyVariants::Variant0, MyEnum::Variant0(true).into());
 //!     }
 //!     ```
-//! 
+//!
 //! 8. `EnumCount`: for a given enum generates implementation of `strum::EnumCount`,
 //!    which returns number of variants via `strum::EnumCount::count` method,
 //!	also for given `enum MyEnum` generates `const MYENUM_COUNT: usize`
@@ -692,6 +692,7 @@ pub trait EnumProperty {
 
 /// A cheap reference-to-reference conversion. Used to convert a value to a
 /// reference value with `'static` lifetime within generic code.
+/// #[deprecated(since="0.13.0", note="please use `#[derive(IntoStaticStr)]` instead")]
 pub trait AsStaticRef<T>
 where
     T: ?Sized,
@@ -699,8 +700,8 @@ where
     fn as_static(&self) -> &'static T;
 }
 
-/// A trait for capturing the number of variants in Enum. This trait can be autoderived by 
-/// `strum_macros`. 
+/// A trait for capturing the number of variants in Enum. This trait can be autoderived by
+/// `strum_macros`.
 pub trait EnumCount {
     fn count() -> usize;
 }
