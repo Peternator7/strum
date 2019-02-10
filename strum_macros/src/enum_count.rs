@@ -24,7 +24,7 @@ pub(crate) fn enum_count_inner(ast: &syn::DeriveInput) -> TokenStream {
                 }
             }
 
-            #[allow(dead_code)]
+            #[allow(dead_code, missing_docs)]
             pub const #const_name: usize = #n;
     }
 }
