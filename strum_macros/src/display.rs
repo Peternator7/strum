@@ -41,19 +41,19 @@ pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
         };
 
         let params = match variant.fields {
-            Unit => quote!{},
-            Unnamed(..) => quote!{ (..) },
-            Named(..) => quote!{ {..} },
+            Unit => quote! {},
+            Unnamed(..) => quote! { (..) },
+            Named(..) => quote! { {..} },
         };
 
-        arms.push(quote!{ #name::#ident #params => f.write_str(#output) });
+        arms.push(quote! { #name::#ident #params => f.write_str(#output) });
     }
 
     if arms.len() < variants.len() {
-        arms.push(quote!{ _ => panic!("fmt() called on disabled variant.")})
+        arms.push(quote! { _ => panic!("fmt() called on disabled variant.")})
     }
 
-    quote!{
+    quote! {
         impl #impl_generics ::std::fmt::Display for #name #ty_generics #where_clause {
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
                 match *self {

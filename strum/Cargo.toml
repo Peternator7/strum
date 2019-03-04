@@ -13,7 +13,7 @@ homepage = "https://github.com/Peternator7/strum"
 readme = "../README.md"
 
 [dev-dependencies]
-strum_macros = { path = "../strum_macros", version = "0.13.0" }
+strum_macros = { path = "../strum_macros", version = "0.14.0" }
 
 [badges]
 travis-ci = { repository = "Peternator7/strum" }

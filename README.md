@@ -7,6 +7,12 @@
 Strum is a set of macros and traits for working with
 enums and strings easier in Rust.
 
+# Compatibility
+
+Strum is compatible with versions of rustc >= 1.26.0. That's the earliest version of stable rust that supports
+impl trait. Pull Requests that improve compatibility with older versions are welcome, but new feature work
+will focus on the current version of rust with an effort to avoid breaking compatibility with older versions.
+
 # Including Strum in Your Project
 
 Import strum and strum_macros into your project by adding the following lines to your
@@ -14,8 +20,8 @@ Cargo.toml. Strum_macros contains the macros needed to derive all the traits in 
 
 ```toml
 [dependencies]
-strum = "0.13.0"
-strum_macros = "0.13.0"
+strum = "0.14.0"
+strum_macros = "0.14.0"
 ```
 
 And add these lines to the root of your project, either lib.rs or main.rs.
@@ -97,7 +103,7 @@ Strum has implemented the following macros:
     Section for more information on using this feature.
 
 2. `Display` / `ToString`: prints out the given enum. This enables you to perform round trip
-    style conversions from enum into string and back again for unit style variants. `ToString` and 
+    style conversions from enum into string and back again for unit style variants. `ToString` and
     `Display` choose which serialization to used based on the following criteria:
 
     1. If there is a `to_string` property, this value will be used. There can only be one per variant.
@@ -131,12 +137,12 @@ Strum has implemented the following macros:
     }
     ```
 
-3. `AsRefStr`: this derive implements `AsRef<str>` on your enum using the same rules as 
-   `ToString` for determining what string is returned. The difference is that `as_ref()` returns 
+3. `AsRefStr`: this derive implements `AsRef<str>` on your enum using the same rules as
+   `ToString` for determining what string is returned. The difference is that `as_ref()` returns
     a `&str` instead of a `String` so you don't allocate any additional memory with each call.
 
 4. `IntoStaticStr`: this trait implements `From<YourEnum>` and `From<&'a YourEnum>` for `&'static str`. This is
-   useful for turning an enum variant into a static string. The Rust `std` provides a blanket impl of the 
+   useful for turning an enum variant into a static string. The Rust `std` provides a blanket impl of the
    reverse direction - i.e. `impl Into<&'static str> for YourEnum`.
 
    ```rust
@@ -154,23 +160,23 @@ Strum has implemented the following macros:
        // The following won't work because the lifetime is incorrect so we can use.as_static() instead.
        // let wrong: &'static str = state.as_ref();
        let right: &'static str = state.into();
-       println!("{}", right); 
+       println!("{}", right);
    }
 
    fn main() {
        print_state(&"hello world".to_string())
    }
-   ``` 
+   ```
 
-4. `AsStaticStr`:  **Deprecated since version 0.13.0. Prefer IntoStaticStr instead.**  
+4. `AsStaticStr`:  **Deprecated since version 0.13.0. Prefer IntoStaticStr instead.**
    This is similar to `AsRefStr`, but returns a `'static` reference to a string which is helpful
-   in some scenarios. This macro implements `strum::AsStaticRef<str>` which adds a method `.to_static()` that 
+   in some scenarios. This macro implements `strum::AsStaticRef<str>` which adds a method `.to_static()` that
    returns a `&'static str`.
 
    ```rust
    extern crate strum;
    #[macro_use] extern crate strum_macros;
-   
+
    use strum::AsStaticRef;
 
    #[derive(AsStaticStr)]
@@ -181,7 +187,7 @@ Strum has implemented the following macros:
 
    fn print_state<'a>(s:&'a str) {
        let right: &'static str = State::Initial(s).as_static();
-       println!("{}", right); 
+       println!("{}", right);
    }
    ```
 
@@ -408,7 +414,7 @@ Strum has implemented the following macros:
 
     ```rust
     extern crate strum;
-    #[macro_use] 
+    #[macro_use]
     extern crate strum_macros;
 
     use strum::{IntoEnumIterator, EnumCount};

@@ -124,7 +124,7 @@ fn split_attributes_test() {
 #[strum_discriminants(
     name(PassThroughBoo),
     derive(Display, EnumIter, EnumString),
-    strum(serialize_all = "snake_case"),
+    strum(serialize_all = "snake_case")
 )]
 enum PassThrough {
     DarkBlack(bool),
@@ -168,7 +168,7 @@ fn from_ref_test() {
 struct Rara;
 
 #[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(name(EnumIntoComplexVars),)]
+#[strum_discriminants(name(EnumIntoComplexVars))]
 enum EnumIntoComplex<'a, T: 'a> {
     A(&'a T),
 }

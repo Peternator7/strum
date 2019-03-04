@@ -41,19 +41,19 @@ pub fn to_string_inner(ast: &syn::DeriveInput) -> TokenStream {
         };
 
         let params = match variant.fields {
-            Unit => quote!{},
-            Unnamed(..) => quote!{ (..) },
-            Named(..) => quote!{ {..} },
+            Unit => quote! {},
+            Unnamed(..) => quote! { (..) },
+            Named(..) => quote! { {..} },
         };
 
-        arms.push(quote!{ #name::#ident #params => ::std::string::String::from(#output) });
+        arms.push(quote! { #name::#ident #params => ::std::string::String::from(#output) });
     }
 
     if arms.len() < variants.len() {
-        arms.push(quote!{ _ => panic!("to_string() called on disabled variant.")})
+        arms.push(quote! { _ => panic!("to_string() called on disabled variant.")})
     }
 
-    quote!{
+    quote! {
         impl #impl_generics ::std::string::ToString for #name #ty_generics #where_clause {
             fn to_string(&self) -> ::std::string::String {
                 match *self {
