@@ -6,6 +6,7 @@ pub(crate) fn enum_count_inner(ast: &syn::DeriveInput) -> TokenStream {
         syn::Data::Enum(ref v) => v.variants.len(),
         _ => panic!("EnumCount can only be used with enums"),
     };
+
     // Used in the quasi-quotation below as `#name`
     let name = &ast.ident;
     let const_name = &syn::Ident::new(
@@ -17,7 +18,7 @@ pub(crate) fn enum_count_inner(ast: &syn::DeriveInput) -> TokenStream {
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
     quote! {
-            // The generated impl
+            // Implementation
             impl #impl_generics ::strum::EnumCount for #name #ty_generics #where_clause {
                 fn count() -> usize {
                     #n

@@ -42,7 +42,7 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
                     panic!("Default only works on unit structs with a single String parameter");
                 }
 
-                default = quote!{
+                default = quote! {
                     default => ::std::result::Result::Ok(#name::#ident (default.into()))
                 };
             } else {
@@ -59,7 +59,7 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
         }
 
         let params = match variant.fields {
-            Unit => quote!{},
+            Unit => quote! {},
             Unnamed(ref fields) => {
                 let defaults =
                     ::std::iter::repeat(quote!(Default::default())).take(fields.unnamed.len());
@@ -74,12 +74,12 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
             }
         };
 
-        arms.push(quote!{ #(#attrs)|* => ::std::result::Result::Ok(#name::#ident #params) });
+        arms.push(quote! { #(#attrs)|* => ::std::result::Result::Ok(#name::#ident #params) });
     }
 
     arms.push(default);
 
-    quote!{
+    quote! {
         impl #impl_generics ::std::str::FromStr for #name #ty_generics #where_clause {
             type Err = ::strum::ParseError;
             fn from_str(s: &str) -> ::std::result::Result< #name #ty_generics , Self::Err> {

@@ -3,8 +3,9 @@ extern crate strum;
 extern crate strum_macros;
 
 #[allow(dead_code)]
-#[derive(Debug, Eq, PartialEq, EnumString, ToString)]
+#[derive(Debug, Eq, PartialEq, EnumString, ToString, EnumCount, EnumDiscriminants)]
 enum Color {
+    /// Random Docs
     #[strum(to_string = "RedRed")]
     Red,
     #[strum(serialize = "b", to_string = "blue")]

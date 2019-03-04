@@ -37,7 +37,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
         use syn::Fields::*;
         let ident = &variant.ident;
         let params = match variant.fields {
-            Unit => quote!{},
+            Unit => quote! {},
             Unnamed(ref fields) => {
                 let defaults = ::std::iter::repeat(quote!(::std::default::Default::default()))
                     .take(fields.unnamed.len());
@@ -52,13 +52,13 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
             }
         };
 
-        arms.push(quote!{#idx => ::std::option::Option::Some(#name::#ident #params)});
+        arms.push(quote! {#idx => ::std::option::Option::Some(#name::#ident #params)});
     }
 
     let variant_count = arms.len();
     arms.push(quote! { _ => ::std::option::Option::None });
     let iter_name = syn::parse_str::<syn::Ident>(&format!("{}Iter", name)).unwrap();
-    quote!{
+    quote! {
         #[allow(missing_docs)]
         #vis struct #iter_name #ty_generics {
             idx: usize,

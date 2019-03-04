@@ -23,9 +23,9 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         use syn::Fields::*;
         let params = match variant.fields {
-            Unit => quote!{},
-            Unnamed(..) => quote!{ (..) },
-            Named(..) => quote!{ {..} },
+            Unit => quote! {},
+            Unnamed(..) => quote! { (..) },
+            Named(..) => quote! { {..} },
         };
 
         // You can't disable getting the serializations.
@@ -36,7 +36,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
             }
 
             let count = serialization_variants.len();
-            serializations.push(quote!{
+            serializations.push(quote! {
                 &#name::#ident #params => {
                     static ARR: [&'static str; #count] = [#(#serialization_variants),*];
                     &ARR
@@ -53,7 +53,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
             let params = params.clone();
 
             // Push the simple message.
-            let tokens = quote!{ &#name::#ident #params => ::std::option::Option::Some(#msg) };
+            let tokens = quote! { &#name::#ident #params => ::std::option::Option::Some(#msg) };
             arms.push(tokens.clone());
 
             if detailed_messages.is_none() {
@@ -65,19 +65,19 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
             let params = params.clone();
             // Push the simple message.
             detailed_arms
-                .push(quote!{ &#name::#ident #params => ::std::option::Option::Some(#msg) });
+                .push(quote! { &#name::#ident #params => ::std::option::Option::Some(#msg) });
         }
     }
 
     if arms.len() < variants.len() {
-        arms.push(quote!{ _ => ::std::option::Option::None });
+        arms.push(quote! { _ => ::std::option::Option::None });
     }
 
     if detailed_arms.len() < variants.len() {
-        detailed_arms.push(quote!{ _ => ::std::option::Option::None });
+        detailed_arms.push(quote! { _ => ::std::option::Option::None });
     }
 
-    quote!{
+    quote! {
         impl #impl_generics ::strum::EnumMessage for #name #ty_generics #where_clause {
             fn get_message(&self) -> ::std::option::Option<&str> {
                 match self {

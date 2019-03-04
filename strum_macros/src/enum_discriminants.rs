@@ -19,6 +19,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     let discriminant_attrs = get_meta_list(type_meta.iter(), "strum_discriminants")
         .flat_map(|meta| extract_list_metas(meta).collect::<Vec<_>>())
         .collect::<Vec<&syn::Meta>>();
+
     let derives = get_meta_list(discriminant_attrs.iter().map(|&m| m), "derive")
         .flat_map(extract_list_metas)
         .filter_map(get_meta_ident)
@@ -44,7 +45,8 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         filter_metas(discriminant_attrs.iter().map(|&m| m), |meta| match meta {
             syn::Meta::List(ref metalist) => metalist.ident != "derive" && metalist.ident != "name",
             _ => true,
-        }).map(|meta| quote! { #[ #meta ] })
+        })
+        .map(|meta| quote! { #[ #meta ] })
         .collect::<Vec<_>>();
 
     // Add the variants without fields, but exclude the `strum` meta item
@@ -60,7 +62,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
             })
         });
 
-        discriminants.push(quote!{ #(#attrs)* #ident });
+        discriminants.push(quote! { #(#attrs)* #ident });
     }
 
     // Ideally:
@@ -89,7 +91,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
             use syn::Fields::*;
             let params = match variant.fields {
-                Unit => quote!{},
+                Unit => quote! {},
                 Unnamed(ref _fields) => {
                     quote! { (..) }
                 }
@@ -99,7 +101,8 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
             };
 
             quote! { #name::#ident #params => #discriminants_name::#ident }
-        }).collect::<Vec<_>>();
+        })
+        .collect::<Vec<_>>();
     let from_fn_body = quote! { match val { #(#arms),* } };
 
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
@@ -129,7 +132,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         }
     };
 
-    quote!{
+    quote! {
         /// Auto-generated discriminant enum variants
         #derives
         #(#pass_though_attributes)*

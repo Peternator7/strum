@@ -122,9 +122,9 @@
 //! 3. `AsRefStr`: this derive implements `AsRef<str>` on your enum using the same rules as
 //!    `ToString` for determining what string is returned. The difference is that `as_ref()` returns
 //!     a borrowed `str` instead of a `String` so you can save an allocation.
-//! 
+//!
 //! 4. `IntoStaticStr`: this trait implements `From<YourEnum>` and `From<&'a YourEnum>` for `&'static str`. This is
-//!   useful for turning an enum variant into a static string. The Rust `std` provides a blanket impl of the 
+//!   useful for turning an enum variant into a static string. The Rust `std` provides a blanket impl of the
 //!   reverse direction - i.e. `impl Into<&'static str> for YourEnum`.
 //!
 //!   ```rust
@@ -142,13 +142,13 @@
 //!       // The following won't work because the lifetime is incorrect so we can use.as_static() instead.
 //!       // let wrong: &'static str = state.as_ref();
 //!       let right: &'static str = state.into();
-//!       println!("{}", right); 
+//!       println!("{}", right);
 //!   }
 //!
 //!   fn main() {
 //!       print_state(&"hello world".to_string())
 //!   }
-//!   ``` 
+//!   ```
 //!
 //! 4. `EnumIter`: iterate over the variants of an Enum. Any additional data on your variants will be
 //!     set to `Default::default()`. The macro implements `strum::IntoEnumIter` on your enum and
