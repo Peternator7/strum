@@ -2,5 +2,5 @@
 members = [
     "strum",
     "strum_macros",
-    "strum_tests",
+    "strum_tests"
 ]

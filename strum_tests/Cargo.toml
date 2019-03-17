@@ -5,4 +5,4 @@ authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 
 [dependencies]
 strum = { path = "../strum" }
-strum_macros = { path = "../strum_macros" }
+strum_macros = { path = "../strum_macros", features = [] }

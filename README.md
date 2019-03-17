@@ -13,6 +13,8 @@ Strum is compatible with versions of rustc >= 1.26.0. That's the earliest versio
 impl trait. Pull Requests that improve compatibility with older versions are welcome, but new feature work
 will focus on the current version of rust with an effort to avoid breaking compatibility with older versions.
 
+For versions of rust that don't support named imports of procedural macros, see further down for macro-renaming to avoid collisions.
+
 # Including Strum in Your Project
 
 Import strum and strum_macros into your project by adding the following lines to your
@@ -574,6 +576,24 @@ fn main() {
                           Tokens::CloseParen]);
 }
 ```
+
+# Macro Renames
+
+In versions of Rust prior to 1.31.0, Rust didn't support importing macros by path. They could only be brought into scope by `#[macro_use]`
+
+| Original Macro Name | Feature Flag | New Macro Name |
+|-|-|-|
+| `EnumString` | verbose-enumstring-name | `StrumEnumString`|
+| `AsRefStr` |verbose-asrefstr-name | `StrumAsRefStr` |
+| `AsStaticStr` |verbose-asstaticstr-name | `StrumAsStaticStr` |
+| `IntoStaticStr` |verbose-intostaticstr-name | `StrumIntoStaticStr` |
+| `ToString` |verbose-tostring-name | `StrumToString` |
+| `Display` |verbose-display-name | `StrumDisplay` |
+| `EnumIter` |verbose-enumiter-name | `StrumEnumIter` |
+| `EnumMessage` |verbose-enummessage-name | `StrumEnumMessage` |
+| `EnumProperty` |verbose-enumproperty-name | `StrumProperty` |
+| `EnumDiscriminants` |verbose-enumdiscriminants-name | `StrumEnumDiscriminants` |
+| `EnumCount` |verbose-enumcount-name | `StrumEnumCount` |
 
 # Name
 
