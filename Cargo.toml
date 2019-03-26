@@ -4,3 +4,5 @@ members = [
     "strum_macros",
     "strum_tests"
 ]
+
+exclude = [ "strum_tests_rename" ]
