@@ -53,6 +53,8 @@ only dump the code generated on a type named `YourType`.
 
 # Strum Macros
 
+Strum has implemented the following macros:
+
 | Macro | Description |
 | --- | ----------- |
 | [EnumString](#EnumString) | Converts strings to enum variants based on their name |
@@ -64,8 +66,6 @@ only dump the code generated on a type named `YourType`.
 | [EnumMessage](#EnumMessage) | Add a verbose message to an enum variant. |
 | [EnumDiscriminants](#EnumDiscriminants) | Generate a new type with only the discriminant names. |
 | [EnumCount](#EnumCount) | Add a constant `usize` equal to the number of variantes. |
-
-Strum has implemented the following macros:
 
 ## EnumString
 
@@ -136,7 +136,7 @@ from enum into string and back again for unit style variants.
 // You need to bring the type into scope to use it!!!
 use std::string::ToString;
 
-#[derive(ToString,Debug)]
+#[derive(Display, Debug)]
 enum Color {
     #[strum(serialize="redred")]
     Red,
