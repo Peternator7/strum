@@ -67,7 +67,7 @@ only dump the code generated on a type named `YourType`.
 
 Strum has implemented the following macros:
 
-## `EnumString`
+## EnumString
 
 auto-derives `std::str::FromStr` on the enum. Each variant of the enum will match on it's own name.
 This can be overridden using `serialize="DifferentName"` or `to_string="DifferentName"`
@@ -121,7 +121,7 @@ variant. There is an option to match on different case conversions through the
 `#[strum(serialize_all = "snake_case")]` type attribute. See the **Additional Attributes**
 Section for more information on using this feature.
 
-## `Display`
+## Display
 
 Print out the given enum. This enables you to perform round trip style conversions
 from enum into string and back again for unit style variants.
@@ -156,13 +156,13 @@ fn main() {
 }
 ```
 
-## `AsRefStr`
+## AsRefStr
 
 Implements `AsRef<str>` on your enum using the same rules as
 `ToString` for determining what string is returned. The difference is that `as_ref()` returns
 a `&str` instead of a `String` so you don't allocate any additional memory with each call.
 
-## `IntoStaticStr`
+## IntoStaticStr
 
 Implements `From<YourEnum>` and `From<&'a YourEnum>` for `&'static str`. This is
 useful for turning an enum variant into a static string.
@@ -191,7 +191,7 @@ fn main() {
 }
 ```
 
-## `EnumIter`
+## EnumIter
 
 Iterate over the variants of an Enum. Any additional data on your variants will be set to `Default::default()`.
 The macro implements `strum::IntoEnumIter` on your enum and creates a new type called `YourEnumIter` that is the iterator object.
@@ -222,7 +222,7 @@ fn main() {
 }
 ```
 
-## `EnumMessage`
+## EnumMessage
 
 Encode strings into the enum itself. This macro implements the `strum::EnumMessage` trait.
 `EnumMessage` looks for `#[strum(message="...")]` attributes on your variants.
@@ -283,7 +283,7 @@ impl ::strum::EnumMessage for Color {
 */
 ```
 
-## `EnumProperty`
+## EnumProperty
 
 Enables the encoding of arbitary constants into enum variants. This method
 currently only supports adding additional string values. Other types of literals are still
@@ -325,7 +325,7 @@ fn main() {
 }
 ```
 
-## `EnumDiscriminants`
+## EnumDiscriminants
 
 Given an enum named `MyEnum`, generates another enum called `MyEnumDiscriminants` with the same variants, without any data fields.
 This is useful when you wish to determine the variant of an enum from a String, but the variants contain any
@@ -410,7 +410,7 @@ fn main() {
 }
 ```
 
-## `EnumCount`
+## EnumCount
 
 For a given enum generates implementation of `strum::EnumCount`,
 which returns number of variants via `strum::EnumCount::count` method,
@@ -442,11 +442,11 @@ fn main() {
 }
 ```
 
-## `ToString`
+## ToString
 
 **Deprecated** Prefer using [`Display`](#Display). All types that implement `std::fmt::Display` have a default implementation of `ToString`.**
 
-## `AsStaticStr`
+## AsStaticStr
 
 **Deprecated since version 0.13.0.** Prefer [IntoStaticStr](#IntoStaticStr) instead.
 
