@@ -1,0 +1,23 @@
+[package]
+name = "strum_tests_rename"
+version = "0.15.0"
+authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
+
+[dependencies]
+strum = { path = "../strum" }
+
+[dependencies.strum_macros]
+path = "../strum_macros"
+features = [
+    "verbose-enumcount-name",
+    "verbose-enumstring-name",
+    "verbose-asrefstr-name",
+    "verbose-asstaticstr-name",
+    "verbose-intostaticstr-name",
+    "verbose-tostring-name",
+    "verbose-display-name",
+    "verbose-enumiter-name",
+    "verbose-enummessage-name",
+    "verbose-enumproperty-name",
+    "verbose-enumdiscriminants-name"
+]

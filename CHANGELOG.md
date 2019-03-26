@@ -1,10 +1,24 @@
 # Changelog
 
+## 0.15.0
+
+### Added
+
+* Added Feature flags to rename macros. This is to improve compatibility with older versions of rust. [Wiki](https://github.com/Peternator7/strum/wiki/Macro-Renames)
+
+## 0.14.0
+
+### Added
+
+* Allow Missing Docs on EnumCount. [PR #43](https://github.com/Peternator7/strum/pull/43)
+* Fix serialize_all in `AsRefStr`, `AsStaticStr` and `IntoStaticStr`. [PR #42](https://github.com/Peternator7/strum/pull/42)
+  * This is a bug fix, but it may break code that was relying on the incorrect behavior.
+
 ## 0.13.0
 
 ### Added
 
-* Added a derive to implement `From<YourEnum>` for `&'static str`. This deprecates `AsStaticStr` since 
+* Added a derive to implement `From<YourEnum>` for `&'static str`. This deprecates `AsStaticStr` since
   the new solution doesn't require a `strum` specific trait to use.
 
 ## 0.12.0
