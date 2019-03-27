@@ -1,8 +1,8 @@
 [package]
 name = "strum_tests"
-version = "0.14.0"
+version = "0.15.0"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 
 [dependencies]
 strum = { path = "../strum" }
-strum_macros = { path = "../strum_macros" }
+strum_macros = { path = "../strum_macros", features = [] }

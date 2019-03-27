@@ -1,6 +1,6 @@
 [package]
 name = "strum_macros"
-version = "0.14.0"
+version = "0.15.0"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 license = "MIT"
 
@@ -21,3 +21,16 @@ heck = "0.3"
 proc-macro2 = "0.4"
 quote = "0.6"
 syn = { version = "0.15", features = ["parsing", "extra-traits"] }
+
+[features]
+verbose-enumstring-name = []
+verbose-asrefstr-name = []
+verbose-asstaticstr-name = []
+verbose-intostaticstr-name = []
+verbose-tostring-name = []
+verbose-display-name = []
+verbose-enumiter-name = []
+verbose-enummessage-name = []
+verbose-enumproperty-name = []
+verbose-enumdiscriminants-name = []
+verbose-enumcount-name = []
