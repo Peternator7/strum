@@ -155,6 +155,7 @@ pub fn convert_case(ident: &Ident, case_style: Option<CaseStyle>) -> String {
             CaseStyle::ShoutySnakeCase => ident_string.to_shouty_snake_case(),
             CaseStyle::SnakeCase => ident_string.to_snake_case(),
             CaseStyle::TitleCase => ident_string.to_title_case(),
+            CaseStyle::UpperCase => ident_string.to_uppercase(),
         }
     } else {
         ident_string

@@ -6,6 +6,7 @@ pub enum CaseStyle {
     ShoutySnakeCase,
     SnakeCase,
     TitleCase,
+    UpperCase,
 }
 
 impl<'s> From<&'s str> for CaseStyle {
@@ -17,6 +18,7 @@ impl<'s> From<&'s str> for CaseStyle {
             "shouty_snake_case" | "shouty_snek_case" => CaseStyle::ShoutySnakeCase,
             "snake_case" | "snek_case" => CaseStyle::SnakeCase,
             "title_case" => CaseStyle::TitleCase,
+            "UPPERCASE" => CaseStyle::UpperCase,
             _ => panic!(
                 "Unexpected case style for serialize_all: `{}`. Valid values are: `{:?}`",
                 text,
@@ -26,7 +28,8 @@ impl<'s> From<&'s str> for CaseStyle {
                     "mixed_case",
                     "shouty_snake_case",
                     "snake_case",
-                    "title_case"
+                    "title_case",
+                    "UPPERCASE",
                 ]
             ),
         }
