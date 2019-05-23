@@ -127,3 +127,6 @@ test_script:
   - cd .\strum_tests
   - cargo test --verbose %cargoflags%
   - cd ..
+  - cd .\rust_2018_tests
+  - cargo test --verbose %cargoflags%
+  - cd ..
