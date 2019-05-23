@@ -1,0 +1,9 @@
+[package]
+name = "rust_2018_tests"
+version = "0.15.0"
+authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
+edition = "2018"
+
+[dependencies]
+strum = { path = "../strum" }
+strum_macros = { path = "../strum_macros", features = [] }
