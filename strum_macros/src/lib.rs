@@ -22,6 +22,7 @@ mod case_style;
 mod display;
 mod enum_count;
 mod enum_discriminants;
+mod enum_variant_names;
 mod enum_iter;
 mod enum_messages;
 mod enum_properties;
@@ -61,6 +62,16 @@ pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
     let toks = as_ref_str::as_ref_str_inner(&ast);
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
+#[cfg_attr(not(feature = "verbose-variant-names"), proc_macro_derive(EnumVariantNames, attributes(strum)))]
+#[cfg_attr(feature = "verbose-variant-names", proc_macro_derive(StrumEnumVariantNames, attributes(strum)))]
+pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse(input).unwrap();
+
+    let toks = enum_variant_names::enum_variant_names_inner(&ast);
     debug_print_generated(&ast, &toks);
     toks.into()
 }

@@ -25,6 +25,7 @@ syn = { version = "0.15", features = ["parsing", "extra-traits"] }
 [features]
 verbose-enumstring-name = []
 verbose-asrefstr-name = []
+verbose-variant-names = []
 verbose-asstaticstr-name = []
 verbose-intostaticstr-name = []
 verbose-tostring-name = []
