@@ -212,6 +212,13 @@ enum Color {
 }
 
 fn main() {
+    // This is what you get:
+    assert_eq!(
+        &Color::variants(),
+        &["red", "blue", "yellow", "rebecca-purple"]
+    );
+    
+    // Use it with clap like this:
     let args = clap::App::new("app")
         .arg(Arg::with_name("color")
             .long("color")
@@ -223,7 +230,7 @@ fn main() {
 }
 ```
 
-or with [structopt](https://docs.rs/structopt/0.2) (assuming the same definition of `Color` as above):
+This also works with [structopt](https://docs.rs/structopt/0.2) (assuming the same definition of `Color` as above):
 
 ```rust
 #[derive(Debug, StructOpt)]
