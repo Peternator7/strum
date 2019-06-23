@@ -4,7 +4,7 @@ version = "0.15.0"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 
 [dependencies]
-strum = { path = "../strum" }
+strum = { path = "../strum", features = ["derive"] }
 strum_macros = { path = "../strum_macros", features = [] }
 clap = "2.33.0"
 structopt = "0.2.18"

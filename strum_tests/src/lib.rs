@@ -1,6 +1,8 @@
+#![allow(unused_imports)]
 extern crate strum;
 #[macro_use]
 extern crate strum_macros;
+use strum::*;
 
 #[allow(dead_code)]
 #[derive(Debug, Eq, PartialEq, EnumString, ToString, EnumCount, EnumDiscriminants)]
