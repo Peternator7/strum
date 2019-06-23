@@ -206,3 +206,12 @@ where
 pub trait EnumCount {
     fn count() -> usize;
 }
+
+#[cfg(feature = "derive")]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate strum_macros;
+
+#[cfg(feature = "derive")]
+#[doc(hidden)]
+pub use strum_macros::*;

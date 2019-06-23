@@ -12,8 +12,14 @@ documentation = "https://docs.rs/strum"
 homepage = "https://github.com/Peternator7/strum"
 readme = "../README.md"
 
+[dependencies]
+strum_macros = { path = "../strum_macros", optional = true, version = "0.15.0" }
+
 [dev-dependencies]
 strum_macros = { path = "../strum_macros", version = "0.15.0" }
 
 [badges]
 travis-ci = { repository = "Peternator7/strum" }
+
+[features]
+derive = ["strum_macros"]
