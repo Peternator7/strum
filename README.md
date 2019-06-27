@@ -61,7 +61,7 @@ Strum has implemented the following macros:
 | [Display](#Display) | Converts enum variants to strings |
 | [AsRefStr](#AsRefStr) | Converts enum variants to `&'static str` |
 | [IntoStaticStr](#IntoStaticStr) | Implements `From<MyEnum> for &'static str` on an enum |
-| [EnumVariantNames](#EnumVariantNames) | Adds a `variant` method returning an array of discriminant names |
+| [EnumVariantNames](#EnumVariantNames) | Adds a `variants` method returning an array of discriminant names |
 | [EnumIter](#EnumIter) | Creates a new type that iterates of the variants of an enum. |
 | [EnumProperty](#EnumProperty) | Add custom properties to enum variants. |
 | [EnumMessage](#EnumMessage) | Add a verbose message to an enum variant. |
