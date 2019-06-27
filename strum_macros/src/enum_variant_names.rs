@@ -21,13 +21,12 @@ pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
         .iter()
         .map(|v| convert_case(&v.ident, case_style))
         .collect::<Vec<_>>();
-    let len = names.len();
 
     quote! {
         impl #name {
             #[allow(dead_code)]
-            pub fn variants() -> [&'static str; #len] {
-                [
+            pub fn variants() -> &'static [&'static str] {
+                &[
                     #(#names),*
                 ]
             }
