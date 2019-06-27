@@ -24,6 +24,7 @@ pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
 
     quote! {
         impl #name {
+            /// Return a slice containing the names of the variants of this enum
             #[allow(dead_code)]
             pub fn variants() -> &'static [&'static str] {
                 &[
