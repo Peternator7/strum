@@ -6,3 +6,5 @@ authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 [dependencies]
 strum = { path = "../strum" }
 strum_macros = { path = "../strum_macros", features = [] }
+clap = "2.33.0"
+structopt = "0.2.18"

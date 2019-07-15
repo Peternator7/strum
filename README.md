@@ -61,6 +61,7 @@ Strum has implemented the following macros:
 | [Display](#Display) | Converts enum variants to strings |
 | [AsRefStr](#AsRefStr) | Converts enum variants to `&'static str` |
 | [IntoStaticStr](#IntoStaticStr) | Implements `From<MyEnum> for &'static str` on an enum |
+| [EnumVariantNames](#EnumVariantNames) | Adds a `variants` method returning an array of discriminant names |
 | [EnumIter](#EnumIter) | Creates a new type that iterates of the variants of an enum. |
 | [EnumProperty](#EnumProperty) | Add custom properties to enum variants. |
 | [EnumMessage](#EnumMessage) | Add a verbose message to an enum variant. |
@@ -188,6 +189,55 @@ fn print_state<'a>(s:&'a str) {
 
 fn main() {
     print_state(&"hello world".to_string())
+}
+```
+
+## EnumVariantNames
+
+Adds an `impl` block for the `enum` that adds a static `variants()` method that returns an array of `&'static str` that are the discriminant names.
+This will respect the `serialize_all` attribute on the `enum` (like `#[strum(serialize_all = "snake_case")]`, see **Additional Attributes** below).
+
+**Note:** This is compatible with the format [clap](https://docs.rs/clap/2) expects for `enums`, meaning this works:
+
+```rust
+use strum::{EnumString, EnumVariantNames};
+
+#[derive(EnumString, EnumVariantNames)]
+#[strum(serialize_all = "kebab_case")]
+enum Color {
+    Red,
+    Blue,
+    Yellow,
+    RebeccaPurple,
+}
+
+fn main() {
+    // This is what you get:
+    assert_eq!(
+        &Color::variants(),
+        &["red", "blue", "yellow", "rebecca-purple"]
+    );
+    
+    // Use it with clap like this:
+    let args = clap::App::new("app")
+        .arg(Arg::with_name("color")
+            .long("color")
+            .possible_values(&Color::variants())
+            .case_insensitive(true))
+        .get_matches();
+
+    // ...
+}
+```
+
+This also works with [structopt](https://docs.rs/structopt/0.2) (assuming the same definition of `Color` as above):
+
+```rust
+#[derive(Debug, StructOpt)]
+struct Cli {
+    /// The main color
+    #[structopt(long = "color", default_value = "Color::Blue", raw(possible_values = "&Color::variants()"))]
+    color: Color,
 }
 ```
 
