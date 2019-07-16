@@ -100,3 +100,18 @@ fn cycle_test() {
     ];
     assert_eq!(expected, results);
 }
+
+#[test]
+fn reverse_test() {
+    let results = Week::iter().rev().collect::<Vec<_>>();
+    let expected = vec![
+        Week::Saturday,
+        Week::Friday,
+        Week::Thursday,
+        Week::Wednesday,
+        Week::Tuesday,
+        Week::Monday,
+        Week::Sunday,
+    ];
+    assert_eq!(expected, results);
+}

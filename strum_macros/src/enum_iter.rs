@@ -62,14 +62,24 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
         #[allow(missing_docs)]
         #vis struct #iter_name #ty_generics {
             idx: usize,
+            back_idx: usize,
             marker: ::std::marker::PhantomData #phantom_data,
+        }
+
+        impl #impl_generics #iter_name #ty_generics #where_clause {
+            fn get(&self, idx: usize) -> Option<#name #ty_generics> {
+                match idx {
+                    #(#arms),*
+                }
+            }
         }
 
         impl #impl_generics ::strum::IntoEnumIterator for #name #ty_generics #where_clause {
             type Iterator = #iter_name #ty_generics;
             fn iter() -> #iter_name #ty_generics {
                 #iter_name {
-                    idx:0,
+                    idx: 0,
+                    back_idx: 0,
                     marker: ::std::marker::PhantomData,
                 }
             }
@@ -79,9 +89,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
             type Item = #name #ty_generics;
 
             fn next(&mut self) -> Option<#name #ty_generics> {
-                let output = match self.idx {
-                    #(#arms),*
-                };
+                let output = self.get(self.idx);
 
                 self.idx += 1;
                 output
@@ -99,10 +107,24 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
             }
         }
 
+        impl #impl_generics DoubleEndedIterator for #iter_name #ty_generics #where_clause {
+            fn next_back(&mut self) -> Option<#name #ty_generics> {
+                if self.back_idx >= #variant_count {
+                    return None
+                }
+
+                let output = self.get(#variant_count - self.back_idx - 1);
+
+                self.back_idx += 1;
+                output
+            }
+        }
+
         impl #impl_generics Clone for #iter_name #ty_generics #where_clause {
             fn clone(&self) -> #iter_name #ty_generics {
                 #iter_name {
                     idx: self.idx,
+                    back_idx: self.back_idx,
                     marker: self.marker.clone(),
                 }
             }
