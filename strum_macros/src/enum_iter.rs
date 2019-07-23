@@ -89,6 +89,10 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
             type Item = #name #ty_generics;
 
             fn next(&mut self) -> Option<#name #ty_generics> {
+                if self.idx + self.back_idx >= #variant_count {
+                    return None
+                }
+
                 let output = self.get(self.idx);
 
                 self.idx += 1;
@@ -109,7 +113,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         impl #impl_generics DoubleEndedIterator for #iter_name #ty_generics #where_clause {
             fn next_back(&mut self) -> Option<#name #ty_generics> {
-                if self.back_idx >= #variant_count {
+                if self.idx + self.back_idx >= #variant_count {
                     return None
                 }
 

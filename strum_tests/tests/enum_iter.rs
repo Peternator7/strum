@@ -103,6 +103,21 @@ fn cycle_test() {
 
 #[test]
 fn reverse_test() {
+    let mut iter = Week::iter();
+
+    assert_eq!(Some(Week::Sunday), iter.next());
+    assert_eq!(Some(Week::Saturday), iter.next_back());
+    assert_eq!(Some(Week::Friday), iter.next_back());
+    assert_eq!(Some(Week::Monday), iter.next());
+    assert_eq!(Some(Week::Tuesday), iter.next());
+    assert_eq!(Some(Week::Wednesday), iter.next());
+    assert_eq!(Some(Week::Thursday), iter.next_back());
+    assert_eq!(None, iter.next());
+    assert_eq!(None, iter.next_back());
+}
+
+#[test]
+fn take_from_both_sides_test() {
     let results = Week::iter().rev().collect::<Vec<_>>();
     let expected = vec![
         Week::Saturday,
