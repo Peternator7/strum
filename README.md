@@ -387,6 +387,10 @@ fn main() {
 }
 ```
 
+When using `#[strum_discriminants()], the derive parameter may be followed by
+additional attributes and these will be expanded as attributes on the generated
+enum e.g. `#[strum_discriminants(name(SomeOtherName), derive(Serialize), serde(rename_all = "SCREAMING_SNAKE_CASE"))]`
+
 The derived enum also has the following trait implementations:
 
 * `impl From<MyEnum> for MyEnumDiscriminants`
