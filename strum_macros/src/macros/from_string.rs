@@ -1,8 +1,9 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use case_style::CaseStyle;
-use helpers::{convert_case, extract_attrs, extract_meta, is_disabled, unique_attr};
+use crate::helpers::case_style::CaseStyle;
+// use helpers::{convert_case, extract_attrs, extract_meta, is_disabled, unique_attr, MetaIteratorHelpers};
+use crate::helpers::{convert_case, extract_meta, MetaIteratorHelpers};
 
 pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -13,7 +14,7 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     let type_meta = extract_meta(&ast.attrs);
-    let case_style = unique_attr(&type_meta, "strum", "serialize_all")
+    let case_style = type_meta.unique_attr("strum", "serialize_all")
         .map(|style| CaseStyle::from(style.as_ref()));
 
     let mut has_default = false;
@@ -26,13 +27,18 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
         let meta = extract_meta(&variant.attrs);
 
         // Look at all the serialize attributes.
-        let mut attrs = extract_attrs(&meta, "strum", "serialize");
-        attrs.extend(extract_attrs(&meta, "strum", "to_string"));
-        if is_disabled(&meta) {
+        // let mut attrs = extract_attrs(&meta, "strum", "serialize");
+        // attrs.extend(extract_attrs(&meta, "strum", "to_string"));
+
+        let mut attrs = meta.extract_attrs("strum", "serialize");
+        attrs.extend(meta.extract_attrs("strum", "to_string"));
+
+        // if is_disabled(&meta) {
+        if meta.is_disabled() {
             continue;
         }
 
-        if unique_attr(&meta, "strum", "default").map_or(false, |s| s == "true") {
+        if meta.unique_attr("strum", "default").map_or(false, |s| s == "true") {
             if has_default {
                 panic!("Can't have multiple default variants");
             }

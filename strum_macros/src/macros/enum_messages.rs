@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use helpers::{extract_attrs, extract_meta, is_disabled, unique_attr};
+use helpers::{extract_meta, MetaIteratorHelpers};
 
 pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -17,8 +17,8 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
 
     for variant in variants {
         let meta = extract_meta(&variant.attrs);
-        let messages = unique_attr(&meta, "strum", "message");
-        let detailed_messages = unique_attr(&meta, "strum", "detailed_message");
+        let messages = meta.unique_attr("strum", "message");
+        let detailed_messages = meta.unique_attr("strum", "detailed_message");
         let ident = &variant.ident;
 
         use syn::Fields::*;
@@ -30,7 +30,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         // You can't disable getting the serializations.
         {
-            let mut serialization_variants = extract_attrs(&meta, "strum", "serialize");
+            let mut serialization_variants = meta.extract_attrs("strum", "serialize");
             if serialization_variants.len() == 0 {
                 serialization_variants.push(ident.to_string());
             }
@@ -45,7 +45,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
         }
 
         // But you can disable the messages.
-        if is_disabled(&meta) {
+        if meta.is_disabled() {
             continue;
         }
 

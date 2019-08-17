@@ -1,9 +1,8 @@
+use crate::helpers::{MetaHelpers, MetaListHelpers};
 use proc_macro2::{Span, TokenStream};
 use syn;
 
-use helpers::{
-    extract_list_metas, extract_meta, filter_metas, get_meta_ident, get_meta_list, unique_meta_list,
-};
+use helpers::{extract_meta, unique_meta_list};
 
 pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -16,13 +15,20 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
     // Derives for the generated enum
     let type_meta = extract_meta(&ast.attrs);
-    let discriminant_attrs = get_meta_list(type_meta.iter(), "strum_discriminants")
-        .flat_map(|meta| extract_list_metas(meta).collect::<Vec<_>>())
+    let discriminant_attrs = type_meta.iter()
+        // We are only looking at 'metalist' style attributes [list(item1,item2,...)]
+        .filter_map(|meta| meta.try_metalist())
+        // Find the list named `strum_discriminants`
+        .filter(|list| list.path.is_ident("strum_discriminants"))
+        // If there are multiple attributes, we combine them all together.
+        .flat_map(|list| list.expand_inner())
         .collect::<Vec<&syn::Meta>>();
 
-    let derives = get_meta_list(discriminant_attrs.iter().map(|&m| m), "derive")
-        .flat_map(extract_list_metas)
-        .filter_map(get_meta_ident)
+    let derives = discriminant_attrs.iter()
+        .filter_map(|meta| meta.try_metalist())
+        .filter(|list| list.path.is_ident("derive"))
+        .flat_map(|list| list.expand_inner())
+        .map(|meta| meta.path())
         .collect::<Vec<_>>();
 
     let derives = quote! {
@@ -30,21 +36,21 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     // Work out the name
-    let default_name = syn::Ident::new(
+    let default_name = syn::Path::from(syn::Ident::new(
         &format!("{}Discriminants", name.to_string()),
-        Span::call_site(),
-    );
+        Span::call_site()
+    ));
 
     let discriminants_name = unique_meta_list(discriminant_attrs.iter().map(|&m| m), "name")
-        .map(extract_list_metas)
-        .and_then(|metas| metas.filter_map(get_meta_ident).next())
+        .map(|meta| meta.expand_inner())
+        .and_then(|metas| metas.into_iter().map(|meta| meta.path()).next())
         .unwrap_or(&default_name);
 
     // Pass through all other attributes
-    let pass_though_attributes =
-        filter_metas(discriminant_attrs.iter().map(|&m| m), |meta| match meta {
-            syn::Meta::List(ref metalist) => metalist.ident != "derive" && metalist.ident != "name",
-            _ => true,
+    let pass_though_attributes = discriminant_attrs.iter()
+        .filter(|meta| {
+            let path = meta.path();
+            !path.is_ident("derive") && !path.is_ident("name")
         })
         .map(|meta| quote! { #[ #meta ] })
         .collect::<Vec<_>>();
@@ -56,10 +62,9 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         // Don't copy across the "strum" meta attribute.
         let attrs = variant.attrs.iter().filter(|attr| {
-            attr.interpret_meta().map_or(true, |meta| match meta {
-                syn::Meta::List(ref metalist) => metalist.ident != "strum",
-                _ => true,
-            })
+            attr.parse_meta()
+                .map(|meta| !meta.path().is_ident("strum"))
+                .unwrap_or(true)
         });
 
         discriminants.push(quote! { #(#attrs)* #ident });
