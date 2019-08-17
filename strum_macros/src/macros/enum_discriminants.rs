@@ -1,8 +1,8 @@
-use crate::helpers::{MetaHelpers, MetaListHelpers};
+use crate::helpers::{MetaHelpers, MetaListHelpers, MetaIteratorHelpers};
 use proc_macro2::{Span, TokenStream};
 use syn;
 
-use helpers::{extract_meta, unique_meta_list};
+use helpers::{extract_meta};
 
 pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -15,19 +15,12 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
     // Derives for the generated enum
     let type_meta = extract_meta(&ast.attrs);
-    let discriminant_attrs = type_meta.iter()
-        // We are only looking at 'metalist' style attributes [list(item1,item2,...)]
-        .filter_map(|meta| meta.try_metalist())
-        // Find the list named `strum_discriminants`
-        .filter(|list| list.path.is_ident("strum_discriminants"))
-        // If there are multiple attributes, we combine them all together.
-        .flat_map(|list| list.expand_inner())
+    let discriminant_attrs = type_meta
+        .find_attribute("strum_discriminants")
         .collect::<Vec<&syn::Meta>>();
 
-    let derives = discriminant_attrs.iter()
-        .filter_map(|meta| meta.try_metalist())
-        .filter(|list| list.path.is_ident("derive"))
-        .flat_map(|list| list.expand_inner())
+    let derives = discriminant_attrs
+        .find_attribute("derive")
         .map(|meta| meta.path())
         .collect::<Vec<_>>();
 
@@ -41,7 +34,16 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         Span::call_site()
     ));
 
-    let discriminants_name = unique_meta_list(discriminant_attrs.iter().map(|&m| m), "name")
+    let discriminants_name = discriminant_attrs.iter()
+        .filter_map(|meta| meta.try_metalist())
+        .filter(|list| list.path.is_ident("name"))
+        // We want exactly zero or one items. Start with the assumption we have zero, i.e. None
+        // Then set our output to the first value we see. If fold is called again and we already
+        // have a value, panic.
+        .fold(None, |acc, val| match acc {
+            Some(_) => panic!("Expecting a single attribute 'name' in EnumDiscriminants."),
+            None => Some(val),
+        })
         .map(|meta| meta.expand_inner())
         .and_then(|metas| metas.into_iter().map(|meta| meta.path()).next())
         .unwrap_or(&default_name);

@@ -17,8 +17,8 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
 
     for variant in variants {
         let meta = extract_meta(&variant.attrs);
-        let messages = meta.unique_attr("strum", "message");
-        let detailed_messages = meta.unique_attr("strum", "detailed_message");
+        let messages = meta.find_unique_property("strum", "message");
+        let detailed_messages = meta.find_unique_property("strum", "detailed_message");
         let ident = &variant.ident;
 
         use syn::Fields::*;
@@ -30,7 +30,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         // You can't disable getting the serializations.
         {
-            let mut serialization_variants = meta.extract_attrs("strum", "serialize");
+            let mut serialization_variants = meta.find_properties("strum", "serialize");
             if serialization_variants.len() == 0 {
                 serialization_variants.push(ident.to_string());
             }

@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use syn;
 
 use crate::helpers::case_style::CaseStyle;
-use helpers::{convert_case, extract_meta, MetaIteratorHelpers};
+use helpers::{CaseStyleHelpers, extract_meta, MetaIteratorHelpers};
 
 fn get_arms(ast: &syn::DeriveInput) -> Vec<TokenStream> {
     let name = &ast.ident;
@@ -13,7 +13,7 @@ fn get_arms(ast: &syn::DeriveInput) -> Vec<TokenStream> {
     };
 
     let type_meta = extract_meta(&ast.attrs);
-    let case_style = type_meta.unique_attr("strum", "serialize_all")
+    let case_style = type_meta.find_unique_property("strum", "serialize_all")
         .map(|style| CaseStyle::from(style.as_ref()));
 
     for variant in variants {
@@ -28,16 +28,16 @@ fn get_arms(ast: &syn::DeriveInput) -> Vec<TokenStream> {
         // Look at all the serialize attributes.
         // Use `to_string` attribute (not `as_ref_str` or something) to keep things consistent
         // (i.e. always `enum.as_ref().to_string() == enum.to_string()`).
-        let output = if let Some(n) = meta.unique_attr("strum", "to_string") {
+        let output = if let Some(n) = meta.find_unique_property("strum", "to_string") {
             n
         } else {
-            let mut attrs = meta.extract_attrs("strum", "serialize");
+            let mut attrs = meta.find_properties("strum", "serialize");
             // We always take the longest one. This is arbitary, but is *mostly* deterministic
             attrs.sort_by_key(|s| s.len());
             if let Some(n) = attrs.pop() {
                 n
             } else {
-                convert_case(ident, case_style)
+                ident.convert_case(case_style)
             }
         };
 

@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use syn;
 
 use crate::helpers::case_style::CaseStyle;
-use crate::helpers::{convert_case, extract_meta, MetaIteratorHelpers};
+use crate::helpers::{CaseStyleHelpers, extract_meta, MetaIteratorHelpers};
 
 pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -14,12 +14,12 @@ pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
 
     // Derives for the generated enum
     let type_meta = extract_meta(&ast.attrs);
-    let case_style = type_meta.unique_attr("strum", "serialize_all")
+    let case_style = type_meta.find_unique_property("strum", "serialize_all")
         .map(|style| CaseStyle::from(style.as_ref()));
 
     let names = variants
         .iter()
-        .map(|v| convert_case(&v.ident, case_style))
+        .map(|v| v.ident.convert_case(case_style))
         .collect::<Vec<_>>();
 
     quote! {
