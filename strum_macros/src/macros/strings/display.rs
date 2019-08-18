@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use syn;
 
 use crate::helpers::case_style::CaseStyle;
-use helpers::{CaseStyleHelpers, extract_meta, MetaIteratorHelpers};
+use helpers::{extract_meta, CaseStyleHelpers, MetaIteratorHelpers};
 
 pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -13,7 +13,8 @@ pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     let type_meta = extract_meta(&ast.attrs);
-    let case_style = type_meta.find_unique_property("strum", "serialize_all")
+    let case_style = type_meta
+        .find_unique_property("strum", "serialize_all")
         .map(|style| CaseStyle::from(style.as_ref()));
 
     let mut arms = Vec::new();

@@ -1,14 +1,12 @@
-use syn::Meta;
 use super::MetaHelpers;
 use super::MetaListHelpers;
+use syn::Meta;
 
 pub trait MetaIteratorHelpers {
-
     fn find_attribute(&self, attr: &str) -> std::vec::IntoIter<&Meta>;
     fn find_properties(&self, attr: &str, prop: &str) -> Vec<String>;
 
-    fn find_unique_property(&self, attr: &str, prop: &str) -> Option<String> 
-    {
+    fn find_unique_property(&self, attr: &str, prop: &str) -> Option<String> {
         let mut curr = self.find_properties(attr, prop);
         if curr.len() > 1 {
             panic!("More than one property: {} found on variant", prop);
@@ -17,8 +15,7 @@ pub trait MetaIteratorHelpers {
         curr.pop()
     }
 
-    fn is_disabled(&self) -> bool 
-    {
+    fn is_disabled(&self) -> bool {
         let v = self.find_properties("strum", "disabled");
         match v.len() {
             0 => false,
@@ -29,9 +26,9 @@ pub trait MetaIteratorHelpers {
 }
 
 //impl MetaIteratorHelpers for [Meta]
-impl <T> MetaIteratorHelpers for [T]
+impl<T> MetaIteratorHelpers for [T]
 where
-    T: std::borrow::Borrow<Meta>
+    T: std::borrow::Borrow<Meta>,
 {
     fn find_attribute(&self, attr: &str) -> std::vec::IntoIter<&Meta> {
         self.iter()
@@ -42,8 +39,7 @@ where
             .into_iter()
     }
 
-    fn find_properties(&self, attr: &str, prop: &str) -> Vec<String> 
-    {
+    fn find_properties(&self, attr: &str, prop: &str) -> Vec<String> {
         use syn::{Lit, MetaNameValue};
         self.iter()
             // Only look at MetaList style attributes `[strum(...)]`

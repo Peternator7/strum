@@ -17,29 +17,32 @@ pub enum CaseStyle {
 impl<'s> From<&'s str> for CaseStyle {
     fn from(text: &'s str) -> CaseStyle {
         match text {
-            "lowercase" => CaseStyle::LowerCase,
             "camel_case" | "PascalCase" => CaseStyle::PascalCase,
+            "camelCase" => CaseStyle::CamelCase,
+            "snake_case" | "snek_case" => CaseStyle::SnakeCase,
             "kebab_case" | "kebab-case" => CaseStyle::KebabCase,
-            "mixed_case" => CaseStyle::MixedCase,
+            "SCREAMING-KEBAB-CASE" => CaseStyle::ScreamingKebabCase,
             "shouty_snake_case" | "shouty_snek_case" | "SCREAMING_SNAKE_CASE" => {
                 CaseStyle::ShoutySnakeCase
             }
-            "snake_case" | "snek_case" => CaseStyle::SnakeCase,
             "title_case" => CaseStyle::TitleCase,
+            "mixed_case" => CaseStyle::MixedCase,
+            "lowercase" => CaseStyle::LowerCase,
             "UPPERCASE" => CaseStyle::UpperCase,
-            "camelCase" => CaseStyle::CamelCase,
-            "SCREAMING-KEBAB-CASE" => CaseStyle::ScreamingKebabCase,
             _ => panic!(
                 "Unexpected case style for serialize_all: `{}`. Valid values are: `{:?}`",
                 text,
                 [
-                    "camel_case",
-                    "kebab_case",
-                    "mixed_case",
-                    "shouty_snake_case",
+                    "camelCase",
+                    "PascalCase",
+                    "kebab-case",
                     "snake_case",
-                    "title_case",
+                    "SCREAMING_SNAKE_CASE",
+                    "SCREAMING-KEBAB-CASE",
+                    "lowercase",
                     "UPPERCASE",
+                    "title_case",
+                    "mixed_case",
                 ]
             ),
         }

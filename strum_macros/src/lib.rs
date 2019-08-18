@@ -17,8 +17,8 @@ extern crate quote;
 extern crate proc_macro;
 extern crate proc_macro2;
 
-mod macros;
 mod helpers;
+mod macros;
 
 use proc_macro2::TokenStream;
 use std::env;
@@ -95,7 +95,10 @@ pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
-    let toks = macros::as_ref_str::as_static_str_inner(&ast, macros::as_ref_str::GenerateTraitVariant::AsStaticStr);
+    let toks = macros::as_ref_str::as_static_str_inner(
+        &ast,
+        macros::as_ref_str::GenerateTraitVariant::AsStaticStr,
+    );
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -111,7 +114,10 @@ pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse(input).unwrap();
 
-    let toks = macros::as_ref_str::as_static_str_inner(&ast, macros::as_ref_str::GenerateTraitVariant::From);
+    let toks = macros::as_ref_str::as_static_str_inner(
+        &ast,
+        macros::as_ref_str::GenerateTraitVariant::From,
+    );
     debug_print_generated(&ast, &toks);
     toks.into()
 }

@@ -1,8 +1,8 @@
-use crate::helpers::{MetaHelpers, MetaListHelpers, MetaIteratorHelpers};
+use crate::helpers::{MetaHelpers, MetaIteratorHelpers, MetaListHelpers};
 use proc_macro2::{Span, TokenStream};
 use syn;
 
-use helpers::{extract_meta};
+use helpers::extract_meta;
 
 pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -31,10 +31,11 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     // Work out the name
     let default_name = syn::Path::from(syn::Ident::new(
         &format!("{}Discriminants", name.to_string()),
-        Span::call_site()
+        Span::call_site(),
     ));
 
-    let discriminants_name = discriminant_attrs.iter()
+    let discriminants_name = discriminant_attrs
+        .iter()
         .filter_map(|meta| meta.try_metalist())
         .filter(|list| list.path.is_ident("name"))
         // We want exactly zero or one items. Start with the assumption we have zero, i.e. None
@@ -49,7 +50,8 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         .unwrap_or(&default_name);
 
     // Pass through all other attributes
-    let pass_though_attributes = discriminant_attrs.iter()
+    let pass_though_attributes = discriminant_attrs
+        .iter()
         .filter(|meta| {
             let path = meta.path();
             !path.is_ident("derive") && !path.is_ident("name")

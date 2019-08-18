@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use syn;
 
 use crate::helpers::case_style::CaseStyle;
-use helpers::{CaseStyleHelpers, extract_meta, MetaIteratorHelpers};
+use helpers::{extract_meta, CaseStyleHelpers, MetaIteratorHelpers};
 
 fn get_arms(ast: &syn::DeriveInput) -> Vec<TokenStream> {
     let name = &ast.ident;
@@ -13,7 +13,8 @@ fn get_arms(ast: &syn::DeriveInput) -> Vec<TokenStream> {
     };
 
     let type_meta = extract_meta(&ast.attrs);
-    let case_style = type_meta.find_unique_property("strum", "serialize_all")
+    let case_style = type_meta
+        .find_unique_property("strum", "serialize_all")
         .map(|style| CaseStyle::from(style.as_ref()));
 
     for variant in variants {
