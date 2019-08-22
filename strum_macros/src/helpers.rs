@@ -42,12 +42,12 @@ where
 /// #[strum_discriminant(name(MyEnumVariants))]
 /// enum MyEnum { A }
 /// ```
-pub fn get_meta_list<'meta, MetaIt>(
+pub fn get_meta_list<'iter, 'meta: 'iter, MetaIt>(
     metas: MetaIt,
-    attr: &'meta str,
-) -> impl Iterator<Item = &'meta MetaList>
+    attr: &'iter str,
+) -> impl Iterator<Item = &'meta MetaList> + 'iter
 where
-    MetaIt: Iterator<Item = &'meta Meta>,
+    MetaIt: Iterator<Item = &'meta Meta> + 'iter,
 {
     filter_meta_lists(metas, move |metalist| eq_path_str(&metalist.path, attr))
 }
@@ -57,7 +57,7 @@ where
 /// # Panics
 ///
 /// Panics if more than one `Meta` exists with the name.
-pub fn unique_meta_list<'meta, MetaIt>(metas: MetaIt, attr: &'meta str) -> Option<&'meta MetaList>
+pub fn unique_meta_list<'meta, MetaIt>(metas: MetaIt, attr: &'_ str) -> Option<&'meta MetaList>
 where
     MetaIt: Iterator<Item = &'meta Meta>,
 {
