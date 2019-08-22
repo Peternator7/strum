@@ -10,14 +10,6 @@ pub fn extract_meta(attrs: &[Attribute]) -> Vec<Meta> {
         .collect()
 }
 
-pub fn filter_metas<'meta, MetaIt, F>(metas: MetaIt, filter: F) -> impl Iterator<Item = &'meta Meta>
-where
-    MetaIt: Iterator<Item = &'meta Meta>,
-    F: Fn(&Meta) -> bool,
-{
-    metas.filter_map(move |meta| if filter(meta) { Some(meta) } else { None })
-}
-
 pub fn filter_meta_lists<'meta, MetaIt, F>(
     metas: MetaIt,
     filter: F,
