@@ -70,7 +70,7 @@ where
 }
 
 /// Returns an iterator of the `Meta`s from the given `MetaList`.
-pub fn extract_list_metas<'meta>(metalist: &'meta MetaList) -> impl Iterator<Item = &'meta Meta> {
+pub fn extract_list_metas(metalist: &MetaList) -> impl Iterator<Item = &Meta> {
     use syn::NestedMeta;
     metalist.nested.iter().filter_map(|nested| match *nested {
         NestedMeta::Meta(ref meta) => Some(meta),
@@ -79,7 +79,7 @@ pub fn extract_list_metas<'meta>(metalist: &'meta MetaList) -> impl Iterator<Ite
 }
 
 /// Returns the `Ident` of the `Meta::Word`, or `None`.
-pub fn get_meta_ident<'meta>(meta: &'meta Meta) -> Option<&'meta Ident> {
+pub fn get_meta_ident(meta: &Meta) -> Option<&Ident> {
     match *meta {
         Meta::Path(ref path) => Some(&path.segments[0].ident),
         _ => None,
