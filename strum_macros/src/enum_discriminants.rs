@@ -20,7 +20,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         .flat_map(|meta| extract_list_metas(meta).collect::<Vec<_>>())
         .collect::<Vec<&syn::Meta>>();
 
-    let derives = get_meta_list(discriminant_attrs.iter().map(|&m| m), "derive")
+    let derives = get_meta_list(discriminant_attrs.iter().copied(), "derive")
         .flat_map(extract_list_metas)
         .filter_map(get_meta_ident)
         .collect::<Vec<_>>();
@@ -35,7 +35,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         Span::call_site(),
     );
 
-    let discriminants_name = unique_meta_list(discriminant_attrs.iter().map(|&m| m), "name")
+    let discriminants_name = unique_meta_list(discriminant_attrs.iter().copied(), "name")
         .map(extract_list_metas)
         .and_then(|metas| metas.filter_map(get_meta_ident).next())
         .unwrap_or(&default_name);
@@ -43,7 +43,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     // Pass through all other attributes
     let pass_though_attributes = discriminant_attrs
         .iter()
-        .map(|&m| m)
+        .copied()
         .filter(|meta| match meta {
             syn::Meta::List(metalist) => {
                 !eq_path_str(&metalist.path, "derive") && !eq_path_str(&metalist.path, "name")
