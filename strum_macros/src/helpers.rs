@@ -61,7 +61,7 @@ pub fn unique_meta_list<'meta, MetaIt>(metas: MetaIt, attr: &'meta str) -> Optio
 where
     MetaIt: Iterator<Item = &'meta Meta>,
 {
-    let mut curr = get_meta_list(metas.into_iter(), attr).collect::<Vec<_>>();
+    let mut curr = get_meta_list(metas, attr).collect::<Vec<_>>();
     if curr.len() > 1 {
         panic!("More than one `{}` attribute found on type", attr);
     }
