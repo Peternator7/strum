@@ -2,18 +2,18 @@ use proc_macro2::TokenStream;
 use syn;
 use syn::Meta;
 
-use helpers::{extract_meta, is_disabled};
+use helpers::{eq_path_str, extract_meta, is_disabled};
 
 fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Ident, &syn::Lit)> {
     use syn::{MetaList, MetaNameValue, NestedMeta};
     meta.iter()
         .filter_map(|meta| match *meta {
             Meta::List(MetaList {
-                ref ident,
+                ref path,
                 ref nested,
                 ..
             }) => {
-                if ident == "strum" {
+                if eq_path_str(path, "strum") {
                     Some(nested)
                 } else {
                     None
@@ -24,11 +24,11 @@ fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Ident, &syn::Lit)> {
         .flat_map(|prop| prop)
         .filter_map(|prop| match *prop {
             NestedMeta::Meta(Meta::List(MetaList {
-                ref ident,
+                ref path,
                 ref nested,
                 ..
             })) => {
-                if ident == "props" {
+                if eq_path_str(path, "props") {
                     Some(nested)
                 } else {
                     None
@@ -40,8 +40,8 @@ fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Ident, &syn::Lit)> {
         // Only look at key value pairs
         .filter_map(|prop| match *prop {
             NestedMeta::Meta(Meta::NameValue(MetaNameValue {
-                ref ident, ref lit, ..
-            })) => Some((ident, lit)),
+                ref path, ref lit, ..
+            })) => Some((&path.segments[0].ident, lit)),
             _ => None,
         })
         .collect()

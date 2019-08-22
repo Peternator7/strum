@@ -1,12 +1,12 @@
 use heck::{CamelCase, KebabCase, MixedCase, ShoutySnakeCase, SnakeCase, TitleCase};
-use syn::{Attribute, Ident, Meta, MetaList};
+use syn::{Attribute, Ident, Meta, MetaList, Path};
 
 use case_style::CaseStyle;
 
 pub fn extract_meta(attrs: &[Attribute]) -> Vec<Meta> {
     attrs
         .iter()
-        .filter_map(|attribute| attribute.interpret_meta())
+        .flat_map(|attribute| attribute.parse_meta())
         .collect()
 }
 
@@ -57,7 +57,7 @@ pub fn get_meta_list<'meta, MetaIt>(
 where
     MetaIt: Iterator<Item = &'meta Meta>,
 {
-    filter_meta_lists(metas, move |metalist| metalist.ident == attr)
+    filter_meta_lists(metas, move |metalist| eq_path_str(&metalist.path, attr))
 }
 
 /// Returns the `MetaList` that matches the given name from the list of `Meta`s, or `None`.
@@ -89,7 +89,7 @@ pub fn extract_list_metas<'meta>(metalist: &'meta MetaList) -> impl Iterator<Ite
 /// Returns the `Ident` of the `Meta::Word`, or `None`.
 pub fn get_meta_ident<'meta>(meta: &'meta Meta) -> Option<&'meta Ident> {
     match *meta {
-        Meta::Word(ref ident) => Some(ident),
+        Meta::Path(ref path) => Some(&path.segments[0].ident),
         _ => None,
     }
 }
@@ -100,7 +100,7 @@ pub fn extract_attrs(meta: &[Meta], attr: &str, prop: &str) -> Vec<String> {
         // Get all the attributes with our tag on them.
         .filter_map(|meta| match *meta {
             Meta::List(ref metalist) => {
-                if metalist.ident == attr {
+                if eq_path_str(&metalist.path, attr) {
                     Some(&metalist.nested)
                 } else {
                     None
@@ -112,11 +112,11 @@ pub fn extract_attrs(meta: &[Meta], attr: &str, prop: &str) -> Vec<String> {
         // Get all the inner elements as long as they start with ser.
         .filter_map(|meta| match *meta {
             NestedMeta::Meta(Meta::NameValue(MetaNameValue {
-                ref ident,
+                ref path,
                 lit: Lit::Str(ref s),
                 ..
             })) => {
-                if ident == prop {
+                if eq_path_str(path, prop) {
                     Some(s.value())
                 } else {
                     None
@@ -179,4 +179,14 @@ fn test_convert_case() {
     let id = Ident::new("test_me", proc_macro2::Span::call_site());
     assert_eq!("testMe", convert_case(&id, Some(CaseStyle::CamelCase)));
     assert_eq!("TestMe", convert_case(&id, Some(CaseStyle::PascalCase)));
+}
+
+/// Checks whether the path is equal to the given string.
+///
+/// Returns `true` if they are same.
+///
+/// Note that the given string should be a single path segment.
+/// In other words, it should not be multi-segment path like `a::b::c`.
+pub fn eq_path_str(path: &Path, s: &str) -> bool {
+    (path.segments.len() == 1) && (path.segments[0].ident == s)
 }

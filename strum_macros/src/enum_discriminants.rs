@@ -2,7 +2,8 @@ use proc_macro2::{Span, TokenStream};
 use syn;
 
 use helpers::{
-    extract_list_metas, extract_meta, filter_metas, get_meta_ident, get_meta_list, unique_meta_list,
+    eq_path_str, extract_list_metas, extract_meta, filter_metas, get_meta_ident, get_meta_list,
+    unique_meta_list,
 };
 
 pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
@@ -43,7 +44,9 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     // Pass through all other attributes
     let pass_though_attributes =
         filter_metas(discriminant_attrs.iter().map(|&m| m), |meta| match meta {
-            syn::Meta::List(ref metalist) => metalist.ident != "derive" && metalist.ident != "name",
+            syn::Meta::List(ref metalist) => {
+                !eq_path_str(&metalist.path, "derive") && !eq_path_str(&metalist.path, "name")
+            }
             _ => true,
         })
         .map(|meta| quote! { #[ #meta ] })
@@ -56,8 +59,8 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         // Don't copy across the "strum" meta attribute.
         let attrs = variant.attrs.iter().filter(|attr| {
-            attr.interpret_meta().map_or(true, |meta| match meta {
-                syn::Meta::List(ref metalist) => metalist.ident != "strum",
+            attr.parse_meta().ok().map_or(true, |meta| match meta {
+                syn::Meta::List(ref metalist) => !eq_path_str(&metalist.path, "strum"),
                 _ => true,
             })
         });
