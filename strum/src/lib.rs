@@ -59,7 +59,7 @@ impl std::fmt::Display for ParseError {
         // We could use our macro here, but this way we don't take a dependency on the
         // macros crate.
         match self {
-            &ParseError::VariantNotFound => write!(f, "Matching variant not found"),
+            ParseError::VariantNotFound => write!(f, "Matching variant not found"),
         }
     }
 }
@@ -67,7 +67,7 @@ impl std::fmt::Display for ParseError {
 impl std::error::Error for ParseError {
     fn description(&self) -> &str {
         match self {
-            &ParseError::VariantNotFound => {
+            ParseError::VariantNotFound => {
                 "Unable to find a variant of the given enum matching the string given. Matching \
                  can be extended with the Serialize attribute and is case sensitive."
             }
