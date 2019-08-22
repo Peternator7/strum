@@ -7,12 +7,8 @@ use helpers::{eq_path_str, extract_meta, is_disabled};
 fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Ident, &syn::Lit)> {
     use syn::{MetaList, MetaNameValue, NestedMeta};
     meta.iter()
-        .filter_map(|meta| match *meta {
-            Meta::List(MetaList {
-                ref path,
-                ref nested,
-                ..
-            }) => {
+        .filter_map(|meta| match meta {
+            Meta::List(MetaList { path, nested, .. }) => {
                 if eq_path_str(path, "strum") {
                     Some(nested)
                 } else {
@@ -22,12 +18,8 @@ fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Ident, &syn::Lit)> {
             _ => None,
         })
         .flat_map(|prop| prop)
-        .filter_map(|prop| match *prop {
-            NestedMeta::Meta(Meta::List(MetaList {
-                ref path,
-                ref nested,
-                ..
-            })) => {
+        .filter_map(|prop| match prop {
+            NestedMeta::Meta(Meta::List(MetaList { path, nested, .. })) => {
                 if eq_path_str(path, "props") {
                     Some(nested)
                 } else {
@@ -38,10 +30,10 @@ fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Ident, &syn::Lit)> {
         })
         .flat_map(|prop| prop)
         // Only look at key value pairs
-        .filter_map(|prop| match *prop {
-            NestedMeta::Meta(Meta::NameValue(MetaNameValue {
-                ref path, ref lit, ..
-            })) => Some((&path.segments[0].ident, lit)),
+        .filter_map(|prop| match prop {
+            NestedMeta::Meta(Meta::NameValue(MetaNameValue { path, lit, .. })) => {
+                Some((&path.segments[0].ident, lit))
+            }
             _ => None,
         })
         .collect()
@@ -78,7 +70,7 @@ pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {
             use syn::Lit::*;
             let key = key.to_string();
             match value {
-                Str(ref s, ..) => {
+                Str(s, ..) => {
                     string_arms.push(quote! { #key => ::std::option::Option::Some( #s )})
                 }
                 Bool(b) => bool_arms.push(quote! { #key => ::std::option::Option::Some( #b )}),

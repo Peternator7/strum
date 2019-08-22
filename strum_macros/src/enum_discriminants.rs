@@ -61,7 +61,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         // Don't copy across the "strum" meta attribute.
         let attrs = variant.attrs.iter().filter(|attr| {
             attr.parse_meta().ok().map_or(true, |meta| match meta {
-                syn::Meta::List(ref metalist) => !eq_path_str(&metalist.path, "strum"),
+                syn::Meta::List(metalist) => !eq_path_str(&metalist.path, "strum"),
                 _ => true,
             })
         });

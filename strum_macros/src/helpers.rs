@@ -19,7 +19,7 @@ where
     F: Fn(&MetaList) -> bool,
 {
     metas.filter_map(move |meta| match meta {
-        Meta::List(ref metalist) => {
+        Meta::List(metalist) => {
             if filter(metalist) {
                 Some(metalist)
             } else {
@@ -72,16 +72,16 @@ where
 /// Returns an iterator of the `Meta`s from the given `MetaList`.
 pub fn extract_list_metas(metalist: &MetaList) -> impl Iterator<Item = &Meta> {
     use syn::NestedMeta;
-    metalist.nested.iter().filter_map(|nested| match *nested {
-        NestedMeta::Meta(ref meta) => Some(meta),
+    metalist.nested.iter().filter_map(|nested| match nested {
+        NestedMeta::Meta(meta) => Some(meta),
         _ => None,
     })
 }
 
 /// Returns the `Ident` of the `Meta::Word`, or `None`.
 pub fn get_meta_ident(meta: &Meta) -> Option<&Ident> {
-    match *meta {
-        Meta::Path(ref path) => Some(&path.segments[0].ident),
+    match meta {
+        Meta::Path(path) => Some(&path.segments[0].ident),
         _ => None,
     }
 }
@@ -90,8 +90,8 @@ pub fn extract_attrs(meta: &[Meta], attr: &str, prop: &str) -> Vec<String> {
     use syn::{Lit, MetaNameValue, NestedMeta};
     meta.iter()
         // Get all the attributes with our tag on them.
-        .filter_map(|meta| match *meta {
-            Meta::List(ref metalist) => {
+        .filter_map(|meta| match meta {
+            Meta::List(metalist) => {
                 if eq_path_str(&metalist.path, attr) {
                     Some(&metalist.nested)
                 } else {
@@ -102,10 +102,10 @@ pub fn extract_attrs(meta: &[Meta], attr: &str, prop: &str) -> Vec<String> {
         })
         .flat_map(|nested| nested)
         // Get all the inner elements as long as they start with ser.
-        .filter_map(|meta| match *meta {
+        .filter_map(|meta| match meta {
             NestedMeta::Meta(Meta::NameValue(MetaNameValue {
-                ref path,
-                lit: Lit::Str(ref s),
+                path,
+                lit: Lit::Str(s),
                 ..
             })) => {
                 if eq_path_str(path, prop) {
