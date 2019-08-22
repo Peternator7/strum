@@ -54,7 +54,7 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
         }
 
         // If we don't have any custom variants, add the default serialized name.
-        if attrs.len() == 0 {
+        if attrs.is_empty() {
             attrs.push(convert_case(ident, case_style));
         }
 

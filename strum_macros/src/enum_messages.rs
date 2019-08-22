@@ -31,7 +31,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
         // You can't disable getting the serializations.
         {
             let mut serialization_variants = extract_attrs(&meta, "strum", "serialize");
-            if serialization_variants.len() == 0 {
+            if serialization_variants.is_empty() {
                 serialization_variants.push(ident.to_string());
             }
 
