@@ -20,7 +20,7 @@ name = "strum_macros"
 heck = "0.3"
 proc-macro2 = "1"
 quote = "1"
-syn = { version = "1", features = ["parsing", "extra-traits"] }
+syn = { version = "1.0.3", features = ["parsing", "extra-traits"] }
 
 [features]
 verbose-enumstring-name = []

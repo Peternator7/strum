@@ -188,5 +188,5 @@ fn test_convert_case() {
 /// Note that the given string should be a single path segment.
 /// In other words, it should not be multi-segment path like `a::b::c`.
 pub fn eq_path_str(path: &Path, s: &str) -> bool {
-    (path.segments.len() == 1) && (path.segments[0].ident == s)
+    path.get_ident().map_or(false, |ident| ident == s)
 }
