@@ -1,9 +1,8 @@
+use crate::helpers::{MetaHelpers, MetaIteratorHelpers, MetaListHelpers};
 use proc_macro2::{Span, TokenStream};
 use syn;
 
-use helpers::{
-    extract_list_metas, extract_meta, filter_metas, get_meta_ident, get_meta_list, unique_meta_list,
-};
+use helpers::extract_meta;
 
 pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -16,13 +15,13 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
     // Derives for the generated enum
     let type_meta = extract_meta(&ast.attrs);
-    let discriminant_attrs = get_meta_list(type_meta.iter(), "strum_discriminants")
-        .flat_map(|meta| extract_list_metas(meta).collect::<Vec<_>>())
+    let discriminant_attrs = type_meta
+        .find_attribute("strum_discriminants")
         .collect::<Vec<&syn::Meta>>();
 
-    let derives = get_meta_list(discriminant_attrs.iter().map(|&m| m), "derive")
-        .flat_map(extract_list_metas)
-        .filter_map(get_meta_ident)
+    let derives = discriminant_attrs
+        .find_attribute("derive")
+        .map(|meta| meta.path())
         .collect::<Vec<_>>();
 
     let derives = quote! {
@@ -30,21 +29,32 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     // Work out the name
-    let default_name = syn::Ident::new(
+    let default_name = syn::Path::from(syn::Ident::new(
         &format!("{}Discriminants", name.to_string()),
         Span::call_site(),
-    );
+    ));
 
-    let discriminants_name = unique_meta_list(discriminant_attrs.iter().map(|&m| m), "name")
-        .map(extract_list_metas)
-        .and_then(|metas| metas.filter_map(get_meta_ident).next())
+    let discriminants_name = discriminant_attrs
+        .iter()
+        .filter_map(|meta| meta.try_metalist())
+        .filter(|list| list.path.is_ident("name"))
+        // We want exactly zero or one items. Start with the assumption we have zero, i.e. None
+        // Then set our output to the first value we see. If fold is called again and we already
+        // have a value, panic.
+        .fold(None, |acc, val| match acc {
+            Some(_) => panic!("Expecting a single attribute 'name' in EnumDiscriminants."),
+            None => Some(val),
+        })
+        .map(|meta| meta.expand_inner())
+        .and_then(|metas| metas.into_iter().map(|meta| meta.path()).next())
         .unwrap_or(&default_name);
 
     // Pass through all other attributes
-    let pass_though_attributes =
-        filter_metas(discriminant_attrs.iter().map(|&m| m), |meta| match meta {
-            syn::Meta::List(ref metalist) => metalist.ident != "derive" && metalist.ident != "name",
-            _ => true,
+    let pass_though_attributes = discriminant_attrs
+        .iter()
+        .filter(|meta| {
+            let path = meta.path();
+            !path.is_ident("derive") && !path.is_ident("name")
         })
         .map(|meta| quote! { #[ #meta ] })
         .collect::<Vec<_>>();
@@ -56,10 +66,9 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         // Don't copy across the "strum" meta attribute.
         let attrs = variant.attrs.iter().filter(|attr| {
-            attr.interpret_meta().map_or(true, |meta| match meta {
-                syn::Meta::List(ref metalist) => metalist.ident != "strum",
-                _ => true,
-            })
+            attr.parse_meta()
+                .map(|meta| !meta.path().is_ident("strum"))
+                .unwrap_or(true)
         });
 
         discriminants.push(quote! { #(#attrs)* #ident });
@@ -103,6 +112,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
             quote! { #name::#ident #params => #discriminants_name::#ident }
         })
         .collect::<Vec<_>>();
+
     let from_fn_body = quote! { match val { #(#arms),* } };
 
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
