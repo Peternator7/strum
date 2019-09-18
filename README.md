@@ -8,11 +8,9 @@ Strum is a set of macros and traits for working with enums and strings easier in
 
 # Compatibility
 
-Strum is compatible with versions of rustc >= 1.26.0. That's the earliest version of stable rust that supports
+Strum is compatible with versions of rustc >= 1.31.0. That's the earliest version of stable rust that supports
 impl trait. Pull Requests that improve compatibility with older versions are welcome, but new feature work
 will focus on the current version of rust with an effort to avoid breaking compatibility with older versions.
-
-Versions of rust prior to 1.31.0 don't support importing procedural macros by path. See [this wiki page][Macro-Renames] if you are finding that one of Strum's macros collides with a macro being imported by a different crate. *You do not need this in versions of rust >= 1.31.0*
 
 # Including Strum in Your Project
 

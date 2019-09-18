@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.16.0
+
+* Added serialize UPPERCASE
+* Added "case-styles" to match the formatting convention they imply such as `kebab-case` and `camelCase`.
+* Added Enum Variant Names to improve compatibility with `structopt` and `clap`. [#56](https://github.com/Peternator7/strum/pull/56)
+* Added derive re-export to `strum` to allow re-exporting macros from main crate. [#57](https://github.com/Peternator7/strum/pull/57)
+* Bumped syn and quote to `1.0`. This raises minimal compatible rust version to `1.31`.
+* Did internal refactoring to improve organization of code. Shouldn't change user-facing api though.
+* Added license file to subdirectories so they are included in crate distros.
+
 ## 0.15.0
 
 ### Added

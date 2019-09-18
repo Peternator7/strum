@@ -112,6 +112,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
             quote! { #name::#ident #params => #discriminants_name::#ident }
         })
         .collect::<Vec<_>>();
+        
     let from_fn_body = quote! { match val { #(#arms),* } };
 
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
