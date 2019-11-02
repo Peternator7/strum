@@ -3,6 +3,7 @@ extern crate strum_macros;
 #[macro_use]
 extern crate structopt;
 extern crate strum;
+use strum::VariantNames;
 
 #[test]
 fn simple() {
@@ -15,6 +16,23 @@ fn simple() {
     }
 
     assert_eq!(&Color::variants(), &["Red", "Blue", "Yellow"]);
+}
+
+#[test]
+fn variant_names_trait() {
+    #[allow(dead_code)]
+    #[derive(EnumVariantNames)]
+    enum Color {
+        Red,
+        Blue,
+        Yellow,
+    }
+
+    fn generic_function<T: VariantNames>() {
+        assert_eq!(T::variants(), &["Red", "Blue", "Yellow"]);
+    }
+
+    generic_function::<Color>();
 }
 
 #[test]
