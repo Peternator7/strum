@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 #[macro_use]
 extern crate strum_macros;
 #[macro_use]
@@ -14,7 +16,8 @@ fn simple() {
         Yellow,
     }
 
-    assert_eq!(&Color::variants(), &["Red", "Blue", "Yellow"]);
+    assert_eq!(Color::VARIANTS, &["Red", "Blue", "Yellow"]);
+    assert_eq!(Color::variants(), &["Red", "Blue", "Yellow"]);
 }
 
 #[test]
@@ -29,10 +32,8 @@ fn plain_kebab() {
         RebeccaPurple,
     }
 
-    assert_eq!(
-        &Color::variants(),
-        &["red", "blue", "yellow", "rebecca-purple"]
-    );
+    assert_eq!(Color::VARIANTS, &["red", "blue", "yellow", "rebecca-purple"]);
+    assert_eq!(Color::variants(), &["red", "blue", "yellow", "rebecca-purple"]);
 }
 
 #[test]
@@ -48,7 +49,11 @@ fn non_plain_camel() {
     }
 
     assert_eq!(
-        &Color::variants(),
+        Color::VARIANTS,
+        &["deep-pink", "green-yellow", "cornflower-blue", "other"]
+    );
+    assert_eq!(
+        Color::variants(),
         &["deep-pink", "green-yellow", "cornflower-blue", "other"]
     );
 }
@@ -65,14 +70,19 @@ fn clap_and_structopt() {
     }
 
     assert_eq!(
-        &Color::variants(),
+        Color::VARIANTS,
+        &["red", "blue", "yellow", "rebecca-purple"]
+    );
+
+    assert_eq!(
+        Color::variants(),
         &["red", "blue", "yellow", "rebecca-purple"]
     );
 
     let _clap_example = clap::App::new("app").arg(
         clap::Arg::with_name("color")
             .long("color")
-            .possible_values(Color::variants())
+            .possible_values(Color::VARIANTS)
             .case_insensitive(true),
     );
 
