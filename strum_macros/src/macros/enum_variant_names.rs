@@ -24,7 +24,7 @@ pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
         .collect::<Vec<_>>();
 
     let note = syn::Lit::Str(syn::LitStr::new(
-        &format!("Use {name}::VARIANTS instead", name = name.to_string()),
+        &format!("Use `{name}::VARIANTS` instead", name = name.to_string()),
         Span::call_site(),
     ));
 
