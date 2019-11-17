@@ -83,12 +83,14 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
                     #(#arms),*
                 };
 
-                self.idx += 1;
+                if self.idx < #variant_count {
+                    self.idx += 1;
+                }
                 output
             }
 
             fn size_hint(&self) -> (usize, Option<usize>) {
-                let t = #variant_count - self.idx;
+                let t = if self.idx >= #variant_count { 0 } else { #variant_count - self.idx };
                 (t, Some(t))
             }
         }
