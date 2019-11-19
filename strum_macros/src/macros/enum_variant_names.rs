@@ -5,6 +5,8 @@ use crate::helpers::{case_style::CaseStyle, extract_meta, CaseStyleHelpers, Meta
 
 pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
+    let gen = &ast.generics;
+    let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
 
     let variants = match ast.data {
         syn::Data::Enum(ref v) => &v.variants,
@@ -23,7 +25,7 @@ pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
         .collect::<Vec<_>>();
 
     quote! {
-        impl VariantNames for #name {
+        impl #impl_generics ::strum::VariantNames for #name #ty_generics #where_clause {
             /// Return a slice containing the names of the variants of this enum
             #[allow(dead_code)]
             fn variants() -> &'static [&'static str] {
