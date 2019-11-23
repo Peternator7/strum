@@ -1,4 +1,4 @@
-use proc_macro2::{TokenStream, Span};
+use proc_macro2::TokenStream;
 use syn;
 
 use crate::helpers::case_style::CaseStyle;
@@ -23,11 +23,6 @@ pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
         .map(|v| v.ident.convert_case(case_style))
         .collect::<Vec<_>>();
 
-    let note = syn::Lit::Str(syn::LitStr::new(
-        &format!("Use `{name}::VARIANTS` instead", name = name.to_string()),
-        Span::call_site(),
-    ));
-
     quote! {
         impl #name {
             /// Names of the variants of this enum
@@ -36,8 +31,7 @@ pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
 
             /// Return a slice containing the names of the variants of this enum
             #[allow(dead_code)]
-            #[deprecated = #note]
-            pub const fn variants() -> &'static [&'static str] {
+            pub fn variants() -> &'static [&'static str] {
                 Self::VARIANTS
             }
         }
