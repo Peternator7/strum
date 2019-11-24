@@ -29,10 +29,14 @@ pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
             /// Return a slice containing the names of the variants of this enum
             #[allow(dead_code)]
             fn variants() -> &'static [&'static str] {
-                &[
-                    #(#names),*
-                ]
+                Self::VARIANTS
             }
+        }
+
+        impl #impl_generics #name #ty_generics #where_clause {
+            /// Names of the variants of this enum
+            #[allow(dead_code)]
+            pub const VARIANTS: &'static [&'static str] = &[ #(#names),* ];
         }
     }
 }
