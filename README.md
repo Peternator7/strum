@@ -50,7 +50,7 @@ Strum has implemented the following macros:
 | [EnumProperty] | Add custom properties to enum variants. |
 | [EnumMessage] | Add a verbose message to an enum variant. |
 | [EnumDiscriminants] | Generate a new type with only the discriminant names. |
-| [EnumCount] | Add a constant `usize` equal to the number of variantes. |
+| [EnumCount] | Add a constant `usize` equal to the number of variants. |
 
 # Contributing
 
