@@ -40,7 +40,7 @@
 //! | [Display] | Converts enum variants to strings |
 //! | [AsRefStr] | Converts enum variants to `&'static str` |
 //! | [IntoStaticStr] | Implements `From<MyEnum> for &'static str` on an enum |
-//! | [EnumVariantNames] | Adds a `variants` method returning an array of discriminant names |
+//! | [EnumVariantNames] | Implements Strum::VariantNames which adds a static `variants` method returning an array of discriminant names |
 //! | [EnumIter] | Creates a new type that iterates of the variants of an enum. |
 //! | [EnumProperty] | Add custom properties to enum variants. |
 //! | [EnumMessage] | Add a verbose message to an enum variant. |
@@ -216,6 +216,12 @@ where
 /// `strum_macros`.
 pub trait EnumCount {
     fn count() -> usize;
+}
+
+/// A trait for retrieving the names of each variant in Enum. This trait can
+/// be autoderived by `strum_macros`.
+pub trait VariantNames {
+    fn variants() -> &'static [&'static str];
 }
 
 #[cfg(feature = "derive")]
