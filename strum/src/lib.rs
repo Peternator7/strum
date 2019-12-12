@@ -221,7 +221,8 @@ pub trait EnumCount {
 /// A trait for retrieving the names of each variant in Enum. This trait can
 /// be autoderived by `strum_macros`.
 pub trait VariantNames {
-    fn variants() -> &'static [&'static str];
+    /// Names of the variants of this enum
+    const VARIANTS: &'static [&'static str];
 }
 
 #[cfg(feature = "derive")]
