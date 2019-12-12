@@ -223,11 +223,6 @@ pub trait EnumCount {
 pub trait VariantNames {
     /// Names of the variants of this enum
     const VARIANTS: &'static [&'static str];
-
-    /// Return a slice containing the names of the variants of this enum
-    fn variants() -> &'static [&'static str] {
-        Self::VARIANTS
-    }
 }
 
 #[cfg(feature = "derive")]
