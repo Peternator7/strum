@@ -150,6 +150,21 @@ fn take_from_both_sides_test() {
 }
 
 #[test]
+fn take_from_both_sides_test2() {
+    let mut iter = Week::iter();
+
+    assert_eq!(Some(Week::Sunday), iter.next());
+    assert_eq!(Some(Week::Saturday), iter.next_back());
+    assert_eq!(Some(Week::Friday), iter.next_back());
+    assert_eq!(Some(Week::Monday), iter.next());
+    assert_eq!(Some(Week::Tuesday), iter.next());
+    assert_eq!(Some(Week::Wednesday), iter.next());
+    assert_eq!(Some(Week::Thursday), iter.next());
+    assert_eq!(None, iter.next_back());
+    assert_eq!(None, iter.next());
+}
+
+#[test]
 fn take_nth_test() {
     let mut iter = Week::iter();
 
