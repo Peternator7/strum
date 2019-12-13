@@ -88,20 +88,23 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
         impl #impl_generics Iterator for #iter_name #ty_generics #where_clause {
             type Item = #name #ty_generics;
 
-            fn next(&mut self) -> Option<#name #ty_generics> {
-                if self.idx + self.back_idx >= #variant_count {
-                    return None
-                }
-
-                let output = self.get(self.idx);
-
-                self.idx += 1;
-                output
+            fn next(&mut self) -> Option<Self::Item> {
+                self.nth(0)
             }
 
             fn size_hint(&self) -> (usize, Option<usize>) {
                 let t = #variant_count - self.idx - self.back_idx;
                 (t, Some(t))
+            }
+
+            fn nth(&mut self, n: usize) -> Option<Self::Item> {
+                self.idx += n + 1;
+
+                if self.idx + self.back_idx > #variant_count {
+                    None
+                } else {
+                    self.get(self.idx - 1)
+                }   
             }
         }
 
@@ -112,15 +115,18 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
         }
 
         impl #impl_generics DoubleEndedIterator for #iter_name #ty_generics #where_clause {
-            fn next_back(&mut self) -> Option<#name #ty_generics> {
-                if self.idx + self.back_idx >= #variant_count {
-                    return None
-                }
+            fn next_back(&mut self) -> Option<Self::Item> {
+                self.nth_back(0)
+            }
 
-                let output = self.get(#variant_count - self.back_idx - 1);
+            fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
+                self.back_idx += n + 1;
 
-                self.back_idx += 1;
-                output
+                if self.idx + self.back_idx > #variant_count {
+                    None
+                } else {
+                    self.get(#variant_count - self.back_idx)
+                }  
             }
         }
 
