@@ -63,6 +63,9 @@ fn len_test() {
     i.next();
 
     assert_eq!(0, i.len());
+    i.next();
+
+    assert_eq!(0, i.size_hint().1.unwrap());
 }
 
 #[test]

@@ -16,8 +16,8 @@
 //!
 //! ```toml
 //! [dependencies]
-//! strum = "0.15.0"
-//! strum_macros = "0.15.0"
+//! strum = "0.16.0"
+//! strum_macros = "0.16.0"
 //! ```
 //!
 //! And add these lines to the root of your project, either lib.rs or main.rs.
@@ -36,16 +36,27 @@
 //!
 //! | Macro | Description |
 //! | --- | ----------- |
-//! | [EnumString](https://github.com/Peternator7/strum#EnumString) | Converts strings to enum variants based on their name |
-//! | [Display](https://github.com/Peternator7/strum#Display) | Converts enum variants to strings |
-//! | [AsRefStr](https://github.com/Peternator7/strum#AsRefStr) | Converts enum variants to `&'static str` |
-//! | [IntoStaticStr](https://github.com/Peternator7/strum#IntoStaticStr) | Implements `From<MyEnum> for &'static str` on an enum |
-//! | [EnumIter](https://github.com/Peternator7/strum#EnumIter) | Creates a new type that iterates of the variants of an enum. |
-//! | [EnumProperty](https://github.com/Peternator7/strum#EnumProperty) | Add custom properties to enum variants. |
-//! | [EnumMessage](https://github.com/Peternator7/strum#EnumMessage) | Add a verbose message to an enum variant. |
-//! | [EnumDiscriminants](https://github.com/Peternator7/strum#EnumDiscriminants) | Generate a new type with only the discriminant names. |
-//! | [EnumCount](https://github.com/Peternator7/strum#EnumCount) | Add a constant `usize` equal to the number of variantes. |
+//! | [EnumString] | Converts strings to enum variants based on their name |
+//! | [Display] | Converts enum variants to strings |
+//! | [AsRefStr] | Converts enum variants to `&'static str` |
+//! | [IntoStaticStr] | Implements `From<MyEnum> for &'static str` on an enum |
+//! | [EnumVariantNames] | Implements Strum::VariantNames which adds a static `variants` method returning an array of discriminant names |
+//! | [EnumIter] | Creates a new type that iterates of the variants of an enum. |
+//! | [EnumProperty] | Add custom properties to enum variants. |
+//! | [EnumMessage] | Add a verbose message to an enum variant. |
+//! | [EnumDiscriminants] | Generate a new type with only the discriminant names. |
+//! | [EnumCount] | Add a constant `usize` equal to the number of variants. |
 //!
+//! [EnumString]: https://github.com/Peternator7/strum/wiki/Derive-EnumString
+//! [Display]: https://github.com/Peternator7/strum/wiki/Derive-Display
+//! [AsRefStr]: https://github.com/Peternator7/strum/wiki/Derive-AsRefStr
+//! [IntoStaticStr]: https://github.com/Peternator7/strum/wiki/Derive-IntoStaticStr
+//! [EnumVariantNames]: https://github.com/Peternator7/strum/wiki/Derive-EnumVariantNames
+//! [EnumIter]: https://github.com/Peternator7/strum/wiki/Derive-EnumIter
+//! [EnumProperty]: https://github.com/Peternator7/strum/wiki/Derive-EnumProperty
+//! [EnumMessage]: https://github.com/Peternator7/strum/wiki/Derive-EnumMessage
+//! [EnumDiscriminants]: https://github.com/Peternator7/strum/wiki/Derive-EnumDiscriminants
+//! [EnumCount]: https://github.com/Peternator7/strum/wiki/Derive-EnumCount
 
 /// The ParseError enum is a collection of all the possible reasons
 /// an enum can fail to parse from a string.
@@ -206,3 +217,19 @@ where
 pub trait EnumCount {
     fn count() -> usize;
 }
+
+/// A trait for retrieving the names of each variant in Enum. This trait can
+/// be autoderived by `strum_macros`.
+pub trait VariantNames {
+    /// Names of the variants of this enum
+    const VARIANTS: &'static [&'static str];
+}
+
+#[cfg(feature = "derive")]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate strum_macros;
+
+#[cfg(feature = "derive")]
+#[doc(hidden)]
+pub use strum_macros::*;

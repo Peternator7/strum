@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use helpers::{extract_meta, is_disabled};
+use helpers::{extract_meta, MetaIteratorHelpers};
 
 pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -31,7 +31,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
     let mut arms = Vec::new();
     let enabled = variants
         .iter()
-        .filter(|variant| !is_disabled(&extract_meta(&variant.attrs)));
+        .filter(|variant| !extract_meta(&variant.attrs).is_disabled());
 
     for (idx, variant) in enabled.enumerate() {
         use syn::Fields::*;
@@ -91,9 +91,9 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
             fn next(&mut self) -> Option<Self::Item> {
                 self.nth(0)
             }
-
+            
             fn size_hint(&self) -> (usize, Option<usize>) {
-                let t = #variant_count - self.idx - self.back_idx;
+                let t = if self.idx + self.back_idx >= #variant_count { 0 } else { #variant_count - self.idx - self.back_idx };
                 (t, Some(t))
             }
 

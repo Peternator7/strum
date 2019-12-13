@@ -2,46 +2,23 @@ use proc_macro2::TokenStream;
 use syn;
 use syn::Meta;
 
-use helpers::{extract_meta, is_disabled};
+use crate::helpers::{extract_meta, MetaHelpers, MetaIteratorHelpers, MetaListHelpers};
 
-fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Ident, &syn::Lit)> {
-    use syn::{MetaList, MetaNameValue, NestedMeta};
+fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Path, &syn::Lit)> {
     meta.iter()
-        .filter_map(|meta| match *meta {
-            Meta::List(MetaList {
-                ref ident,
-                ref nested,
-                ..
-            }) => {
-                if ident == "strum" {
-                    Some(nested)
-                } else {
-                    None
-                }
-            }
-            _ => None,
-        })
-        .flat_map(|prop| prop)
+        // Filter down to the strum(..) attribute
+        .filter_map(|meta| meta.try_metalist())
+        .filter(|list| list.path.is_ident("strum"))
+        .flat_map(|list| list.expand_inner())
+        // Filter down to the `strum(props(..))` attribute
+        .filter_map(|meta| meta.try_metalist())
+        .filter(|inner_list| inner_list.path.is_ident("props"))
+        .flat_map(|inner_list| inner_list.expand_inner())
+        // Expand all the pairs `strum(props(key = value, ..))`
         .filter_map(|prop| match *prop {
-            NestedMeta::Meta(Meta::List(MetaList {
-                ref ident,
-                ref nested,
-                ..
-            })) => {
-                if ident == "props" {
-                    Some(nested)
-                } else {
-                    None
-                }
-            }
-            _ => None,
-        })
-        .flat_map(|prop| prop)
-        // Only look at key value pairs
-        .filter_map(|prop| match *prop {
-            NestedMeta::Meta(Meta::NameValue(MetaNameValue {
-                ref ident, ref lit, ..
-            })) => Some((ident, lit)),
+            syn::Meta::NameValue(syn::MetaNameValue {
+                ref path, ref lit, ..
+            }) => Some((path, lit)),
             _ => None,
         })
         .collect()
@@ -63,7 +40,7 @@ pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {
         let mut bool_arms = Vec::new();
         let mut num_arms = Vec::new();
         // But you can disable the messages.
-        if is_disabled(&meta) {
+        if meta.is_disabled() {
             continue;
         }
 
@@ -76,7 +53,7 @@ pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         for (key, value) in extract_properties(&meta) {
             use syn::Lit::*;
-            let key = key.to_string();
+            let key = key.segments.last().unwrap().ident.to_string();
             match value {
                 Str(ref s, ..) => {
                     string_arms.push(quote! { #key => ::std::option::Option::Some( #s )})
