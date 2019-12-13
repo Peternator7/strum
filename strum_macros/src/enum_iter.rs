@@ -100,7 +100,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
             }
 
             fn size_hint(&self) -> (usize, Option<usize>) {
-                let t = #variant_count - self.idx;
+                let t = #variant_count - self.idx - self.back_idx;
                 (t, Some(t))
             }
         }
