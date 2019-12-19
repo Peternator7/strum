@@ -69,6 +69,21 @@ fn len_test() {
 }
 
 #[test]
+fn double_ended_len_test() {
+    let mut i = Complicated::<(), ()>::iter();
+    assert_eq!(3, i.len());
+    i.next_back();
+
+    assert_eq!(2, i.len());
+    i.next();
+
+    assert_eq!(1, i.len());
+    i.next_back();
+
+    assert_eq!(0, i.len());
+}
+
+#[test]
 fn clone_test() {
     let mut i = Week::iter();
     i.next();
@@ -102,4 +117,61 @@ fn cycle_test() {
         Week::Tuesday,
     ];
     assert_eq!(expected, results);
+}
+
+#[test]
+fn reverse_test() {
+    let results = Week::iter().rev().collect::<Vec<_>>();
+    let expected = vec![
+        Week::Saturday,
+        Week::Friday,
+        Week::Thursday,
+        Week::Wednesday,
+        Week::Tuesday,
+        Week::Monday,
+        Week::Sunday,
+    ];
+    assert_eq!(expected, results);
+}
+
+#[test]
+fn take_from_both_sides_test() {
+    let mut iter = Week::iter();
+
+    assert_eq!(Some(Week::Sunday), iter.next());
+    assert_eq!(Some(Week::Saturday), iter.next_back());
+    assert_eq!(Some(Week::Friday), iter.next_back());
+    assert_eq!(Some(Week::Monday), iter.next());
+    assert_eq!(Some(Week::Tuesday), iter.next());
+    assert_eq!(Some(Week::Wednesday), iter.next());
+    assert_eq!(Some(Week::Thursday), iter.next_back());
+    assert_eq!(None, iter.next());
+    assert_eq!(None, iter.next_back());
+}
+
+#[test]
+fn take_from_both_sides_test2() {
+    let mut iter = Week::iter();
+
+    assert_eq!(Some(Week::Sunday), iter.next());
+    assert_eq!(Some(Week::Saturday), iter.next_back());
+    assert_eq!(Some(Week::Friday), iter.next_back());
+    assert_eq!(Some(Week::Monday), iter.next());
+    assert_eq!(Some(Week::Tuesday), iter.next());
+    assert_eq!(Some(Week::Wednesday), iter.next());
+    assert_eq!(Some(Week::Thursday), iter.next());
+    assert_eq!(None, iter.next_back());
+    assert_eq!(None, iter.next());
+}
+
+#[test]
+fn take_nth_test() {
+    let mut iter = Week::iter();
+
+    assert_eq!(Some(Week::Tuesday), iter.nth(2));
+    assert_eq!(Some(Week::Saturday), iter.nth_back(0));
+    assert_eq!(Some(Week::Thursday), iter.nth_back(1));
+    assert_eq!(None, iter.nth(1));
+    assert_eq!(None, iter.next());
+    assert_eq!(None, iter.next_back());
 }

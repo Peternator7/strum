@@ -62,14 +62,24 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
         #[allow(missing_docs)]
         #vis struct #iter_name #ty_generics {
             idx: usize,
+            back_idx: usize,
             marker: ::std::marker::PhantomData #phantom_data,
+        }
+
+        impl #impl_generics #iter_name #ty_generics #where_clause {
+            fn get(&self, idx: usize) -> Option<#name #ty_generics> {
+                match idx {
+                    #(#arms),*
+                }
+            }
         }
 
         impl #impl_generics ::strum::IntoEnumIterator for #name #ty_generics #where_clause {
             type Iterator = #iter_name #ty_generics;
             fn iter() -> #iter_name #ty_generics {
                 #iter_name {
-                    idx:0,
+                    idx: 0,
+                    back_idx: 0,
                     marker: ::std::marker::PhantomData,
                 }
             }
@@ -78,20 +88,23 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
         impl #impl_generics Iterator for #iter_name #ty_generics #where_clause {
             type Item = #name #ty_generics;
 
-            fn next(&mut self) -> Option<#name #ty_generics> {
-                let output = match self.idx {
-                    #(#arms),*
-                };
-
-                if self.idx < #variant_count {
-                    self.idx += 1;
-                }
-                output
+            fn next(&mut self) -> Option<Self::Item> {
+                self.nth(0)
+            }
+            
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                let t = if self.idx + self.back_idx >= #variant_count { 0 } else { #variant_count - self.idx - self.back_idx };
+                (t, Some(t))
             }
 
-            fn size_hint(&self) -> (usize, Option<usize>) {
-                let t = if self.idx >= #variant_count { 0 } else { #variant_count - self.idx };
-                (t, Some(t))
+            fn nth(&mut self, n: usize) -> Option<Self::Item> {
+                self.idx += n + 1;
+
+                if self.idx + self.back_idx > #variant_count {
+                    None
+                } else {
+                    self.get(self.idx - 1)
+                }   
             }
         }
 
@@ -101,10 +114,27 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
             }
         }
 
+        impl #impl_generics DoubleEndedIterator for #iter_name #ty_generics #where_clause {
+            fn next_back(&mut self) -> Option<Self::Item> {
+                self.nth_back(0)
+            }
+
+            fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
+                self.back_idx += n + 1;
+
+                if self.idx + self.back_idx > #variant_count {
+                    None
+                } else {
+                    self.get(#variant_count - self.back_idx)
+                }  
+            }
+        }
+
         impl #impl_generics Clone for #iter_name #ty_generics #where_clause {
             fn clone(&self) -> #iter_name #ty_generics {
                 #iter_name {
                     idx: self.idx,
+                    back_idx: self.back_idx,
                     marker: self.marker.clone(),
                 }
             }
