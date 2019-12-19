@@ -19,8 +19,8 @@ Cargo.toml. Strum_macros contains the macros needed to derive all the traits in 
 
 ```toml
 [dependencies]
-strum = "0.16.0"
-strum_macros = "0.16.0"
+strum = "0.17.0"
+strum_macros = "0.17.0"
 ```
 
 And add these lines to the root of your project, either lib.rs or main.rs.
@@ -45,7 +45,7 @@ Strum has implemented the following macros:
 | [Display] | Converts enum variants to strings |
 | [AsRefStr] | Converts enum variants to `&'static str` |
 | [IntoStaticStr] | Implements `From<MyEnum> for &'static str` on an enum |
-| [EnumVariantNames] | Adds a `variants` method returning an array of discriminant names |
+| [EnumVariantNames] | Adds an associated `VARIANTS` constant which is an array of discriminant names |
 | [EnumIter] | Creates a new type that iterates of the variants of an enum. |
 | [EnumProperty] | Add custom properties to enum variants. |
 | [EnumMessage] | Add a verbose message to an enum variant. |

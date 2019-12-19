@@ -16,8 +16,8 @@
 //!
 //! ```toml
 //! [dependencies]
-//! strum = "0.16.0"
-//! strum_macros = "0.16.0"
+//! strum = "0.17.0"
+//! strum_macros = "0.17.0"
 //! ```
 //!
 //! And add these lines to the root of your project, either lib.rs or main.rs.
@@ -40,7 +40,7 @@
 //! | [Display] | Converts enum variants to strings |
 //! | [AsRefStr] | Converts enum variants to `&'static str` |
 //! | [IntoStaticStr] | Implements `From<MyEnum> for &'static str` on an enum |
-//! | [EnumVariantNames] | Implements Strum::VariantNames which adds a static `variants` method returning an array of discriminant names |
+//! | [EnumVariantNames] | Implements Strum::VariantNames which adds an associated constant `VARIANTS` which is an array of discriminant names |
 //! | [EnumIter] | Creates a new type that iterates of the variants of an enum. |
 //! | [EnumProperty] | Add custom properties to enum variants. |
 //! | [EnumMessage] | Add a verbose message to an enum variant. |
@@ -70,7 +70,7 @@ impl std::fmt::Display for ParseError {
         // We could use our macro here, but this way we don't take a dependency on the
         // macros crate.
         match self {
-            &ParseError::VariantNotFound => write!(f, "Matching variant not found"),
+            ParseError::VariantNotFound => write!(f, "Matching variant not found"),
         }
     }
 }
@@ -78,7 +78,7 @@ impl std::fmt::Display for ParseError {
 impl std::error::Error for ParseError {
     fn description(&self) -> &str {
         match self {
-            &ParseError::VariantNotFound => {
+            ParseError::VariantNotFound => {
                 "Unable to find a variant of the given enum matching the string given. Matching \
                  can be extended with the Serialize attribute and is case sensitive."
             }

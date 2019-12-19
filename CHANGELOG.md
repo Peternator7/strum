@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.17.0
+
+* **Breaking Change**. Enum variant names now exports an associated constant `VARIANTS` in the
+  `strum::VariantNames` trait instead of adding a `variants` method directly to the enum.
+  The fix is to `use strum::VariantNames` in your module and replace occurrances of `variants()`
+  with `VARIANTS`.
+  * [#74](https://github.com/Peternator7/strum/pull/74)
+  * [#75](https://github.com/Peternator7/strum/pull/75)
+* 🐛 fix - stop incrementing iterator index after we reach the end. [#76](https://github.com/Peternator7/strum/pull/76)
+* Strum iterators now implemented [DoubleEndedIterator](https://doc.rust-lang.org/std/iter/trait.DoubleEndedIterator.html). [#60](https://github.com/Peternator7/strum/pull/60)
+
 ## 0.16.0
 
 * Added serialize UPPERCASE
