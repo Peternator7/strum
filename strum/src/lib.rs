@@ -16,8 +16,8 @@
 //!
 //! ```toml
 //! [dependencies]
-//! strum = "0.17.0"
-//! strum_macros = "0.17.0"
+//! strum = "0.17.1"
+//! strum_macros = "0.17.1"
 //! ```
 //!
 //! And add these lines to the root of your project, either lib.rs or main.rs.

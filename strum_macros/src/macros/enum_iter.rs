@@ -91,20 +91,24 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
             fn next(&mut self) -> Option<Self::Item> {
                 self.nth(0)
             }
-            
+
             fn size_hint(&self) -> (usize, Option<usize>) {
                 let t = if self.idx + self.back_idx >= #variant_count { 0 } else { #variant_count - self.idx - self.back_idx };
                 (t, Some(t))
             }
 
             fn nth(&mut self, n: usize) -> Option<Self::Item> {
-                self.idx += n + 1;
-
-                if self.idx + self.back_idx > #variant_count {
+                let idx = self.idx + n + 1;
+                if idx + self.back_idx > #variant_count {
+                    // We went past the end of the iterator. Freeze idx at #variant_count
+                    // so that it doesn't overflow if the user calls this repeatedly.
+                    // See PR #76 for context.
+                    self.idx = #variant_count;
                     None
                 } else {
-                    self.get(self.idx - 1)
-                }   
+                    self.idx = idx;
+                    self.get(idx - 1)
+                }
             }
         }
 
@@ -120,13 +124,18 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
             }
 
             fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
-                self.back_idx += n + 1;
+                let back_idx = self.back_idx + n + 1;
 
-                if self.idx + self.back_idx > #variant_count {
+                if self.idx + back_idx > #variant_count {
+                    // We went past the end of the iterator. Freeze back_idx at #variant_count
+                    // so that it doesn't overflow if the user calls this repeatedly.
+                    // See PR #76 for context.
+                    self.back_idx = #variant_count;
                     None
                 } else {
+                    self.back_idx = back_idx;
                     self.get(#variant_count - self.back_idx)
-                }  
+                }
             }
         }
 

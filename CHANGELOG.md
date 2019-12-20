@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.17.1
+
+* Fixed an issue caused by combining [#60](https://github.com/Peternator7/strum/pull/60) and [#76](https://github.com/Peternator7/strum/pull/76)
+
 ## 0.17.0
 
 * **Breaking Change**. Enum variant names now exports an associated constant `VARIANTS` in the
