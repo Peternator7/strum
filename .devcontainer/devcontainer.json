@@ -1,0 +1,7 @@
+{
+    "extensions": [
+        "rust-lang.rust",
+        "webfreak.debug"
+    ],
+    "image":"rust:1-buster"
+}
