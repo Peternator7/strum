@@ -3,5 +3,5 @@
         "rust-lang.rust",
         "webfreak.debug"
     ],
-    "image":"library/rust:1-buster"
+    "image":"docker.io/library/rust:1-buster"
 }
