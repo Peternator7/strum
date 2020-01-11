@@ -3,6 +3,6 @@
         "rust-lang.rust",
         "webfreak.debug"
     ],
-    "postCreateCommand": "curl --proto '=https' --tlsv1.2 -sSf -o ~/rustup.sh https://sh.rustup.rs && /bin/bash ~/rustup.sh -y",
+    "postCreateCommand": "curl --proto '=https' --tlsv1.2 -sSf -o ~/rustup.sh https://sh.rustup.rs && /bin/bash ~/rustup.sh -y && cargo build",
     "image":"docker.io/library/rust:1-buster"
 }
