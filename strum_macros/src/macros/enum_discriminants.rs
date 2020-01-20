@@ -4,6 +4,12 @@ use syn;
 
 use helpers::extract_meta;
 
+/// Attributes to copy from the main enum's variants to the discriminant enum's variants.
+///
+/// Attributes not in this list may be for other `proc_macro`s on the main enum, and may cause
+/// compilation problems when copied across.
+const ATTRIBUTES_TO_COPY: &[&str] = &["doc", "cfg", "allow", "deny"];
+
 pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let vis = &ast.vis;
@@ -66,9 +72,9 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         // Don't copy across the "strum" meta attribute.
         let attrs = variant.attrs.iter().filter(|attr| {
-            attr.parse_meta()
-                .map(|meta| !meta.path().is_ident("strum"))
-                .unwrap_or(true)
+            ATTRIBUTES_TO_COPY
+                .iter()
+                .any(|attr_whitelisted| attr.path.is_ident(attr_whitelisted))
         });
 
         discriminants.push(quote! { #(#attrs)* #ident });
