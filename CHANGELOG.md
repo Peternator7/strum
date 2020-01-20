@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+* Only copy across `"doc", "cfg", "allow", "deny"` attributes from main enum variants to discriminant variants. [#73](https://github.com/Peternator7/strum/issues/73)
+
 ## 0.17.1
 
 * Fixed an issue caused by combining [#60](https://github.com/Peternator7/strum/pull/60) and [#76](https://github.com/Peternator7/strum/pull/76)
