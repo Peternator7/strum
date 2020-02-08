@@ -1,6 +1,8 @@
 extern crate strum;
 #[macro_use]
 extern crate strum_macros;
+#[macro_use]
+extern crate enum_variant_type;
 
 use strum::IntoEnumIterator;
 
@@ -183,4 +185,36 @@ fn from_test_complex() {
 fn from_ref_test_complex() {
     let rara = Rara;
     assert_eq!(EnumIntoComplexVars::A, (&EnumIntoComplex::A(&rara)).into());
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Eq, PartialEq, EnumDiscriminants, EnumVariantType)]
+#[strum_discriminants(
+    name(VariantFilterAttrDiscs),
+    derive(Display, EnumIter, EnumString),
+    strum(serialize_all = "snake_case")
+)]
+enum VariantFilterAttr {
+    #[evt(derive(Clone, Copy, Debug))]
+    DarkBlack(bool),
+    #[evt(skip)]
+    BrightWhite(i32),
+}
+
+#[test]
+fn filter_variant_attributes_pass_through() {
+    use std::str::FromStr;
+
+    let discriminants = VariantFilterAttrDiscs::iter().collect::<Vec<_>>();
+    let expected = vec![
+        VariantFilterAttrDiscs::DarkBlack,
+        VariantFilterAttrDiscs::BrightWhite,
+    ];
+
+    assert_eq!(expected, discriminants);
+    assert_eq!("dark_black", VariantFilterAttrDiscs::DarkBlack.to_string());
+    assert_eq!(
+        VariantFilterAttrDiscs::DarkBlack,
+        VariantFilterAttrDiscs::from_str("dark_black").unwrap()
+    );
 }
