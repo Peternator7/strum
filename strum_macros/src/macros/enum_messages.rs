@@ -1,7 +1,8 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use helpers::{extract_meta, MetaIteratorHelpers};
+use crate::helpers::case_style::CaseStyle;
+use helpers::{extract_meta, CaseStyleHelpers, MetaIteratorHelpers};
 
 pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -10,6 +11,11 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
         syn::Data::Enum(ref v) => &v.variants,
         _ => panic!("EnumMessage only works on Enums"),
     };
+
+    let type_meta = extract_meta(&ast.attrs);
+    let case_style = type_meta
+        .find_unique_property("strum", "serialize_all")
+        .map(|style| CaseStyle::from(style.as_ref()));
 
     let mut arms = Vec::new();
     let mut detailed_arms = Vec::new();
@@ -32,7 +38,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
         {
             let mut serialization_variants = meta.find_properties("strum", "serialize");
             if serialization_variants.len() == 0 {
-                serialization_variants.push(ident.to_string());
+                serialization_variants.push(ident.convert_case(case_style));
             }
 
             let count = serialization_variants.len();

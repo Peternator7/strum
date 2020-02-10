@@ -54,3 +54,30 @@ fn disabled_message() {
     assert_eq!(None, (Pets::Hamster).get_message());
     assert_eq!(None, (Pets::Hamster).get_detailed_message());
 }
+
+#[derive(Debug, Eq, PartialEq, EnumMessage)]
+#[strum(serialize_all = "kebab_case")]
+enum Brightness {
+    DarkBlack,
+    Dim {
+        glow: usize,
+    },
+    #[strum(serialize = "bright")]
+    BrightWhite,
+}
+
+#[test]
+fn get_serializations() {
+    assert_eq!(
+        vec!["dark-black"],
+        (Brightness::DarkBlack).get_serializations()
+    );
+    assert_eq!(
+        vec!["dim"],
+        (Brightness::Dim { glow: 1 }).get_serializations()
+    );
+    assert_eq!(
+        vec!["bright"],
+        (Brightness::BrightWhite).get_serializations()
+    );
+}
