@@ -120,11 +120,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         impl #impl_generics DoubleEndedIterator for #iter_name #ty_generics #where_clause {
             fn next_back(&mut self) -> Option<Self::Item> {
-                self.nth_back(0)
-            }
-
-            fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
-                let back_idx = self.back_idx + n + 1;
+                let back_idx = self.back_idx + 1;
 
                 if self.idx + back_idx > #variant_count {
                     // We went past the end of the iterator. Freeze back_idx at #variant_count
