@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.18.0
+
+* The formatting of generated serialization variants returned by `get_serializations()` from an
+  enum that derives `EnumMessage` are now affected by the `serialize_all` property on the enum.
+  [#84](https://github.com/Peternator7/strum/pull/84)
+
 ## 0.17.1
 
 * Fixed an issue caused by combining [#60](https://github.com/Peternator7/strum/pull/60) and [#76](https://github.com/Peternator7/strum/pull/76)
