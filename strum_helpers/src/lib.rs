@@ -1,3 +1,6 @@
+extern crate syn;
+extern crate heck;
+
 use syn::{Attribute, Meta};
 
 pub mod case_style;

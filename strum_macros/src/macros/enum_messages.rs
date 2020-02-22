@@ -1,8 +1,8 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use crate::helpers::case_style::CaseStyle;
-use helpers::{extract_meta, CaseStyleHelpers, MetaIteratorHelpers};
+use strum_helpers::case_style::CaseStyle;
+use strum_helpers::{extract_meta, CaseStyleHelpers, MetaIteratorHelpers};
 
 pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;

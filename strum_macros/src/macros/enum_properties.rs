@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use syn;
 use syn::Meta;
 
-use crate::helpers::{extract_meta, MetaHelpers, MetaIteratorHelpers, MetaListHelpers};
+use strum_helpers::{extract_meta, MetaHelpers, MetaIteratorHelpers, MetaListHelpers};
 
 fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Path, &syn::Lit)> {
     meta.iter()

@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use helpers::{extract_meta, MetaIteratorHelpers};
+use strum_helpers::{extract_meta, MetaIteratorHelpers};
 
 pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;

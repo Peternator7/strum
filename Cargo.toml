@@ -2,6 +2,7 @@
 members = [
     "strum",
     "strum_macros",
+    "strum_helpers",
     "strum_tests"
 ]
 

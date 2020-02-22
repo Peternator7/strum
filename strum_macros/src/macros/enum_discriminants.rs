@@ -1,8 +1,8 @@
-use crate::helpers::{MetaHelpers, MetaIteratorHelpers, MetaListHelpers};
+use strum_helpers::{MetaHelpers, MetaIteratorHelpers, MetaListHelpers};
 use proc_macro2::{Span, TokenStream};
 use syn;
 
-use helpers::extract_meta;
+use strum_helpers::extract_meta;
 
 /// Attributes to copy from the main enum's variants to the discriminant enum's variants.
 ///
