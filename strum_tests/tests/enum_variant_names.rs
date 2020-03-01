@@ -47,7 +47,10 @@ fn plain_kebab() {
         RebeccaPurple,
     }
 
-    assert_eq!(Color::VARIANTS, &["red", "blue", "yellow", "rebecca-purple"]);
+    assert_eq!(
+        Color::VARIANTS,
+        &["red", "blue", "yellow", "rebecca-purple"]
+    );
 }
 
 #[test]

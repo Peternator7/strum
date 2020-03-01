@@ -106,23 +106,23 @@ impl std::error::Error for ParseError {
 ///         Yellow,
 /// }
 ///
-/// // Iterating over any enum requires 2 type parameters
-/// // A 3rd is used in this example to allow passing a predicate
-/// fn generic_iterator<E, I, F>(pred: F)
-///                      where E: IntoEnumIterator<Iterator=I>,
-///                            I: Iterator<Item=E>,
-///                            F: Fn(E) {
+/// // Iterate over the items in an enum and perform some function on them.
+/// fn generic_iterator<E, F>(pred: F)
+/// where
+///     E: IntoEnumIterator,
+///     F: Fn(E),
+/// {
 ///     for e in E::iter() {
 ///         pred(e)
 ///     }
 /// }
 ///
 /// fn main() {
-///     generic_iterator::<Color,_, _>(|color| println!("{:?}", color));
+///     generic_iterator::<Color, _>(|color| println!("{:?}", color));
 /// }
 /// ```
-pub trait IntoEnumIterator {
-    type Iterator;
+pub trait IntoEnumIterator: Sized {
+    type Iterator: Iterator<Item = Self>;
 
     fn iter() -> Self::Iterator;
 }
