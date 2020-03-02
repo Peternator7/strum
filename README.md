@@ -19,8 +19,8 @@ Cargo.toml. Strum_macros contains the macros needed to derive all the traits in 
 
 ```toml
 [dependencies]
-strum = "0.17.1"
-strum_macros = "0.17.1"
+strum = "0.18.0"
+strum_macros = "0.18.0"
 ```
 
 And add these lines to the root of your project, either lib.rs or main.rs.

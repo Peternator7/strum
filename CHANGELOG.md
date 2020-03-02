@@ -1,11 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.18.0
 
 * Only copy across `"doc", "cfg", "allow", "deny"` attributes from main enum variants to discriminant variants. [#73](https://github.com/Peternator7/strum/issues/73)
 * The formatting of generated serialization variants returned by `get_serializations()` from an
   enum that derives `EnumMessage` is now affected by the `serialize_all` property on the enum.
   [#84](https://github.com/Peternator7/strum/pull/84)
+* IntoEnumIterator now has the constraint `IntoEnumIterator::Iterator<Item=Self>` and `Self: Sized`. This makes
+  it much easier to be generic over `IntoEnumIterator` and enum variants must be sized. [#80]
 
 ## 0.17.1
 
