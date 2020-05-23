@@ -20,6 +20,14 @@ fn to_blue_string() {
 }
 
 #[test]
+fn test_formatters() {
+    assert_eq!(String::from("  blue"), format!("{:>6}", Color::Blue { hue: 0 }));
+    assert_eq!(String::from("blue  "), format!("{:<6}", Color::Blue { hue: 0 }));
+    assert_eq!(String::from(" blue "), format!("{:^6}", Color::Blue { hue: 0 }));
+    assert_eq!(String::from("bl"), format!("{:.2}", Color::Blue { hue: 0 }));
+}
+
+#[test]
 fn to_yellow_string() {
     assert_eq!(String::from("yellow"), format!("{}", Color::Yellow));
 }
