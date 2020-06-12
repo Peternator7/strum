@@ -47,7 +47,7 @@ pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
             Named(..) => quote! { {..} },
         };
 
-        arms.push(quote! { #name::#ident #params => f.write_str(#output) });
+        arms.push(quote! { #name::#ident #params => f.pad(#output) });
     }
 
     if arms.len() < variants.len() {
