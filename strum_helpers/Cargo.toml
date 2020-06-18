@@ -1,6 +1,6 @@
 [package]
-name = "strum_macros"
-version = "0.18.0"
+name = "strum_helpers"
+version = "0.17.1"
 authors = ["Peter Glotfelty <peter.glotfelty@microsoft.com>"]
 license = "MIT"
 
@@ -13,15 +13,12 @@ homepage = "https://github.com/Peternator7/strum"
 readme = "../README.md"
 
 [lib]
-proc-macro = true
-name = "strum_macros"
+name = "strum_helpers"
 
 [dependencies]
 heck = "0.3"
 proc-macro2 = "1.0"
-quote = "1.0"
 syn = { version = "1.0", features = ["parsing", "extra-traits"] }
-strum_helpers = { path = "../strum_helpers", version = "0.17.1" }
 
 [features]
 verbose-enumstring-name = []
