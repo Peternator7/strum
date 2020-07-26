@@ -192,12 +192,12 @@ pub trait EnumMessage {
 /// }
 /// ```
 pub trait EnumProperty {
-    fn get_str(&self, &str) -> Option<&'static str>;
-    fn get_int(&self, &str) -> Option<usize> {
+    fn get_str(&self, prop: &str) -> Option<&'static str>;
+    fn get_int(&self, _prop: &str) -> Option<usize> {
         Option::None
     }
 
-    fn get_bool(&self, &str) -> Option<bool> {
+    fn get_bool(&self, _prop: &str) -> Option<bool> {
         Option::None
     }
 }
@@ -215,7 +215,7 @@ where
 /// A trait for capturing the number of variants in Enum. This trait can be autoderived by
 /// `strum_macros`.
 pub trait EnumCount {
-    fn count() -> usize;
+    const COUNT: usize;
 }
 
 /// A trait for retrieving the names of each variant in Enum. This trait can
