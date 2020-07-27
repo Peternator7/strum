@@ -1,27 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use crate::models::HasStrumVariantProperties;
-
-// fn extract_properties(meta: &[Meta]) -> Vec<(&syn::Path, &syn::Lit)> {
-//     meta.iter()
-//         // Filter down to the strum(..) attribute
-//         .filter_map(|meta| meta.expect_metalist())
-//         .filter(|list| list.path.is_ident("strum"))
-//         .flat_map(|list| list.expand_inner())
-//         // Filter down to the `strum(props(..))` attribute
-//         .filter_map(|meta| meta.expect_metalist())
-//         .filter(|inner_list| inner_list.path.is_ident("props"))
-//         .flat_map(|inner_list| inner_list.expand_inner())
-//         // Expand all the pairs `strum(props(key = value, ..))`
-//         .filter_map(|prop| match *prop {
-//             syn::Meta::NameValue(syn::MetaNameValue {
-//                 ref path, ref lit, ..
-//             }) => Some((path, lit)),
-//             _ => None,
-//         })
-//         .collect()
-// }
+use crate::helpers::HasStrumVariantProperties;
 
 pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;

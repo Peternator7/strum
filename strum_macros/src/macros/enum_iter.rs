@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use crate::models::HasStrumVariantProperties;
+use crate::helpers::HasStrumVariantProperties;
 
 pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;

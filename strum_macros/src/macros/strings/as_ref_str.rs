@@ -1,8 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use crate::models::type_props::HasTypeProperties;
-use crate::models::variant_props::HasStrumVariantProperties;
+use crate::helpers::{HasTypeProperties, HasStrumVariantProperties};
 
 fn get_arms(ast: &syn::DeriveInput) -> Vec<TokenStream> {
     let name = &ast.ident;

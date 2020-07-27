@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.19.0
+
+* **Breaking Change**. `default` and `disabled` should now be written as markers instead of key value pairs.
+  Here is the old way of adding these attributes to a variant.
+  ```rust
+  // OLD WAY
+  enum Test {
+    #[strum(disabled = "true", default = "true")]
+    Variant(String)
+  }
+  ```
+
+  Here is the new way. There is less ambiguity in the new syntax.
+
+  ```rust
+  enum Test {
+    #[strum(disabled, default)]
+    Variant(String)
+  }
+  ```
+* **Breaking Change**. Most of the strum plugins will now error more aggresively on invalid options being
+  used. Historically, the plugins have ignore invalid options, but most of these should error now. Silent
+  errors are a rust anti-pattern.
+
 ## 0.18.0
 
 * Only copy across `"doc", "cfg", "allow", "deny"` attributes from main enum variants to discriminant variants. [#73](https://github.com/Peternator7/strum/issues/73)

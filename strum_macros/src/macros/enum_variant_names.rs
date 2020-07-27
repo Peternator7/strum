@@ -1,8 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use crate::helpers::CaseStyleHelpers;
-use crate::models::{HasStrumVariantProperties, HasTypeProperties};
+use crate::helpers::{CaseStyleHelpers, HasTypeProperties};
 
 pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;

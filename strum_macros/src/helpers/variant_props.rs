@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::default::Default;
 
 use crate::helpers::case_style::{CaseStyle, CaseStyleHelpers};
-use crate::helpers::HasMetadata;
+use crate::helpers::has_metadata::HasMetadata;
 use crate::helpers::{LitHelpers, MetaHelpers, NestedMetaHelpers};
 
 pub trait HasStrumVariantProperties {

@@ -1,7 +1,7 @@
 use proc_macro2::{Span, TokenStream};
 use syn;
 
-use crate::models::HasTypeProperties;
+use crate::helpers::HasTypeProperties;
 
 /// Attributes to copy from the main enum's variants to the discriminant enum's variants.
 ///
@@ -19,9 +19,9 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     // Derives for the generated enum
-    let discriminant_attrs = ast.get_type_properties();
+    let type_properties = ast.get_type_properties();
 
-    let derives = discriminant_attrs.discriminant_derives;
+    let derives = type_properties.discriminant_derives;
 
     let derives = quote! {
         #[derive(Clone, Copy, Debug, PartialEq, Eq, #(#derives),*)]
@@ -33,10 +33,10 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         Span::call_site(),
     ));
 
-    let discriminants_name = discriminant_attrs.discriminant_name.unwrap_or(default_name);
+    let discriminants_name = type_properties.discriminant_name.unwrap_or(default_name);
 
     // Pass through all other attributes
-    let pass_though_attributes = discriminant_attrs
+    let pass_though_attributes = type_properties
         .discriminant_others
         .into_iter()
         .map(|meta| quote! { #[ #meta ] })

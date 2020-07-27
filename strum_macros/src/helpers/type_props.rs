@@ -2,7 +2,7 @@ use std::convert::From;
 use std::default::Default;
 
 use crate::helpers::case_style::CaseStyle;
-use crate::helpers::HasMetadata;
+use crate::helpers::has_metadata::HasMetadata;
 use crate::helpers::{MetaHelpers, NestedMetaHelpers};
 
 pub trait HasTypeProperties {

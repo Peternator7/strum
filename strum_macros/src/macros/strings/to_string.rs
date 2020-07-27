@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use crate::models::{HasStrumVariantProperties, HasTypeProperties};
+use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 
 pub fn to_string_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;

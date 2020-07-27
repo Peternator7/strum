@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use crate::models::{HasStrumVariantProperties, HasTypeProperties};
+use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 
 pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -32,7 +32,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         // You can't disable getting the serializations.
         {
-            let mut serialization_variants = meta.get_serializations(type_meta.case_style);
+            let serialization_variants = meta.get_serializations(type_meta.case_style);
 
             let count = serialization_variants.len();
             serializations.push(quote! {
