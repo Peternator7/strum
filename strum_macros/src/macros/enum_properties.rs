@@ -14,12 +14,12 @@ pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {
     let mut arms = Vec::new();
     for variant in variants {
         let ident = &variant.ident;
-        let meta = variant.get_variant_properties();
+        let variant_properties = variant.get_variant_properties();
         let mut string_arms = Vec::new();
         let mut bool_arms = Vec::new();
         let mut num_arms = Vec::new();
         // But you can disable the messages.
-        if meta.is_disabled {
+        if variant_properties.is_disabled {
             continue;
         }
 
@@ -30,7 +30,7 @@ pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {
             Named(..) => quote! { {..} },
         };
 
-        for (key, value) in meta.string_props {
+        for (key, value) in variant_properties.string_props {
             string_arms.push(quote! { #key => ::std::option::Option::Some( #value )})
         }
 

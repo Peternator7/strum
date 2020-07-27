@@ -11,16 +11,16 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
         _ => panic!("EnumMessage only works on Enums"),
     };
 
-    let type_meta = ast.get_type_properties();
+    let type_properties = ast.get_type_properties();
 
     let mut arms = Vec::new();
     let mut detailed_arms = Vec::new();
     let mut serializations = Vec::new();
 
     for variant in variants {
-        let meta = variant.get_variant_properties();
-        let messages = meta.message.as_ref();
-        let detailed_messages = meta.detailed_message.as_ref();
+        let variant_properties = variant.get_variant_properties();
+        let messages = variant_properties.message.as_ref();
+        let detailed_messages = variant_properties.detailed_message.as_ref();
         let ident = &variant.ident;
 
         use syn::Fields::*;
@@ -32,7 +32,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         // You can't disable getting the serializations.
         {
-            let serialization_variants = meta.get_serializations(type_meta.case_style);
+            let serialization_variants = variant_properties.get_serializations(type_properties.case_style);
 
             let count = serialization_variants.len();
             serializations.push(quote! {
@@ -44,7 +44,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
         }
 
         // But you can disable the messages.
-        if meta.is_disabled {
+        if variant_properties.is_disabled {
             continue;
         }
 

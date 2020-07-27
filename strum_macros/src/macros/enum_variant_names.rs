@@ -14,11 +14,11 @@ pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     // Derives for the generated enum
-    let type_meta = ast.get_type_properties();
+    let type_properties = ast.get_type_properties();
 
     let names = variants
         .iter()
-        .map(|v| v.ident.convert_case(type_meta.case_style))
+        .map(|v| v.ident.convert_case(type_properties.case_style))
         .collect::<Vec<_>>();
 
     quote! {

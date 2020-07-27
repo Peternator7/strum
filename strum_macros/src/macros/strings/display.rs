@@ -15,7 +15,6 @@ pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
 
     let mut arms = Vec::new();
     for variant in variants {
-        use syn::Fields::*;
         let ident = &variant.ident;
         let variant_properties = variant.get_variant_properties();
 
@@ -27,9 +26,9 @@ pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
         let output = variant_properties.get_preferred_name(type_properties.case_style);
 
         let params = match variant.fields {
-            Unit => quote! {},
-            Unnamed(..) => quote! { (..) },
-            Named(..) => quote! { {..} },
+            syn::Fields::Unit => quote! {},
+            syn::Fields::Unnamed(..) => quote! { (..) },
+            syn::Fields::Named(..) => quote! { {..} },
         };
 
         arms.push(quote! { #name::#ident #params => f.pad(#output) });
