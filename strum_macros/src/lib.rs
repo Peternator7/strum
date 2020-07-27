@@ -19,6 +19,7 @@ extern crate proc_macro2;
 
 mod helpers;
 mod macros;
+mod models;
 
 use proc_macro2::TokenStream;
 use std::env;

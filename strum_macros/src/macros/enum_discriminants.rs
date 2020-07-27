@@ -1,8 +1,7 @@
-use crate::helpers::{MetaHelpers, MetaIteratorHelpers, MetaListHelpers};
 use proc_macro2::{Span, TokenStream};
 use syn;
 
-use helpers::extract_meta;
+use crate::models::HasTypeProperties;
 
 /// Attributes to copy from the main enum's variants to the discriminant enum's variants.
 ///
@@ -20,15 +19,9 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     // Derives for the generated enum
-    let type_meta = extract_meta(&ast.attrs);
-    let discriminant_attrs = type_meta
-        .find_attribute("strum_discriminants")
-        .collect::<Vec<&syn::Meta>>();
+    let discriminant_attrs = ast.get_type_properties();
 
-    let derives = discriminant_attrs
-        .find_attribute("derive")
-        .map(|meta| meta.path())
-        .collect::<Vec<_>>();
+    let derives = discriminant_attrs.discriminant_derives;
 
     let derives = quote! {
         #[derive(Clone, Copy, Debug, PartialEq, Eq, #(#derives),*)]
@@ -40,28 +33,12 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         Span::call_site(),
     ));
 
-    let discriminants_name = discriminant_attrs
-        .iter()
-        .filter_map(|meta| meta.try_metalist())
-        .filter(|list| list.path.is_ident("name"))
-        // We want exactly zero or one items. Start with the assumption we have zero, i.e. None
-        // Then set our output to the first value we see. If fold is called again and we already
-        // have a value, panic.
-        .fold(None, |acc, val| match acc {
-            Some(_) => panic!("Expecting a single attribute 'name' in EnumDiscriminants."),
-            None => Some(val),
-        })
-        .map(|meta| meta.expand_inner())
-        .and_then(|metas| metas.into_iter().map(|meta| meta.path()).next())
-        .unwrap_or(&default_name);
+    let discriminants_name = discriminant_attrs.discriminant_name.unwrap_or(default_name);
 
     // Pass through all other attributes
     let pass_though_attributes = discriminant_attrs
-        .iter()
-        .filter(|meta| {
-            let path = meta.path();
-            !path.is_ident("derive") && !path.is_ident("name")
-        })
+        .discriminant_others
+        .into_iter()
         .map(|meta| quote! { #[ #meta ] })
         .collect::<Vec<_>>();
 

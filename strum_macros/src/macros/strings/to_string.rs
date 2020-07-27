@@ -1,8 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use crate::helpers::case_style::CaseStyle;
-use crate::helpers::{extract_meta, CaseStyleHelpers, MetaIteratorHelpers};
+use crate::models::{HasStrumVariantProperties, HasTypeProperties};
 
 pub fn to_string_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -12,34 +11,19 @@ pub fn to_string_inner(ast: &syn::DeriveInput) -> TokenStream {
         _ => panic!("ToString only works on Enums"),
     };
 
-    let type_meta = extract_meta(&ast.attrs);
-    let case_style = type_meta
-        .find_unique_property("strum", "serialize_all")
-        .map(|style| CaseStyle::from(style.as_ref()));
-
+    let type_meta = ast.get_type_properties();
     let mut arms = Vec::new();
     for variant in variants {
         use syn::Fields::*;
         let ident = &variant.ident;
-        let meta = extract_meta(&variant.attrs);
+        let meta = variant.get_variant_properties();
 
-        if meta.is_disabled() {
+        if meta.is_disabled {
             continue;
         }
 
         // Look at all the serialize attributes.
-        let output = if let Some(n) = meta.find_unique_property("strum", "to_string") {
-            n
-        } else {
-            let mut attrs = meta.find_properties("strum", "serialize");
-            // We always take the longest one. This is arbitary, but is *mostly* deterministic
-            attrs.sort_by_key(|s| s.len());
-            if let Some(n) = attrs.pop() {
-                n
-            } else {
-                ident.convert_case(case_style)
-            }
-        };
+        let output = meta.get_preferred_name(type_meta.case_style);
 
         let params = match variant.fields {
             Unit => quote! {},

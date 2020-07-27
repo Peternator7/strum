@@ -1,8 +1,8 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use crate::helpers::case_style::CaseStyle;
-use crate::helpers::{extract_meta, CaseStyleHelpers, MetaIteratorHelpers};
+use crate::helpers::CaseStyleHelpers;
+use crate::models::{HasStrumVariantProperties, HasTypeProperties};
 
 pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -12,10 +12,7 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
         _ => panic!("FromString only works on Enums"),
     };
 
-    let type_meta = extract_meta(&ast.attrs);
-    let case_style = type_meta
-        .find_unique_property("strum", "serialize_all")
-        .map(|style| CaseStyle::from(style.as_ref()));
+    let type_properties = ast.get_type_properties();
 
     let mut has_default = false;
     let mut default =
@@ -24,24 +21,13 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
     for variant in variants {
         use syn::Fields::*;
         let ident = &variant.ident;
-        let meta = extract_meta(&variant.attrs);
+        let variant_properties = variant.get_variant_properties();
 
-        // Look at all the serialize attributes.
-        // let mut attrs = find_properties(&meta, "strum", "serialize");
-        // attrs.extend(find_properties(&meta, "strum", "to_string"));
-
-        let mut attrs = meta.find_properties("strum", "serialize");
-        attrs.extend(meta.find_properties("strum", "to_string"));
-
-        // if is_disabled(&meta) {
-        if meta.is_disabled() {
+        if variant_properties.is_disabled {
             continue;
         }
 
-        if meta
-            .find_unique_property("strum", "default")
-            .map_or(false, |s| s == "true")
-        {
+        if variant_properties.default {
             if has_default {
                 panic!("Can't have multiple default variants");
             }
@@ -63,9 +49,7 @@ pub fn from_string_inner(ast: &syn::DeriveInput) -> TokenStream {
         }
 
         // If we don't have any custom variants, add the default serialized name.
-        if attrs.len() == 0 {
-            attrs.push(ident.convert_case(case_style));
-        }
+        let attrs = variant_properties.get_serializations(type_properties.case_style);
 
         let params = match variant.fields {
             Unit => quote! {},

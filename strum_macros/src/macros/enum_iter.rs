@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use helpers::{extract_meta, MetaIteratorHelpers};
+use crate::models::HasStrumVariantProperties;
 
 pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -31,7 +31,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
     let mut arms = Vec::new();
     let enabled = variants
         .iter()
-        .filter(|variant| !extract_meta(&variant.attrs).is_disabled());
+        .filter(|variant| !variant.get_variant_properties().is_disabled);
 
     for (idx, variant) in enabled.enumerate() {
         use syn::Fields::*;

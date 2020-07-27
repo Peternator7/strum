@@ -10,7 +10,7 @@ enum Color {
     Blue { hue: usize },
     #[strum(serialize = "y", serialize = "yellow")]
     Yellow,
-    #[strum(default = "true")]
+    #[strum(default)]
     Green(String),
 }
 
@@ -21,9 +21,18 @@ fn to_blue_string() {
 
 #[test]
 fn test_formatters() {
-    assert_eq!(String::from("  blue"), format!("{:>6}", Color::Blue { hue: 0 }));
-    assert_eq!(String::from("blue  "), format!("{:<6}", Color::Blue { hue: 0 }));
-    assert_eq!(String::from(" blue "), format!("{:^6}", Color::Blue { hue: 0 }));
+    assert_eq!(
+        String::from("  blue"),
+        format!("{:>6}", Color::Blue { hue: 0 })
+    );
+    assert_eq!(
+        String::from("blue  "),
+        format!("{:<6}", Color::Blue { hue: 0 })
+    );
+    assert_eq!(
+        String::from(" blue "),
+        format!("{:^6}", Color::Blue { hue: 0 })
+    );
     assert_eq!(String::from("bl"), format!("{:.2}", Color::Blue { hue: 0 }));
 }
 

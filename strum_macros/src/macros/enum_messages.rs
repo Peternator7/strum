@@ -1,8 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use crate::helpers::case_style::CaseStyle;
-use helpers::{extract_meta, CaseStyleHelpers, MetaIteratorHelpers};
+use crate::models::{HasStrumVariantProperties, HasTypeProperties};
 
 pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -12,19 +11,16 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
         _ => panic!("EnumMessage only works on Enums"),
     };
 
-    let type_meta = extract_meta(&ast.attrs);
-    let case_style = type_meta
-        .find_unique_property("strum", "serialize_all")
-        .map(|style| CaseStyle::from(style.as_ref()));
+    let type_meta = ast.get_type_properties();
 
     let mut arms = Vec::new();
     let mut detailed_arms = Vec::new();
     let mut serializations = Vec::new();
 
     for variant in variants {
-        let meta = extract_meta(&variant.attrs);
-        let messages = meta.find_unique_property("strum", "message");
-        let detailed_messages = meta.find_unique_property("strum", "detailed_message");
+        let meta = variant.get_variant_properties();
+        let messages = meta.message.as_ref();
+        let detailed_messages = meta.detailed_message.as_ref();
         let ident = &variant.ident;
 
         use syn::Fields::*;
@@ -36,10 +32,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         // You can't disable getting the serializations.
         {
-            let mut serialization_variants = meta.find_properties("strum", "serialize");
-            if serialization_variants.len() == 0 {
-                serialization_variants.push(ident.convert_case(case_style));
-            }
+            let mut serialization_variants = meta.get_serializations(type_meta.case_style);
 
             let count = serialization_variants.len();
             serializations.push(quote! {
@@ -51,7 +44,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
         }
 
         // But you can disable the messages.
-        if meta.is_disabled() {
+        if meta.is_disabled {
             continue;
         }
 

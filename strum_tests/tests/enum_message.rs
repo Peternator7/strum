@@ -15,7 +15,7 @@ enum Pets {
     #[strum(detailed_message = "My fish is named Charles McFish")]
     Fish,
     Bird,
-    #[strum(disabled = "true")]
+    #[strum(disabled)]
     Hamster,
 }
 
