@@ -10,6 +10,7 @@ categories = ["development-tools::procedural-macro-helpers", "parsing"]
 
 documentation = "https://docs.rs/strum"
 homepage = "https://github.com/Peternator7/strum"
+repository = "https://github.com/Peternator7/strum"
 readme = "../README.md"
 
 [lib]
