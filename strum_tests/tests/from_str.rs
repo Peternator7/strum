@@ -12,7 +12,7 @@ enum Color {
     },
     #[strum(serialize = "y", serialize = "yellow")]
     Yellow,
-    #[strum(default = "true")]
+    #[strum(default)]
     Green(String),
     #[strum(to_string = "purp")]
     Purple,

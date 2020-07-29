@@ -9,7 +9,7 @@ enum Color {
     Blue { hue: usize },
     #[strum(serialize = "y", serialize = "yellow")]
     Yellow,
-    #[strum(default = "true")]
+    #[strum(default)]
     Green(String),
 }
 
