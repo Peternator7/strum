@@ -1,18 +1,11 @@
-use syn::{Attribute, Meta};
+pub use self::case_style::CaseStyleHelpers;
+pub use self::meta_helpers::{LitHelpers, MetaHelpers, NestedMetaHelpers};
+pub use self::type_props::HasTypeProperties;
+pub use self::variant_props::HasStrumVariantProperties;
 
 pub mod case_style;
+pub mod type_props;
+pub mod variant_props;
+mod has_metadata;
 mod meta_helpers;
-mod meta_iterator_helpers;
-mod metalist_helpers;
 
-pub use self::case_style::CaseStyleHelpers;
-pub use self::meta_helpers::MetaHelpers;
-pub use self::meta_iterator_helpers::MetaIteratorHelpers;
-pub use self::metalist_helpers::MetaListHelpers;
-
-pub fn extract_meta(attrs: &[Attribute]) -> Vec<Meta> {
-    attrs
-        .iter()
-        .filter_map(|attribute| attribute.parse_meta().ok())
-        .collect()
-}

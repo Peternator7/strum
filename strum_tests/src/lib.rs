@@ -14,6 +14,6 @@ pub enum Color {
     Blue { hue: usize },
     #[strum(serialize = "y", serialize = "yellow")]
     Yellow,
-    #[strum(disabled = "true")]
+    #[strum(disabled)]
     Green(String),
 }

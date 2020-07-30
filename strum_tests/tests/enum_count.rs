@@ -17,7 +17,6 @@ enum Week {
 
 #[test]
 fn simple_test() {
-    assert_eq!(7, Week::count());
-    assert_eq!(Week::count(), WEEK_COUNT);
-    assert_eq!(Week::iter().count(), WEEK_COUNT);
+    assert_eq!(7, Week::COUNT);
+    assert_eq!(Week::iter().count(), Week::COUNT);
 }
