@@ -2,6 +2,12 @@
 
 ## 0.19.0
 
+* Fixed a regression using `nth_back`. [#85](https://github.com/Peternator7/strum/pull/85)
+* Added repository to Cargo.toml. [#90](https://github.com/Peternator7/strum/pull/90)
+* Correctly handle fill align in `Display` impls. [#95](https://github.com/Peternator7/strum/pull/95)
+* **Breaking Change**: Use Associated Constant for EnumCount instead of const fn and free constant. [#99](https://github.com/Peternator7/strum/pull/99)
+* **Breaking Change**: EnumVariantNames now properly adjusts to the `to_string` and `serialize` attributes.
+  This behavior is consistent with the other derives.
 * **Breaking Change**. `default` and `disabled` should now be written as markers instead of key value pairs.
   Here is the old way of adding these attributes to a variant.
   ```rust

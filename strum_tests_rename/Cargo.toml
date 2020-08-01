@@ -1,6 +1,6 @@
 [package]
 name = "strum_tests_rename"
-version = "0.15.0"
+version = "0.19.0"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 
 [dependencies]
