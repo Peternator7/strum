@@ -11,11 +11,13 @@ fn simple() {
     #[derive(EnumVariantNames)]
     enum Color {
         Red,
+        #[strum(serialize = "b")]
         Blue,
+        #[strum(to_string="y", serialize="yy")]
         Yellow,
     }
 
-    assert_eq!(Color::VARIANTS, &["Red", "Blue", "Yellow"]);
+    assert_eq!(Color::VARIANTS, &["Red", "b", "y"]);
 }
 
 #[test]
