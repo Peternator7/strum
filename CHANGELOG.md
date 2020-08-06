@@ -1,8 +1,14 @@
 # Changelog
 
-## 0.20.0
+## 0.19.2
+
+* Fixes [#104](https://github.com/Peternator7/strum/issues/104). PR [#105](https://github.com/Peternator7/strum/issues/105)
+
+## 0.19.1
 
 * **Breaking Change**: EnumVariantNames now properly adjusts to the `to_string` and `serialize` attributes.
+* There's a regression in this release that may make strum imcompatible with other plugins if those
+  plugins use non-rust syntax in their attributes. [#104](https://github.com/Peternator7/strum/issues/104)
 
 ## 0.19.0
 
