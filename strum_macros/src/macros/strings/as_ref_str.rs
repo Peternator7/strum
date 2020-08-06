@@ -63,6 +63,7 @@ pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> TokenStream {
 pub enum GenerateTraitVariant {
     AsStaticStr,
     From,
+    VariantName,
 }
 
 pub fn as_static_str_inner(
@@ -87,6 +88,17 @@ pub fn as_static_str_inner(
             quote! {
                 impl #impl_generics ::strum::AsStaticRef<str> for #name #ty_generics #where_clause {
                     fn as_static(&self) -> &'static str {
+                        match *self {
+                            #(#arms),*
+                        }
+                    }
+                }
+            }
+        }
+        GenerateTraitVariant::VariantName => {
+            quote! {
+                impl #impl_generics ::strum::VariantName for #name #ty_generics #where_clause {
+                    fn variant_name(&self) -> &'static str {
                         match *self {
                             #(#arms),*
                         }

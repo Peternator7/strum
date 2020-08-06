@@ -104,6 +104,25 @@ pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 }
 
 #[cfg_attr(
+    feature = "verbose-variantname-name",
+    proc_macro_derive(StrumVariantName, attributes(strum))
+)]
+#[cfg_attr(
+    not(feature = "verbose-variantname-name"),
+    proc_macro_derive(VariantName, attributes(strum))
+)]
+pub fn variant_name(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse(input).unwrap();
+
+    let toks = macros::as_ref_str::as_static_str_inner(
+        &ast,
+        macros::as_ref_str::GenerateTraitVariant::VariantName,
+    );
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
+#[cfg_attr(
     feature = "verbose-intostaticstr-name",
     proc_macro_derive(StrumIntoStaticStr, attributes(strum))
 )]
