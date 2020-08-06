@@ -212,6 +212,12 @@ where
     fn as_static(&self) -> &'static T;
 }
 
+/// Use `#[derive(VariantName)]` on an enum to get this method which returns
+/// a static str reference to the variant name (dropping any data attached)
+pub trait VariantName {
+    fn variant_name(&self) -> &'static str;
+}
+
 /// A trait for capturing the number of variants in Enum. This trait can be autoderived by
 /// `strum_macros`.
 pub trait EnumCount {

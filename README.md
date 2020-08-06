@@ -14,8 +14,8 @@ will focus on the current version of rust with an effort to avoid breaking compa
 
 # Including Strum in Your Project
 
-Import strum and strum_macros into your project by adding the following lines to your
-Cargo.toml. Strum_macros contains the macros needed to derive all the traits in Strum.
+Import `strum` and `strum_macros` into your project by adding the following lines to your
+Cargo.toml. `strum_macros` contains the macros needed to derive all the traits in Strum.
 
 ```toml
 [dependencies]
@@ -51,6 +51,7 @@ Strum has implemented the following macros:
 | [EnumMessage] | Add a verbose message to an enum variant. |
 | [EnumDiscriminants] | Generate a new type with only the discriminant names. |
 | [EnumCount] | Add a constant `usize` equal to the number of variants. |
+| [VariantName] | Adds a `fn variant_name(&self) -> &'static str` to an enum |
 
 # Contributing
 
@@ -61,7 +62,7 @@ to run the tests and add new integration tests to make sure the features work as
 
 # Debugging
 
-To see the generated code, set the STRUM_DEBUG environment variable before compiling your code.
+To see the generated code, set the `STRUM_DEBUG` environment variable before compiling your code.
 `STRUM_DEBUG=1` will dump all of the generated code for every type. `STRUM_DEBUG=YourType` will
 only dump the code generated on a type named `YourType`.
 
@@ -83,3 +84,4 @@ Strumming is also a very whimsical motion, much like writing Rust code.
 [EnumMessage]: https://github.com/Peternator7/strum/wiki/Derive-EnumMessage
 [EnumDiscriminants]: https://github.com/Peternator7/strum/wiki/Derive-EnumDiscriminants
 [EnumCount]: https://github.com/Peternator7/strum/wiki/Derive-EnumCount
+[VariantName]: https://github.com/Peternator7/strum/wiki/Derive-VariantName

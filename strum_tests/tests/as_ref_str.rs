@@ -3,7 +3,7 @@ extern crate strum;
 extern crate strum_macros;
 
 use std::str::FromStr;
-use strum::AsStaticRef;
+use strum::{AsStaticRef, VariantName};
 
 #[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
 enum Color {
@@ -86,7 +86,7 @@ fn test_into_static_str() {
     assert_eq!("C", <&'static str>::from(Moo::C::<String>(&17)));
 }
 
-#[derive(Debug, Eq, PartialEq, AsRefStr, AsStaticStr, IntoStaticStr)]
+#[derive(Debug, Eq, PartialEq, AsRefStr, AsStaticStr, IntoStaticStr, VariantName)]
 #[strum(serialize_all = "snake_case")]
 enum Brightness {
     DarkBlack,
@@ -106,6 +106,10 @@ fn brightness_serialize_all() {
     assert_eq!("dark_black", Brightness::DarkBlack.as_static());
     assert_eq!("dim", Brightness::Dim { glow: 0 }.as_static());
     assert_eq!("Bright", Brightness::BrightWhite.as_static());
+
+    assert_eq!("dark_black", Brightness::DarkBlack.variant_name());
+    assert_eq!("dim", Brightness::Dim { glow: 0 }.variant_name());
+    assert_eq!("Bright", Brightness::BrightWhite.variant_name());
 
     assert_eq!("dark_black", <&'static str>::from(Brightness::DarkBlack));
     assert_eq!("dim", <&'static str>::from(Brightness::Dim { glow: 0 }));
