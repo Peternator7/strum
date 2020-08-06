@@ -11,7 +11,7 @@ fn get_metadata_inner<'a>(
     it: impl IntoIterator<Item = &'a syn::Attribute>,
 ) -> Vec<syn::Meta> {
     it.into_iter()
-        .map(|attr| attr.parse_meta().unwrap())
+        .filter_map(|attr| attr.parse_meta().ok())
         .filter_map(|meta| match meta {
             syn::Meta::List(syn::MetaList { path, nested, .. }) => {
                 if path.is_ident(ident) {
