@@ -32,7 +32,8 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         // You can't disable getting the serializations.
         {
-            let serialization_variants = variant_properties.get_serializations(type_properties.case_style);
+            let serialization_variants =
+                variant_properties.get_serializations(type_properties.case_style);
 
             let count = serialization_variants.len();
             serializations.push(quote! {

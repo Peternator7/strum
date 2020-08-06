@@ -31,7 +31,10 @@ impl StrumVariantProperties {
             if let Some(n) = serialized.pop() {
                 n
             } else {
-                self.ident.as_ref().expect("identifier").convert_case(case_style)
+                self.ident
+                    .as_ref()
+                    .expect("identifier")
+                    .convert_case(case_style)
             }
         }
     }
@@ -43,7 +46,12 @@ impl StrumVariantProperties {
         }
 
         if attrs.is_empty() {
-            attrs.push(self.ident.as_ref().expect("identifier").convert_case(case_style));
+            attrs.push(
+                self.ident
+                    .as_ref()
+                    .expect("identifier")
+                    .convert_case(case_style),
+            );
         }
 
         attrs

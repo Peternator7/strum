@@ -4,8 +4,7 @@ pub use self::type_props::HasTypeProperties;
 pub use self::variant_props::HasStrumVariantProperties;
 
 pub mod case_style;
-pub mod type_props;
-pub mod variant_props;
 mod has_metadata;
 mod meta_helpers;
-
+pub mod type_props;
+pub mod variant_props;

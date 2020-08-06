@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn;
 
-use crate::helpers::{HasTypeProperties, HasStrumVariantProperties};
+use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 
 pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
@@ -18,7 +18,10 @@ pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> TokenStream {
 
     let names = variants
         .iter()
-        .map(|v| v.get_variant_properties().get_preferred_name(type_properties.case_style))
+        .map(|v| {
+            v.get_variant_properties()
+                .get_preferred_name(type_properties.case_style)
+        })
         .collect::<Vec<_>>();
 
     quote! {

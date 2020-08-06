@@ -13,7 +13,7 @@ fn simple() {
         Red,
         #[strum(serialize = "b")]
         Blue,
-        #[strum(to_string="y", serialize="yy")]
+        #[strum(to_string = "y", serialize = "yy")]
         Yellow,
     }
 
