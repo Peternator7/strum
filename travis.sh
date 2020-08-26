@@ -13,3 +13,8 @@ cargo build --verbose
 cargo test --verbose
 
 cd ..
+cd ./rust_2018_tests/
+cargo build --verbose
+cargo test --verbose
+
+cd ..
