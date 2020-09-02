@@ -1,5 +1,4 @@
 use proc_macro2::TokenStream;
-use syn;
 
 use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 
