@@ -1,4 +1,5 @@
 use proc_macro2::TokenStream;
+use quote::quote;
 
 pub(crate) fn enum_count_inner(ast: &syn::DeriveInput) -> TokenStream {
     let n = match ast.data {

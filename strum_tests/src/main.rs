@@ -1,6 +1,4 @@
-extern crate strum;
-#[macro_use]
-extern crate strum_macros;
+use strum::{EnumCount, EnumDiscriminants, EnumString, ToString};
 
 #[allow(dead_code)]
 #[derive(Debug, Eq, PartialEq, EnumString, ToString, EnumCount, EnumDiscriminants)]

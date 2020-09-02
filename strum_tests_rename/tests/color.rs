@@ -1,8 +1,7 @@
-extern crate strum;
-#[macro_use]
-extern crate strum_macros;
+use strum::*;
 
-#[derive(StrumEnumString,
+#[derive(
+    StrumEnumString,
     StrumAsRefStr,
     StrumAsStaticStr,
     StrumIntoStaticStr,
@@ -11,7 +10,8 @@ extern crate strum_macros;
     StrumEnumMessage,
     StrumEnumProperty,
     StrumEnumDiscriminants,
-    StrumEnumCount)]
+    StrumEnumCount,
+)]
 pub enum Color {
     Red,
     Blue,
@@ -23,5 +23,5 @@ pub enum Color {
 pub enum Color2 {
     Red,
     Blue,
-    Green
+    Green,
 }

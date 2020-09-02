@@ -1,10 +1,5 @@
-extern crate strum;
-#[macro_use]
-extern crate strum_macros;
-#[macro_use]
-extern crate enum_variant_type;
-
-use strum::IntoEnumIterator;
+use enum_variant_type::EnumVariantType;
+use strum::{Display, EnumDiscriminants, EnumIter, EnumString, IntoEnumIterator};
 
 #[allow(dead_code)]
 #[derive(Debug, Eq, PartialEq, EnumDiscriminants)]

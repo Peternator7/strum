@@ -23,18 +23,6 @@ strum = "0.19"
 strum_macros = "0.19"
 ```
 
-And add these lines to the root of your project, either lib.rs or main.rs.
-
-```rust
-// Strum contains all the trait definitions
-extern crate strum;
-#[macro_use]
-extern crate strum_macros;
-
-// Instead of #[macro_use], newer versions of rust should prefer
-use strum_macros::{Display, EnumIter}; // etc.
-```
-
 # Strum Macros
 
 Strum has implemented the following macros:

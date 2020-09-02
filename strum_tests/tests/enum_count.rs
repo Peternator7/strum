@@ -1,8 +1,4 @@
-extern crate strum;
-#[macro_use]
-extern crate strum_macros;
-
-use strum::{EnumCount, IntoEnumIterator};
+use strum::{EnumCount, EnumIter, IntoEnumIterator};
 
 #[derive(Debug, EnumCount, EnumIter)]
 enum Week {

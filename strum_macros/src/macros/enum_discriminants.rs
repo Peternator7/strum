@@ -1,4 +1,6 @@
 use proc_macro2::{Span, TokenStream};
+use quote::quote;
+use syn::parse_quote;
 
 use crate::helpers::HasTypeProperties;
 

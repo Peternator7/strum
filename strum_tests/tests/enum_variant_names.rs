@@ -1,9 +1,5 @@
-#[macro_use]
-extern crate strum_macros;
-#[macro_use]
-extern crate structopt;
-extern crate strum;
-use strum::VariantNames;
+use structopt::StructOpt;
+use strum::{EnumString, EnumVariantNames, VariantNames};
 
 #[test]
 fn simple() {
