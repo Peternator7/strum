@@ -72,7 +72,7 @@ impl HasTypeProperties for syn::DeriveInput {
 
                         output.discriminant_name = Some(name.clone());
                     } else {
-                        output.discriminant_others.push(meta);
+                        output.discriminant_others.push(meta.clone());
                     }
                 }
                 _ => {

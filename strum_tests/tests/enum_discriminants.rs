@@ -187,6 +187,7 @@ fn from_ref_test_complex() {
     assert_eq!(EnumIntoComplexVars::A, (&EnumIntoComplex::A(&rara)).into());
 }
 
+#[cfg(try_from)]
 #[allow(dead_code)]
 #[derive(Debug, Eq, PartialEq, EnumDiscriminants, EnumVariantType)]
 #[strum_discriminants(
@@ -201,6 +202,7 @@ enum VariantFilterAttr {
     BrightWhite(i32),
 }
 
+#[cfg(try_from)]
 #[test]
 fn filter_variant_attributes_pass_through() {
     use std::str::FromStr;

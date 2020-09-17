@@ -167,10 +167,14 @@ fn take_from_both_sides_test2() {
 #[test]
 fn take_nth_test() {
     let mut iter = Week::iter();
+    let saturday = iter.next_back();
+    let friday = iter.next_back();
+    let thursday = iter.next_back();
 
     assert_eq!(Some(Week::Tuesday), iter.nth(2));
-    assert_eq!(Some(Week::Saturday), iter.nth_back(0));
-    assert_eq!(Some(Week::Thursday), iter.nth_back(1));
+    assert_eq!(Some(Week::Saturday), saturday);
+    assert_eq!(Some(Week::Friday), friday);
+    assert_eq!(Some(Week::Thursday), thursday);
     assert_eq!(None, iter.nth(1));
     assert_eq!(None, iter.next());
     assert_eq!(None, iter.next_back());
