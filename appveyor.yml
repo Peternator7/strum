@@ -37,6 +37,12 @@ environment:
 
 ### MSVC Toolchains ###
 
+  # MSRC 64-bit MSVC
+  - channel: 1.31.1
+    target: x86_64-pc-windows-msvc
+  # MSRC 32-bit MSVC
+  - channel: 1.31.1
+    target: i686-pc-windows-msvc
   # Stable 64-bit MSVC
     - channel: stable
       target: x86_64-pc-windows-msvc
@@ -60,6 +66,12 @@ environment:
 
 ### GNU Toolchains ###
 
+  # MSRC 64-bit GNU
+  - channel: 1.31.1
+    target: x86_64-pc-windows-gnu
+  # MSRC 32-bit GNU
+  - channel: 1.31.1
+    target: i686-pc-windows-gnu
   # Stable 64-bit GNU
     - channel: stable
       target: x86_64-pc-windows-gnu
@@ -118,12 +130,4 @@ build: false
 #directly or perform other testing commands. Rust will automatically be placed in the PATH
 # environment variable.
 test_script:
-  - cd .\strum
   - cargo test --verbose %cargoflags%
-  - cd ..
-  - cd .\strum_macros
-  - cargo build --verbose %cargoflags%
-  - cd ..
-  - cd .\strum_tests
-  - cargo test --verbose %cargoflags%
-  - cd ..
