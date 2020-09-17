@@ -20,16 +20,6 @@
 //! strum_macros = "0.18.0"
 //! ```
 //!
-//! And add these lines to the root of your project, either lib.rs or main.rs.
-//!
-//! ```rust
-//! // Strum contains all the trait definitions
-//! extern crate strum;
-//! #[macro_use]
-//! extern crate strum_macros;
-//! # fn main() {}
-//! ```
-//!
 //! # Strum Macros
 //!
 //! Strum has implemented the following macros:
@@ -92,18 +82,16 @@ impl std::error::Error for ParseError {
 /// # Example
 ///
 /// ```rust
-/// # extern crate strum;
-/// # #[macro_use] extern crate strum_macros;
 /// # use std::fmt::Debug;
 /// // You need to bring the type into scope to use it!!!
-/// use strum::IntoEnumIterator;
+/// use strum::{EnumIter, IntoEnumIterator};
 ///
-/// #[derive(EnumIter,Debug)]
+/// #[derive(EnumIter, Debug)]
 /// enum Color {
-///         Red,
-///         Green { range:usize },
-///         Blue(usize),
-///         Yellow,
+///     Red,
+///     Green { range: usize },
+///     Blue(usize),
+///     Yellow,
 /// }
 ///
 /// // Iterate over the items in an enum and perform some function on them.
@@ -117,9 +105,7 @@ impl std::error::Error for ParseError {
 ///     }
 /// }
 ///
-/// fn main() {
-///     generic_iterator::<Color, _>(|color| println!("{:?}", color));
-/// }
+/// generic_iterator::<Color, _>(|color| println!("{:?}", color));
 /// ```
 pub trait IntoEnumIterator: Sized {
     type Iterator: Iterator<Item = Self>;
@@ -134,8 +120,6 @@ pub trait IntoEnumIterator: Sized {
 /// # Example
 ///
 /// ```rust
-/// # extern crate strum;
-/// # #[macro_use] extern crate strum_macros;
 /// # use std::fmt::Debug;
 /// // You need to bring the type into scope to use it!!!
 /// use strum::EnumMessage;
@@ -149,10 +133,8 @@ pub trait IntoEnumIterator: Sized {
 ///     Cat,
 /// }
 ///
-/// fn main() {
-///     let my_pet = Pet::Dog;
-///     assert_eq!("I have a dog", my_pet.get_message().unwrap());
-/// }
+/// let my_pet = Pet::Dog;
+/// assert_eq!("I have a dog", my_pet.get_message().unwrap());
 /// ```
 pub trait EnumMessage {
     fn get_message(&self) -> Option<&str>;
@@ -169,8 +151,6 @@ pub trait EnumMessage {
 /// # Example
 ///
 /// ```rust
-/// # extern crate strum;
-/// # #[macro_use] extern crate strum_macros;
 /// # use std::fmt::Debug;
 /// // You need to bring the type into scope to use it!!!
 /// use strum::EnumProperty;
@@ -186,10 +166,8 @@ pub trait EnumMessage {
 ///     Science,
 /// }
 ///
-/// fn main() {
-///     let history = Class::History;
-///     assert_eq!("Ms.Frizzle", history.get_str("Teacher").unwrap());
-/// }
+/// let history = Class::History;
+/// assert_eq!("Ms.Frizzle", history.get_str("Teacher").unwrap());
 /// ```
 pub trait EnumProperty {
     fn get_str(&self, prop: &str) -> Option<&'static str>;
@@ -224,11 +202,6 @@ pub trait VariantNames {
     /// Names of the variants of this enum
     const VARIANTS: &'static [&'static str];
 }
-
-#[cfg(feature = "derive")]
-#[allow(unused_imports)]
-#[macro_use]
-extern crate strum_macros;
 
 #[cfg(feature = "derive")]
 #[doc(hidden)]

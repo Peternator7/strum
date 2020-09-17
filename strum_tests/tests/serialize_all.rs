@@ -1,10 +1,7 @@
 /// test serialize_all cooperation with other macroses
-extern crate strum;
-#[macro_use]
-extern crate strum_macros;
-
 use std::str::FromStr;
 use std::string::ToString;
+use strum::{EnumString, IntoStaticStr, ToString};
 
 #[derive(Debug, Eq, PartialEq, EnumString, ToString, IntoStaticStr)]
 #[strum(serialize_all = "title_case")]

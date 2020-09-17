@@ -1,8 +1,5 @@
-extern crate strum;
-#[macro_use]
-extern crate strum_macros;
-
 use std::str::FromStr;
+use strum::EnumString;
 
 #[derive(Debug, Eq, PartialEq, EnumString)]
 enum Color {

@@ -1,5 +1,4 @@
-#[macro_use]
-extern crate strum_macros;
+use strum_macros::AsRefStr;
 
 #[derive(Debug, Eq, PartialEq, AsRefStr)]
 enum Color {

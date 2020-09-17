@@ -1,9 +1,6 @@
-extern crate strum;
-#[macro_use]
-extern crate strum_macros;
-
 use std::str::FromStr;
 use std::string::ToString;
+use strum::{EnumString, ToString};
 
 #[derive(Debug, Eq, PartialEq, EnumString, ToString)]
 enum Color {
