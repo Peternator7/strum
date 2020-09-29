@@ -19,6 +19,7 @@ strum_macros = { path = "../strum_macros", optional = true, version = "0.19.2" }
 
 [dev-dependencies]
 strum_macros = { path = "../strum_macros", version = "0.19.2" }
+structopt = { version = "0.3", default-features = false }
 
 [badges]
 travis-ci = { repository = "Peternator7/strum" }
