@@ -29,6 +29,16 @@ from enum into string and back again for unit style variants.
     behavior isn't desired, you should use `to_string`.
 3. The name of the variant will be used if there are no `serialize` or `to_string` attributes.
 
+`cargo run --example display`
+
+## AsRefStr
+
+Implements `AsRef<str>` on your enum using the same rules as
+`Display` for determining what string is returned. The difference is that `as_ref()` returns
+a `&str` instead of a `String` so you don't allocate any additional memory with each call.
+
+`cargo run --example asrefstr`
+
 ## EnumVariantNames
 
 Adds an `impl` block for the `enum` that adds a static `VARIANTS` array of `&'static str` that are the discriminant names.
