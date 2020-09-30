@@ -39,6 +39,14 @@ a `&str` instead of a `String` so you don't allocate any additional memory with 
 
 `cargo run --example asrefstr`
 
+## IntoStaticStr
+
+Implements `From<YourEnum>` and `From<&'a YourEnum>` for `&'static str`. This is
+useful for turning an enum variant into a static string.
+The Rust `std` provides a blanket impl of the reverse direction - i.e. `impl Into<&'static str> for YourEnum`.
+
+`cargo run --example intostaticstr`
+
 ## EnumVariantNames
 
 Adds an `impl` block for the `enum` that adds a static `VARIANTS` array of `&'static str` that are the discriminant names.
