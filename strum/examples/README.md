@@ -76,3 +76,7 @@ number of variants and properties, but scales linearly with the number of varian
 be the best choice in all situations.
 
 `cargo run --example enumproperty`
+
+## EnumMessage
+
+please read the source code of `examples/enummessage.rs` to get more details
