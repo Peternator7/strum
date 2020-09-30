@@ -80,3 +80,15 @@ be the best choice in all situations.
 ## EnumMessage
 
 please read the source code of `examples/enummessage.rs` to get more details
+
+`cargo run --example enummessage`
+
+## EnumDiscriminants
+
+Given an enum named `MyEnum`, generates another enum called `MyEnumDiscriminants` with the same variants, without any data fields.
+This is useful when you wish to determine the variant of an enum from a String, but the variants contain any
+non-`Default` fields. By default, the generated enum has the following derives:
+`Clone, Copy, Debug, PartialEq, Eq`. You can add additional derives using the
+`#[strum_discriminants(derive(AdditionalDerive))]` attribute.
+
+`cargo run --example enumdiscriminants`
