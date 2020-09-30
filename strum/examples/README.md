@@ -18,6 +18,17 @@ Section for more information on using this feature.
 
 `cargo run --example enumstring`
 
+## Display
+
+Deriving `Display` on an enum prints out the given enum. This enables you to perform round trip style conversions
+from enum into string and back again for unit style variants.
+`Display` choose which serialization to used based on the following criteria:
+
+1. If there is a `to_string` property, this value will be used. There can only be one per variant.
+2. Of the various `serialize` properties, the value with the longest length is chosen. If that
+    behavior isn't desired, you should use `to_string`.
+3. The name of the variant will be used if there are no `serialize` or `to_string` attributes.
+
 ## EnumVariantNames
 
 Adds an `impl` block for the `enum` that adds a static `VARIANTS` array of `&'static str` that are the discriminant names.
