@@ -64,3 +64,15 @@ You cannot derive `EnumIter` on any type with a lifetime bound (`<'a>`) because 
 create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
 
 `cargo run --example enumiter`
+
+## EnumProperty
+
+Enables the encoding of arbitary constants into enum variants. This method
+currently only supports adding additional string values. Other types of literals are still
+experimental in the rustc compiler. The generated code works by nesting match statements.
+The first match statement matches on the type of the enum, and the inner match statement
+matches on the name of the property requested. This design works well for enums with a small
+number of variants and properties, but scales linearly with the number of variants so may not
+be the best choice in all situations.
+
+`cargo run --example enumproperty`
