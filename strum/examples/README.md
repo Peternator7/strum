@@ -56,3 +56,11 @@ This example shows how to use this macro with structopt, you can run it using e.
 
 `cargo run --example enumvariantnames -- --color blue`
 
+## EnumIter
+
+Iterate over the variants of an Enum. Any additional data on your variants will be set to `Default::default()`.
+The macro implements `strum::IntoEnumIter` on your enum and creates a new type called `YourEnumIter` that is the iterator object.
+You cannot derive `EnumIter` on any type with a lifetime bound (`<'a>`) because the iterator would surely
+create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
+
+`cargo run --example enumiter`
