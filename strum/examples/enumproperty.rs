@@ -1,8 +1,8 @@
-use strum_macros::EnumProperty;
+use strum_macros;
 // bring the trait into scope
 use strum::EnumProperty;
 
-#[derive(EnumProperty, Debug)]
+#[derive(strum_macros::EnumProperty, Debug)]
 #[allow(dead_code)]
 enum Color {
     #[strum(props(Red = "255", Blue = "255", Green = "255"))]

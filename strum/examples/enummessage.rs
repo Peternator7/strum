@@ -4,9 +4,9 @@
 
 // You need to bring the trait into scope to use it!!!
 use strum::EnumMessage;
-use strum_macros::EnumMessage;
+use strum_macros;
 
-#[derive(EnumMessage, Debug)]
+#[derive(strum_macros::EnumMessage, Debug)]
 #[allow(dead_code)]
 enum Color {
     #[strum(message = "Red", detailed_message = "This is very red")]
