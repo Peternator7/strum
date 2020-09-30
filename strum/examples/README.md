@@ -92,3 +92,12 @@ non-`Default` fields. By default, the generated enum has the following derives:
 `#[strum_discriminants(derive(AdditionalDerive))]` attribute.
 
 `cargo run --example enumdiscriminants`
+
+## EnumCount
+
+For a given enum generates implementation of `strum::EnumCount`,
+which returns number of variants via `strum::EnumCount::count` method,
+also for given `enum MyEnum` generates `const MYENUM_COUNT: usize`
+which gives the same value as `strum::EnumCount` (which is usefull for array sizes, etc.).
+
+`cargo run --example enumcount`
