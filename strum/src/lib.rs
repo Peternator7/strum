@@ -20,33 +20,9 @@
 //! strum_macros = "0.18.0"
 //! ```
 //!
-//! # Strum Macros
-//!
-//! Strum has implemented the following macros:
-//!
-//! | Macro | Description |
-//! | --- | ----------- |
-//! | [EnumString] | Converts strings to enum variants based on their name |
-//! | [Display] | Converts enum variants to strings |
-//! | [AsRefStr] | Converts enum variants to `&'static str` |
-//! | [IntoStaticStr] | Implements `From<MyEnum> for &'static str` on an enum |
-//! | [EnumVariantNames] | Implements Strum::VariantNames which adds an associated constant `VARIANTS` which is an array of discriminant names |
-//! | [EnumIter] | Creates a new type that iterates of the variants of an enum. |
-//! | [EnumProperty] | Add custom properties to enum variants. |
-//! | [EnumMessage] | Add a verbose message to an enum variant. |
-//! | [EnumDiscriminants] | Generate a new type with only the discriminant names. |
-//! | [EnumCount] | Add a constant `usize` equal to the number of variants. |
-//!
-//! [EnumString]: https://github.com/Peternator7/strum/wiki/Derive-EnumString
-//! [Display]: https://github.com/Peternator7/strum/wiki/Derive-Display
-//! [AsRefStr]: https://github.com/Peternator7/strum/wiki/Derive-AsRefStr
-//! [IntoStaticStr]: https://github.com/Peternator7/strum/wiki/Derive-IntoStaticStr
-//! [EnumVariantNames]: https://github.com/Peternator7/strum/wiki/Derive-EnumVariantNames
-//! [EnumIter]: https://github.com/Peternator7/strum/wiki/Derive-EnumIter
-//! [EnumProperty]: https://github.com/Peternator7/strum/wiki/Derive-EnumProperty
-//! [EnumMessage]: https://github.com/Peternator7/strum/wiki/Derive-EnumMessage
-//! [EnumDiscriminants]: https://github.com/Peternator7/strum/wiki/Derive-EnumDiscriminants
-//! [EnumCount]: https://github.com/Peternator7/strum/wiki/Derive-EnumCount
+
+// only for documentation purposes
+pub mod additional_attributes;
 
 /// The ParseError enum is a collection of all the possible reasons
 /// an enum can fail to parse from a string.
@@ -204,5 +180,4 @@ pub trait VariantNames {
 }
 
 #[cfg(feature = "derive")]
-#[doc(hidden)]
 pub use strum_macros::*;
