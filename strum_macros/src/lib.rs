@@ -40,7 +40,9 @@ fn debug_print_generated(ast: &syn::DeriveInput, toks: &TokenStream) {
 ///
 /// Note that the implementation of `FromStr` by default only matches on the name of the
 /// variant. There is an option to match on different case conversions through the
-/// `#[strum(serialize_all = "snake_case")]` type attribute. See the [Additional Attributes](https://github.com/Peternator7/strum/wiki/Additional-Attributes)
+/// `#[strum(serialize_all = "snake_case")]` type attribute.
+///
+/// See the [Additional Attributes](../strum/additional_attributes/index.html)
 /// Section for more information on using this feature.
 ///
 /// # Example howto use EnumString

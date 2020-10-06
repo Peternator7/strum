@@ -21,6 +21,9 @@
 //! ```
 //!
 
+// only for documentation purposes
+pub mod additional_attributes;
+
 /// The ParseError enum is a collection of all the possible reasons
 /// an enum can fail to parse from a string.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
