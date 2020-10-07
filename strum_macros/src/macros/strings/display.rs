@@ -3,7 +3,7 @@ use quote::quote;
 
 use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 
-pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
+pub fn display_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.data {
@@ -11,12 +11,12 @@ pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
         _ => panic!("Display only works on Enums"),
     };
 
-    let type_properties = ast.get_type_properties();
+    let type_properties = ast.get_type_properties()?;
 
     let mut arms = Vec::new();
     for variant in variants {
         let ident = &variant.ident;
-        let variant_properties = variant.get_variant_properties();
+        let variant_properties = variant.get_variant_properties()?;
 
         if variant_properties.is_disabled {
             continue;
@@ -38,7 +38,7 @@ pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
         arms.push(quote! { _ => panic!("fmt() called on disabled variant.")})
     }
 
-    quote! {
+    Ok(quote! {
         impl #impl_generics ::std::fmt::Display for #name #ty_generics #where_clause {
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
                 match *self {
@@ -46,5 +46,5 @@ pub fn display_inner(ast: &syn::DeriveInput) -> TokenStream {
                 }
             }
         }
-    }
+    })
 }

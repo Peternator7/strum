@@ -10,7 +10,7 @@ use crate::helpers::HasTypeProperties;
 /// compilation problems when copied across.
 const ATTRIBUTES_TO_COPY: &[&str] = &["doc", "cfg", "allow", "deny"];
 
-pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
+pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let vis = &ast.vis;
 
@@ -20,7 +20,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     // Derives for the generated enum
-    let type_properties = ast.get_type_properties();
+    let type_properties = ast.get_type_properties()?;
 
     let derives = type_properties.discriminant_derives;
 
@@ -126,7 +126,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         }
     };
 
-    quote! {
+    Ok(quote! {
         /// Auto-generated discriminant enum variants
         #derives
         #(#pass_though_attributes)*
@@ -136,5 +136,5 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         #impl_from
         #impl_from_ref
-    }
+    })
 }

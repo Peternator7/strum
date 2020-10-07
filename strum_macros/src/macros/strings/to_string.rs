@@ -3,7 +3,7 @@ use quote::quote;
 
 use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 
-pub fn to_string_inner(ast: &syn::DeriveInput) -> TokenStream {
+pub fn to_string_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.data {
@@ -11,12 +11,12 @@ pub fn to_string_inner(ast: &syn::DeriveInput) -> TokenStream {
         _ => panic!("ToString only works on Enums"),
     };
 
-    let type_properties = ast.get_type_properties();
+    let type_properties = ast.get_type_properties()?;
     let mut arms = Vec::new();
     for variant in variants {
         use syn::Fields::*;
         let ident = &variant.ident;
-        let variant_properties = variant.get_variant_properties();
+        let variant_properties = variant.get_variant_properties()?;
 
         if variant_properties.is_disabled {
             continue;
@@ -38,7 +38,7 @@ pub fn to_string_inner(ast: &syn::DeriveInput) -> TokenStream {
         arms.push(quote! { _ => panic!("to_string() called on disabled variant.")})
     }
 
-    quote! {
+    Ok(quote! {
         impl #impl_generics ::std::string::ToString for #name #ty_generics #where_clause {
             fn to_string(&self) -> ::std::string::String {
                 match *self {
@@ -46,5 +46,5 @@ pub fn to_string_inner(ast: &syn::DeriveInput) -> TokenStream {
                 }
             }
         }
-    }
+    })
 }

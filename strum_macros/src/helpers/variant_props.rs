@@ -6,7 +6,7 @@ use crate::helpers::has_metadata::HasMetadata;
 use crate::helpers::{LitHelpers, MetaHelpers, NestedMetaHelpers};
 
 pub trait HasStrumVariantProperties {
-    fn get_variant_properties(&self) -> StrumVariantProperties;
+    fn get_variant_properties(&self) -> syn::Result<StrumVariantProperties>;
 }
 
 #[derive(Clone, Eq, PartialEq, Debug, Default)]
@@ -59,11 +59,11 @@ impl StrumVariantProperties {
 }
 
 impl HasStrumVariantProperties for syn::Variant {
-    fn get_variant_properties(&self) -> StrumVariantProperties {
+    fn get_variant_properties(&self) -> syn::Result<StrumVariantProperties> {
         let mut output = StrumVariantProperties::default();
         output.ident = Some(self.ident.clone());
 
-        for meta in self.get_metadata("strum") {
+        for meta in self.get_metadata("strum")? {
             match meta {
                 syn::Meta::NameValue(syn::MetaNameValue { path, lit, .. }) => {
                     if path.is_ident("message") {
@@ -126,6 +126,6 @@ impl HasStrumVariantProperties for syn::Variant {
             }
         }
 
-        output
+        Ok(output)
     }
 }

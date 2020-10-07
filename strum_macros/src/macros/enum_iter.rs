@@ -3,7 +3,7 @@ use quote::quote;
 
 use crate::helpers::HasStrumVariantProperties;
 
-pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
+pub fn enum_iter_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
@@ -29,12 +29,14 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     let mut arms = Vec::new();
-    let enabled = variants
-        .iter()
-        .filter(|variant| !variant.get_variant_properties().is_disabled);
-
-    for (idx, variant) in enabled.enumerate() {
+    let mut idx = 0usize;
+    for variant in variants {
         use syn::Fields::*;
+
+        if variant.get_variant_properties()?.is_disabled {
+            continue;
+        }
+
         let ident = &variant.ident;
         let params = match variant.fields {
             Unit => quote! {},
@@ -53,12 +55,14 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
         };
 
         arms.push(quote! {#idx => ::std::option::Option::Some(#name::#ident #params)});
+        idx += 1;
     }
 
     let variant_count = arms.len();
     arms.push(quote! { _ => ::std::option::Option::None });
     let iter_name = syn::parse_str::<syn::Ident>(&format!("{}Iter", name)).unwrap();
-    quote! {
+
+    Ok(quote! {
         #[allow(missing_docs)]
         #vis struct #iter_name #ty_generics {
             idx: usize,
@@ -144,5 +148,5 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> TokenStream {
                 }
             }
         }
-    }
+    })
 }

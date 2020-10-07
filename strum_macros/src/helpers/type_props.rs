@@ -6,7 +6,7 @@ use crate::helpers::has_metadata::HasMetadata;
 use crate::helpers::{MetaHelpers, NestedMetaHelpers};
 
 pub trait HasTypeProperties {
-    fn get_type_properties(&self) -> StrumTypeProperties;
+    fn get_type_properties(&self) -> syn::Result<StrumTypeProperties>;
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
@@ -18,11 +18,11 @@ pub struct StrumTypeProperties {
 }
 
 impl HasTypeProperties for syn::DeriveInput {
-    fn get_type_properties(&self) -> StrumTypeProperties {
+    fn get_type_properties(&self) -> syn::Result<StrumTypeProperties> {
         let mut output = StrumTypeProperties::default();
 
-        let strum_meta = self.get_metadata("strum");
-        let discriminants_meta = self.get_metadata("strum_discriminants");
+        let strum_meta = self.get_metadata("strum")?;
+        let discriminants_meta = self.get_metadata("strum_discriminants")?;
 
         for meta in strum_meta {
             let meta = match meta {
@@ -81,6 +81,6 @@ impl HasTypeProperties for syn::DeriveInput {
             }
         }
 
-        output
+        Ok(output)
     }
 }

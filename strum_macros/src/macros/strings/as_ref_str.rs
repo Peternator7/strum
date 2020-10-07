@@ -4,7 +4,7 @@ use syn::parse_quote;
 
 use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 
-fn get_arms(ast: &syn::DeriveInput) -> Vec<TokenStream> {
+fn get_arms(ast: &syn::DeriveInput) -> syn::Result<Vec<TokenStream>> {
     let name = &ast.ident;
     let mut arms = Vec::new();
     let variants = match ast.data {
@@ -12,12 +12,12 @@ fn get_arms(ast: &syn::DeriveInput) -> Vec<TokenStream> {
         _ => panic!("This macro only works on Enums"),
     };
 
-    let type_properties = ast.get_type_properties();
+    let type_properties = ast.get_type_properties()?;
 
     for variant in variants {
         use syn::Fields::*;
         let ident = &variant.ident;
-        let variant_properties = variant.get_variant_properties();
+        let variant_properties = variant.get_variant_properties()?;
 
         if variant_properties.is_disabled {
             continue;
@@ -43,14 +43,14 @@ fn get_arms(ast: &syn::DeriveInput) -> Vec<TokenStream> {
         })
     }
 
-    arms
+    Ok(arms)
 }
 
-pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> TokenStream {
+pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
-    let arms = get_arms(ast);
-    quote! {
+    let arms = get_arms(ast)?;
+    Ok(quote! {
         impl #impl_generics ::std::convert::AsRef<str> for #name #ty_generics #where_clause {
             fn as_ref(&self) -> &str {
                 match *self {
@@ -58,7 +58,7 @@ pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> TokenStream {
                 }
             }
         }
-    }
+    })
 }
 
 pub enum GenerateTraitVariant {
@@ -69,10 +69,10 @@ pub enum GenerateTraitVariant {
 pub fn as_static_str_inner(
     ast: &syn::DeriveInput,
     trait_variant: GenerateTraitVariant,
-) -> TokenStream {
+) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
-    let arms = get_arms(ast);
+    let arms = get_arms(ast)?;
 
     let mut generics = ast.generics.clone();
     generics
@@ -83,7 +83,8 @@ pub fn as_static_str_inner(
     let (impl_generics2, _, _) = generics.split_for_impl();
     let arms2 = arms.clone();
     let arms3 = arms.clone();
-    match trait_variant {
+
+    Ok(match trait_variant {
         GenerateTraitVariant::AsStaticStr => {
             quote! {
                 impl #impl_generics ::strum::AsStaticRef<str> for #name #ty_generics #where_clause {
@@ -113,5 +114,5 @@ pub fn as_static_str_inner(
             }
             }
         }
-    }
+    })
 }

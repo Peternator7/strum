@@ -3,7 +3,7 @@ use quote::quote;
 
 use crate::helpers::HasStrumVariantProperties;
 
-pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {
+pub fn enum_properties_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.data {
@@ -14,7 +14,7 @@ pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {
     let mut arms = Vec::new();
     for variant in variants {
         let ident = &variant.ident;
-        let variant_properties = variant.get_variant_properties();
+        let variant_properties = variant.get_variant_properties()?;
         let mut string_arms = Vec::new();
         let mut bool_arms = Vec::new();
         let mut num_arms = Vec::new();
@@ -51,7 +51,7 @@ pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {
         arms.push(quote! { _ => ::std::option::Option::None });
     }
 
-    quote! {
+    Ok(quote! {
         impl #impl_generics ::strum::EnumProperty for #name #ty_generics #where_clause {
             fn get_str(&self, prop: &str) -> ::std::option::Option<&'static str> {
                 match self {
@@ -59,5 +59,5 @@ pub fn enum_properties_inner(ast: &syn::DeriveInput) -> TokenStream {
                 }
             }
         }
-    }
+    })
 }
