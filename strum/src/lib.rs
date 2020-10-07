@@ -16,10 +16,15 @@
 //!
 //! ```toml
 //! [dependencies]
-//! strum = "0.18.0"
-//! strum_macros = "0.18.0"
+//! strum = "0.19"
+//! strum_macros = "0.19"
+//!
+//! # You can also access strum_macros exports directly through strum using the "derive" feature
+//! strum = { version = "0.19", features = ["derive"] }
 //! ```
 //!
+
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 // only for documentation purposes
 pub mod additional_attributes;
@@ -181,3 +186,32 @@ pub trait VariantNames {
 
 #[cfg(feature = "derive")]
 pub use strum_macros::*;
+
+macro_rules! DocumentMacroRexports {
+    ($($export:ident),+) => {
+        $(
+            #[cfg(all(docsrs, feature = "derive"))]
+            #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+            pub use strum_macros::$export;
+        )+
+    };
+}
+
+// We actually only re-export these items individually if we're building
+// for docsrs. You can do a weird thing where you rename the macro
+// and then reference it through strum. The renaming feature should be deprecated now that
+// 2018 edition is almost 2 years old, but we'll need to give people some time to do that.
+DocumentMacroRexports!{
+    AsRefStr,
+    AsStaticStr,
+    Display,
+    EnumCount,
+    EnumDiscriminants,
+    EnumIter,
+    EnumMessage,
+    EnumProperty,
+    EnumString,
+    EnumVariantNames,
+    IntoStaticStr,
+    ToString
+}

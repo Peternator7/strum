@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.19.4 / 0.19.5
+
+* Updated docs
+
+## 0.19.3
+
+* Properly error on malformed strum attributes. [#119](https://github.com/Peternator7/strum/pull/119)
+  * These types of inputs have historically been ignore silently. This may break code that is already
+    incorrect.
+* Move docs back to rust docs. [#121](https://github.com/Peternator7/strum/pull/121)
+* Updated the docs a second time to improve discoverability.
+
 ## 0.19.2
 
 * Fixes [#104](https://github.com/Peternator7/strum/issues/104). PR [#105](https://github.com/Peternator7/strum/issues/105)

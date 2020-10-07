@@ -1,6 +1,6 @@
 [package]
 name = "strum"
-version = "0.19.2"
+version = "0.19.5"
 edition = "2018"
 authors = ["Peter Glotfelty <peter.glotfelty@microsoft.com>"]
 license = "MIT"
@@ -15,13 +15,17 @@ repository = "https://github.com/Peternator7/strum"
 readme = "../README.md"
 
 [dependencies]
-strum_macros = { path = "../strum_macros", optional = true, version = "0.19.2" }
+strum_macros = { path = "../strum_macros", optional = true, version = "0.19" }
 
 [dev-dependencies]
-strum_macros = { path = "../strum_macros", version = "0.19.2" }
+strum_macros = { path = "../strum_macros", version = "0.19" }
 
 [badges]
 travis-ci = { repository = "Peternator7/strum" }
 
 [features]
 derive = ["strum_macros"]
+
+[package.metadata.docs.rs]
+features = ["derive"]
+rustdoc-args = ["--cfg", "docsrs"]
