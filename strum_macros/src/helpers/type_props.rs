@@ -53,7 +53,11 @@ impl HasTypeProperties for syn::DeriveInput {
                         let paths = ls
                             .nested
                             .iter()
-                            .map(|meta| meta.expect_meta("unexpected literal").path().clone());
+                            .map(|meta| {
+                                let meta = meta.expect_meta("unexpected literal")?;
+                                Ok(meta.path().clone())
+                            })
+                            .collect::<syn::Result<Vec<_>>>()?;
 
                         output.discriminant_derives.extend(paths);
                     } else if ls.path.is_ident("name") {
@@ -63,8 +67,8 @@ impl HasTypeProperties for syn::DeriveInput {
 
                         let value = ls.nested.first().expect("unexpected error");
                         let name = value
-                            .expect_meta("unexpected literal")
-                            .expect_path("name must be an identifier");
+                            .expect_meta("unexpected literal")?
+                            .expect_path("name must be an identifier")?;
 
                         if output.discriminant_name.is_some() {
                             panic!("multiple occurrences of 'name'");

@@ -71,21 +71,21 @@ impl HasStrumVariantProperties for syn::Variant {
                             panic!("message is set twice on the same variant");
                         }
 
-                        output.message = Some(lit.expect_string("expected string"));
+                        output.message = Some(lit.expect_string("expected string")?);
                     } else if path.is_ident("detailed_message") {
                         if output.detailed_message.is_some() {
                             panic!("detailed message set twice on the same variant");
                         }
 
-                        output.detailed_message = Some(lit.expect_string("expected string"));
+                        output.detailed_message = Some(lit.expect_string("expected string")?);
                     } else if path.is_ident("serialize") {
-                        output.serialize.push(lit.expect_string("expected string"));
+                        output.serialize.push(lit.expect_string("expected string")?);
                     } else if path.is_ident("to_string") {
                         if output.to_string.is_some() {
                             panic!("to_string is set twice on the same variant");
                         }
 
-                        output.to_string = Some(lit.expect_string("expected string"));
+                        output.to_string = Some(lit.expect_string("expected string")?);
                     } else if path.is_ident("disabled") {
                         panic!("this method is deprecated. Prefer #[strum(disabled)] instead of #[strum(disabled=\"true\")]");
                     } else if path.is_ident("default") {
@@ -107,8 +107,8 @@ impl HasStrumVariantProperties for syn::Variant {
                     if path.is_ident("props") {
                         for p in nested {
                             let p = p
-                                .expect_meta("unexpected literal found in props")
-                                .expect_namevalue("props must be key-value pairs");
+                                .expect_meta("unexpected literal found in props")?
+                                .expect_namevalue("props must be key-value pairs")?;
 
                             let key = p
                                 .path
@@ -116,7 +116,7 @@ impl HasStrumVariantProperties for syn::Variant {
                                 .expect("key must be an identifier")
                                 .to_string();
 
-                            let value = p.lit.expect_string("expected string");
+                            let value = p.lit.expect_string("expected string")?;
                             output.string_props.insert(key, value);
                         }
                     } else {
