@@ -133,20 +133,18 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Yellow,
 /// }
 ///
-/// fn main() {
-///     // uses the serialize string for Display
-///     let red = Color::Red;
-///     assert_eq!("redred", red.as_ref());
-///     // by default the variants Name
-///     let yellow = Color::Yellow;
-///     assert_eq!("Yellow", yellow.as_ref());
-///     // or for string formatting
-///     println!(
-///         "blue: {} green: {}",
-///         Color::Blue(10).as_ref(),
-///         Color::Green { range: 42 }.as_ref()
-///     );
-/// }
+/// // uses the serialize string for Display
+/// let red = Color::Red;
+/// assert_eq!("redred", red.as_ref());
+/// // by default the variants Name
+/// let yellow = Color::Yellow;
+/// assert_eq!("Yellow", yellow.as_ref());
+/// // or for string formatting
+/// println!(
+///     "blue: {} green: {}",
+///     Color::Blue(10).as_ref(),
+///     Color::Green { range: 42 }.as_ref()
+/// );
 /// ```
 #[cfg_attr(
     not(feature = "verbose-asrefstr-name"),
