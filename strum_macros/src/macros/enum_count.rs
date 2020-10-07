@@ -1,9 +1,10 @@
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::{Data, DeriveInput};
 
-pub(crate) fn enum_count_inner(ast: &syn::DeriveInput) -> TokenStream {
+pub(crate) fn enum_count_inner(ast: &DeriveInput) -> TokenStream {
     let n = match ast.data {
-        syn::Data::Enum(ref v) => v.variants.len(),
+        Data::Enum(ref v) => v.variants.len(),
         _ => panic!("EnumCount can only be used with enums"),
     };
 

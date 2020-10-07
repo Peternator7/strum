@@ -1,5 +1,6 @@
 use std::convert::From;
 use std::default::Default;
+use syn::{DeriveInput, Lit, Meta, Path};
 
 use crate::helpers::case_style::CaseStyle;
 use crate::helpers::has_metadata::HasMetadata;
@@ -12,12 +13,12 @@ pub trait HasTypeProperties {
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct StrumTypeProperties {
     pub case_style: Option<CaseStyle>,
-    pub discriminant_derives: Vec<syn::Path>,
-    pub discriminant_name: Option<syn::Path>,
-    pub discriminant_others: Vec<syn::Meta>,
+    pub discriminant_derives: Vec<Path>,
+    pub discriminant_name: Option<Path>,
+    pub discriminant_others: Vec<Meta>,
 }
 
-impl HasTypeProperties for syn::DeriveInput {
+impl HasTypeProperties for DeriveInput {
     fn get_type_properties(&self) -> syn::Result<StrumTypeProperties> {
         let mut output = StrumTypeProperties::default();
 
@@ -26,13 +27,13 @@ impl HasTypeProperties for syn::DeriveInput {
 
         for meta in strum_meta {
             let meta = match meta {
-                syn::Meta::NameValue(mv) => mv,
+                Meta::NameValue(mv) => mv,
                 _ => panic!("strum on types only supports key-values"),
             };
 
             if meta.path.is_ident("serialize_all") {
                 let style = match meta.lit {
-                    syn::Lit::Str(s) => s.value(),
+                    Lit::Str(s) => s.value(),
                     _ => panic!("expected string value for 'serialize_all'"),
                 };
 
@@ -48,7 +49,7 @@ impl HasTypeProperties for syn::DeriveInput {
 
         for meta in discriminants_meta {
             match meta {
-                syn::Meta::List(ref ls) => {
+                Meta::List(ref ls) => {
                     if ls.path.is_ident("derive") {
                         let paths = ls
                             .nested

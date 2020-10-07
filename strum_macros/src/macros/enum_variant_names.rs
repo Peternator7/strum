@@ -1,15 +1,16 @@
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::{Data, DeriveInput};
 
 use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 
-pub fn enum_variant_names_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
+pub fn enum_variant_names_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
 
     let variants = match ast.data {
-        syn::Data::Enum(ref v) => &v.variants,
+        Data::Enum(ref v) => &v.variants,
         _ => panic!("EnumVariantNames only works on Enums"),
     };
 

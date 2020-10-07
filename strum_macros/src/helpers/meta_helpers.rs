@@ -1,12 +1,12 @@
-use syn::{Meta, MetaList, NestedMeta};
+use syn::{Lit, Meta, MetaList, MetaNameValue, NestedMeta, Path};
 
 pub trait MetaHelpers {
     fn expect_metalist(&self, msg: &str) -> syn::Result<&MetaList>;
-    fn expect_path(&self, msg: &str) -> syn::Result<&syn::Path>;
-    fn expect_namevalue(&self, msg: &str) -> syn::Result<&syn::MetaNameValue>;
+    fn expect_path(&self, msg: &str) -> syn::Result<&Path>;
+    fn expect_namevalue(&self, msg: &str) -> syn::Result<&MetaNameValue>;
 }
 
-impl MetaHelpers for syn::Meta {
+impl MetaHelpers for Meta {
     fn expect_metalist(&self, msg: &str) -> syn::Result<&MetaList> {
         match self {
             Meta::List(list) => Ok(list),
@@ -14,14 +14,14 @@ impl MetaHelpers for syn::Meta {
         }
     }
 
-    fn expect_path(&self, msg: &str) -> syn::Result<&syn::Path> {
+    fn expect_path(&self, msg: &str) -> syn::Result<&Path> {
         match self {
             Meta::Path(path) => Ok(path),
             _ => Err(syn::Error::new_spanned(self, msg)),
         }
     }
 
-    fn expect_namevalue(&self, msg: &str) -> syn::Result<&syn::MetaNameValue> {
+    fn expect_namevalue(&self, msg: &str) -> syn::Result<&MetaNameValue> {
         match self {
             Meta::NameValue(pair) => Ok(pair),
             _ => Err(syn::Error::new_spanned(self, msg)),
@@ -30,20 +30,20 @@ impl MetaHelpers for syn::Meta {
 }
 
 pub trait NestedMetaHelpers {
-    fn expect_meta(&self, msg: &str) -> syn::Result<&syn::Meta>;
-    fn expect_lit(&self, msg: &str) -> syn::Result<&syn::Lit>;
+    fn expect_meta(&self, msg: &str) -> syn::Result<&Meta>;
+    fn expect_lit(&self, msg: &str) -> syn::Result<&Lit>;
 }
 
 impl NestedMetaHelpers for NestedMeta {
     fn expect_meta(&self, msg: &str) -> syn::Result<&Meta> {
         match self {
-            syn::NestedMeta::Meta(m) => Ok(m),
+            NestedMeta::Meta(m) => Ok(m),
             _ => Err(syn::Error::new_spanned(self, msg)),
         }
     }
-    fn expect_lit(&self, msg: &str) -> syn::Result<&syn::Lit> {
+    fn expect_lit(&self, msg: &str) -> syn::Result<&Lit> {
         match self {
-            syn::NestedMeta::Lit(l) => Ok(l),
+            NestedMeta::Lit(l) => Ok(l),
             _ => Err(syn::Error::new_spanned(self, msg)),
         }
     }
@@ -53,10 +53,10 @@ pub trait LitHelpers {
     fn expect_string(&self, msg: &str) -> syn::Result<String>;
 }
 
-impl LitHelpers for syn::Lit {
+impl LitHelpers for Lit {
     fn expect_string(&self, msg: &str) -> syn::Result<String> {
         match self {
-            syn::Lit::Str(s) => Ok(s.value()),
+            Lit::Str(s) => Ok(s.value()),
             _ => Err(syn::Error::new_spanned(self, msg)),
         }
     }

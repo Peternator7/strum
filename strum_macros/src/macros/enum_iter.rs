@@ -1,9 +1,10 @@
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::{Data, DeriveInput, Ident};
 
 use crate::helpers::HasStrumVariantProperties;
 
-pub fn enum_iter_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
+pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
@@ -24,7 +25,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
     };
 
     let variants = match ast.data {
-        syn::Data::Enum(ref v) => &v.variants,
+        Data::Enum(ref v) => &v.variants,
         _ => panic!("EnumIter only works on Enums"),
     };
 
@@ -60,7 +61,7 @@ pub fn enum_iter_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
 
     let variant_count = arms.len();
     arms.push(quote! { _ => ::std::option::Option::None });
-    let iter_name = syn::parse_str::<syn::Ident>(&format!("{}Iter", name)).unwrap();
+    let iter_name = syn::parse_str::<Ident>(&format!("{}Iter", name)).unwrap();
 
     Ok(quote! {
         #[allow(missing_docs)]

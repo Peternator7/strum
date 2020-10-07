@@ -1,14 +1,14 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::parse_quote;
+use syn::{parse_quote, Data, DeriveInput};
 
 use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 
-fn get_arms(ast: &syn::DeriveInput) -> syn::Result<Vec<TokenStream>> {
+fn get_arms(ast: &DeriveInput) -> syn::Result<Vec<TokenStream>> {
     let name = &ast.ident;
     let mut arms = Vec::new();
     let variants = match ast.data {
-        syn::Data::Enum(ref v) => &v.variants,
+        Data::Enum(ref v) => &v.variants,
         _ => panic!("This macro only works on Enums"),
     };
 
@@ -46,7 +46,7 @@ fn get_arms(ast: &syn::DeriveInput) -> syn::Result<Vec<TokenStream>> {
     Ok(arms)
 }
 
-pub fn as_ref_str_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
+pub fn as_ref_str_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let arms = get_arms(ast)?;
@@ -67,7 +67,7 @@ pub enum GenerateTraitVariant {
 }
 
 pub fn as_static_str_inner(
-    ast: &syn::DeriveInput,
+    ast: &DeriveInput,
     trait_variant: GenerateTraitVariant,
 ) -> syn::Result<TokenStream> {
     let name = &ast.ident;

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::default::Default;
+use syn::{Ident, Meta, Variant};
 
 use crate::helpers::case_style::{CaseStyle, CaseStyleHelpers};
 use crate::helpers::has_metadata::HasMetadata;
@@ -18,7 +19,7 @@ pub struct StrumVariantProperties {
     pub string_props: HashMap<String, String>,
     serialize: Vec<String>,
     to_string: Option<String>,
-    ident: Option<syn::Ident>,
+    ident: Option<Ident>,
 }
 
 impl StrumVariantProperties {
@@ -58,14 +59,14 @@ impl StrumVariantProperties {
     }
 }
 
-impl HasStrumVariantProperties for syn::Variant {
+impl HasStrumVariantProperties for Variant {
     fn get_variant_properties(&self) -> syn::Result<StrumVariantProperties> {
         let mut output = StrumVariantProperties::default();
         output.ident = Some(self.ident.clone());
 
         for meta in self.get_metadata("strum")? {
             match meta {
-                syn::Meta::NameValue(syn::MetaNameValue { path, lit, .. }) => {
+                Meta::NameValue(syn::MetaNameValue { path, lit, .. }) => {
                     if path.is_ident("message") {
                         if output.message.is_some() {
                             panic!("message is set twice on the same variant");
@@ -94,7 +95,7 @@ impl HasStrumVariantProperties for syn::Variant {
                         panic!("unrecognized value in strum(..) attribute");
                     }
                 }
-                syn::Meta::Path(p) => {
+                Meta::Path(p) => {
                     if p.is_ident("disabled") {
                         output.is_disabled = true;
                     } else if p.is_ident("default") {
@@ -103,7 +104,7 @@ impl HasStrumVariantProperties for syn::Variant {
                         panic!("unrecognized value in strum(..) attribute");
                     }
                 }
-                syn::Meta::List(syn::MetaList { path, nested, .. }) => {
+                Meta::List(syn::MetaList { path, nested, .. }) => {
                     if path.is_ident("props") {
                         for p in nested {
                             let p = p

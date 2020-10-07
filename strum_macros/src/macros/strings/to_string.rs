@@ -1,13 +1,14 @@
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::{Data, DeriveInput};
 
 use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 
-pub fn to_string_inner(ast: &syn::DeriveInput) -> syn::Result<TokenStream> {
+pub fn to_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.data {
-        syn::Data::Enum(ref v) => &v.variants,
+        Data::Enum(ref v) => &v.variants,
         _ => panic!("ToString only works on Enums"),
     };
 
