@@ -85,19 +85,16 @@ pub fn as_static_str_inner(
     let arms3 = arms.clone();
 
     Ok(match trait_variant {
-        GenerateTraitVariant::AsStaticStr => {
-            quote! {
-                impl #impl_generics ::strum::AsStaticRef<str> for #name #ty_generics #where_clause {
-                    fn as_static(&self) -> &'static str {
-                        match *self {
-                            #(#arms),*
-                        }
+        GenerateTraitVariant::AsStaticStr => quote! {
+            impl #impl_generics ::strum::AsStaticRef<str> for #name #ty_generics #where_clause {
+                fn as_static(&self) -> &'static str {
+                    match *self {
+                        #(#arms),*
                     }
                 }
             }
-        }
-        GenerateTraitVariant::From => {
-            quote! {
+        },
+        GenerateTraitVariant::From => quote! {
             impl #impl_generics ::std::convert::From<#name #ty_generics> for &'static str #where_clause {
                 fn from(x: #name #ty_generics) -> &'static str {
                     match x {
@@ -112,7 +109,6 @@ pub fn as_static_str_inner(
                     }
                 }
             }
-            }
-        }
+        },
     })
 }
