@@ -1,6 +1,7 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use syn::parse_quote;
+use syn::{parse_quote, Path};
+use syn::{Data, DeriveInput};
 
 use crate::helpers::HasTypeProperties;
 
@@ -10,17 +11,17 @@ use crate::helpers::HasTypeProperties;
 /// compilation problems when copied across.
 const ATTRIBUTES_TO_COPY: &[&str] = &["doc", "cfg", "allow", "deny"];
 
-pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
+pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let vis = &ast.vis;
 
     let variants = match ast.data {
-        syn::Data::Enum(ref v) => &v.variants,
+        Data::Enum(ref v) => &v.variants,
         _ => panic!("EnumDiscriminants only works on Enums"),
     };
 
     // Derives for the generated enum
-    let type_properties = ast.get_type_properties();
+    let type_properties = ast.get_type_properties()?;
 
     let derives = type_properties.discriminant_derives;
 
@@ -29,7 +30,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     // Work out the name
-    let default_name = syn::Path::from(syn::Ident::new(
+    let default_name = Path::from(syn::Ident::new(
         &format!("{}Discriminants", name.to_string()),
         Span::call_site(),
     ));
@@ -126,7 +127,7 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
         }
     };
 
-    quote! {
+    Ok(quote! {
         /// Auto-generated discriminant enum variants
         #derives
         #(#pass_though_attributes)*
@@ -136,5 +137,5 @@ pub fn enum_discriminants_inner(ast: &syn::DeriveInput) -> TokenStream {
 
         #impl_from
         #impl_from_ref
-    }
+    })
 }

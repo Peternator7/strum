@@ -1,63 +1,63 @@
-use syn::{Meta, MetaList, NestedMeta};
+use syn::{Lit, Meta, MetaList, MetaNameValue, NestedMeta, Path};
 
 pub trait MetaHelpers {
-    fn expect_metalist(&self, msg: &str) -> &MetaList;
-    fn expect_path(&self, msg: &str) -> &syn::Path;
-    fn expect_namevalue(&self, msg: &str) -> &syn::MetaNameValue;
+    fn expect_metalist(&self, msg: &str) -> syn::Result<&MetaList>;
+    fn expect_path(&self, msg: &str) -> syn::Result<&Path>;
+    fn expect_namevalue(&self, msg: &str) -> syn::Result<&MetaNameValue>;
 }
 
-impl MetaHelpers for syn::Meta {
-    fn expect_metalist(&self, msg: &str) -> &MetaList {
+impl MetaHelpers for Meta {
+    fn expect_metalist(&self, msg: &str) -> syn::Result<&MetaList> {
         match self {
-            Meta::List(list) => list,
-            _ => panic!("{}", msg),
+            Meta::List(list) => Ok(list),
+            _ => Err(syn::Error::new_spanned(self, msg)),
         }
     }
 
-    fn expect_path(&self, msg: &str) -> &syn::Path {
+    fn expect_path(&self, msg: &str) -> syn::Result<&Path> {
         match self {
-            Meta::Path(path) => path,
-            _ => panic!("{}", msg),
+            Meta::Path(path) => Ok(path),
+            _ => Err(syn::Error::new_spanned(self, msg)),
         }
     }
 
-    fn expect_namevalue(&self, msg: &str) -> &syn::MetaNameValue {
+    fn expect_namevalue(&self, msg: &str) -> syn::Result<&MetaNameValue> {
         match self {
-            Meta::NameValue(pair) => pair,
-            _ => panic!("{}", msg),
+            Meta::NameValue(pair) => Ok(pair),
+            _ => Err(syn::Error::new_spanned(self, msg)),
         }
     }
 }
 
 pub trait NestedMetaHelpers {
-    fn expect_meta(&self, msg: &str) -> &syn::Meta;
-    fn expect_lit(&self, msg: &str) -> &syn::Lit;
+    fn expect_meta(&self, msg: &str) -> syn::Result<&Meta>;
+    fn expect_lit(&self, msg: &str) -> syn::Result<&Lit>;
 }
 
 impl NestedMetaHelpers for NestedMeta {
-    fn expect_meta(&self, msg: &str) -> &Meta {
+    fn expect_meta(&self, msg: &str) -> syn::Result<&Meta> {
         match self {
-            syn::NestedMeta::Meta(m) => m,
-            _ => panic!("{}", msg),
+            NestedMeta::Meta(m) => Ok(m),
+            _ => Err(syn::Error::new_spanned(self, msg)),
         }
     }
-    fn expect_lit(&self, msg: &str) -> &syn::Lit {
+    fn expect_lit(&self, msg: &str) -> syn::Result<&Lit> {
         match self {
-            syn::NestedMeta::Lit(l) => l,
-            _ => panic!("{}", msg),
+            NestedMeta::Lit(l) => Ok(l),
+            _ => Err(syn::Error::new_spanned(self, msg)),
         }
     }
 }
 
 pub trait LitHelpers {
-    fn expect_string(&self, msg: &str) -> String;
+    fn expect_string(&self, msg: &str) -> syn::Result<String>;
 }
 
-impl LitHelpers for syn::Lit {
-    fn expect_string(&self, msg: &str) -> String {
+impl LitHelpers for Lit {
+    fn expect_string(&self, msg: &str) -> syn::Result<String> {
         match self {
-            syn::Lit::Str(s) => s.value(),
-            _ => panic!("{}", msg),
+            Lit::Str(s) => Ok(s.value()),
+            _ => Err(syn::Error::new_spanned(self, msg)),
         }
     }
 }

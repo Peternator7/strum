@@ -1,12 +1,13 @@
 use std::collections::HashMap;
 use std::default::Default;
+use syn::{Ident, Meta, Variant};
 
 use crate::helpers::case_style::{CaseStyle, CaseStyleHelpers};
 use crate::helpers::has_metadata::HasMetadata;
 use crate::helpers::{LitHelpers, MetaHelpers, NestedMetaHelpers};
 
 pub trait HasStrumVariantProperties {
-    fn get_variant_properties(&self) -> StrumVariantProperties;
+    fn get_variant_properties(&self) -> syn::Result<StrumVariantProperties>;
 }
 
 #[derive(Clone, Eq, PartialEq, Debug, Default)]
@@ -18,7 +19,7 @@ pub struct StrumVariantProperties {
     pub string_props: HashMap<String, String>,
     serialize: Vec<String>,
     to_string: Option<String>,
-    ident: Option<syn::Ident>,
+    ident: Option<Ident>,
 }
 
 impl StrumVariantProperties {
@@ -58,34 +59,34 @@ impl StrumVariantProperties {
     }
 }
 
-impl HasStrumVariantProperties for syn::Variant {
-    fn get_variant_properties(&self) -> StrumVariantProperties {
+impl HasStrumVariantProperties for Variant {
+    fn get_variant_properties(&self) -> syn::Result<StrumVariantProperties> {
         let mut output = StrumVariantProperties::default();
         output.ident = Some(self.ident.clone());
 
-        for meta in self.get_metadata("strum") {
+        for meta in self.get_metadata("strum")? {
             match meta {
-                syn::Meta::NameValue(syn::MetaNameValue { path, lit, .. }) => {
+                Meta::NameValue(syn::MetaNameValue { path, lit, .. }) => {
                     if path.is_ident("message") {
                         if output.message.is_some() {
                             panic!("message is set twice on the same variant");
                         }
 
-                        output.message = Some(lit.expect_string("expected string"));
+                        output.message = Some(lit.expect_string("expected string")?);
                     } else if path.is_ident("detailed_message") {
                         if output.detailed_message.is_some() {
                             panic!("detailed message set twice on the same variant");
                         }
 
-                        output.detailed_message = Some(lit.expect_string("expected string"));
+                        output.detailed_message = Some(lit.expect_string("expected string")?);
                     } else if path.is_ident("serialize") {
-                        output.serialize.push(lit.expect_string("expected string"));
+                        output.serialize.push(lit.expect_string("expected string")?);
                     } else if path.is_ident("to_string") {
                         if output.to_string.is_some() {
                             panic!("to_string is set twice on the same variant");
                         }
 
-                        output.to_string = Some(lit.expect_string("expected string"));
+                        output.to_string = Some(lit.expect_string("expected string")?);
                     } else if path.is_ident("disabled") {
                         panic!("this method is deprecated. Prefer #[strum(disabled)] instead of #[strum(disabled=\"true\")]");
                     } else if path.is_ident("default") {
@@ -94,7 +95,7 @@ impl HasStrumVariantProperties for syn::Variant {
                         panic!("unrecognized value in strum(..) attribute");
                     }
                 }
-                syn::Meta::Path(p) => {
+                Meta::Path(p) => {
                     if p.is_ident("disabled") {
                         output.is_disabled = true;
                     } else if p.is_ident("default") {
@@ -103,12 +104,12 @@ impl HasStrumVariantProperties for syn::Variant {
                         panic!("unrecognized value in strum(..) attribute");
                     }
                 }
-                syn::Meta::List(syn::MetaList { path, nested, .. }) => {
+                Meta::List(syn::MetaList { path, nested, .. }) => {
                     if path.is_ident("props") {
                         for p in nested {
                             let p = p
-                                .expect_meta("unexpected literal found in props")
-                                .expect_namevalue("props must be key-value pairs");
+                                .expect_meta("unexpected literal found in props")?
+                                .expect_namevalue("props must be key-value pairs")?;
 
                             let key = p
                                 .path
@@ -116,7 +117,7 @@ impl HasStrumVariantProperties for syn::Variant {
                                 .expect("key must be an identifier")
                                 .to_string();
 
-                            let value = p.lit.expect_string("expected string");
+                            let value = p.lit.expect_string("expected string")?;
                             output.string_props.insert(key, value);
                         }
                     } else {
@@ -126,6 +127,6 @@ impl HasStrumVariantProperties for syn::Variant {
             }
         }
 
-        output
+        Ok(output)
     }
 }

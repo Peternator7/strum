@@ -1,4 +1,5 @@
 use heck::{CamelCase, KebabCase, MixedCase, ShoutySnakeCase, SnakeCase, TitleCase};
+use syn::Ident;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum CaseStyle {
@@ -53,7 +54,7 @@ pub trait CaseStyleHelpers {
     fn convert_case(&self, case_style: Option<CaseStyle>) -> String;
 }
 
-impl CaseStyleHelpers for syn::Ident {
+impl CaseStyleHelpers for Ident {
     fn convert_case(&self, case_style: Option<CaseStyle>) -> String {
         let ident_string = self.to_string();
         if let Some(case_style) = case_style {
@@ -86,7 +87,7 @@ impl CaseStyleHelpers for syn::Ident {
 
 #[test]
 fn test_convert_case() {
-    let id = syn::Ident::new("test_me", proc_macro2::Span::call_site());
+    let id = Ident::new("test_me", proc_macro2::Span::call_site());
     assert_eq!("testMe", id.convert_case(Some(CaseStyle::CamelCase)));
     assert_eq!("TestMe", id.convert_case(Some(CaseStyle::PascalCase)));
 }

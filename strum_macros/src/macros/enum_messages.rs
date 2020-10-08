@@ -1,24 +1,25 @@
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::{Data, DeriveInput};
 
 use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 
-pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
+pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match ast.data {
-        syn::Data::Enum(ref v) => &v.variants,
+        Data::Enum(ref v) => &v.variants,
         _ => panic!("EnumMessage only works on Enums"),
     };
 
-    let type_properties = ast.get_type_properties();
+    let type_properties = ast.get_type_properties()?;
 
     let mut arms = Vec::new();
     let mut detailed_arms = Vec::new();
     let mut serializations = Vec::new();
 
     for variant in variants {
-        let variant_properties = variant.get_variant_properties();
+        let variant_properties = variant.get_variant_properties()?;
         let messages = variant_properties.message.as_ref();
         let detailed_messages = variant_properties.detailed_message.as_ref();
         let ident = &variant.ident;
@@ -77,7 +78,7 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
         detailed_arms.push(quote! { _ => ::std::option::Option::None });
     }
 
-    quote! {
+    Ok(quote! {
         impl #impl_generics ::strum::EnumMessage for #name #ty_generics #where_clause {
             fn get_message(&self) -> ::std::option::Option<&str> {
                 match self {
@@ -97,5 +98,5 @@ pub fn enum_message_inner(ast: &syn::DeriveInput) -> TokenStream {
                 }
             }
         }
-    }
+    })
 }

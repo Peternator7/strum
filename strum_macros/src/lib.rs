@@ -13,8 +13,9 @@ mod macros;
 
 use proc_macro2::TokenStream;
 use std::env;
+use syn::DeriveInput;
 
-fn debug_print_generated(ast: &syn::DeriveInput, toks: &TokenStream) {
+fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
     let debug = env::var("STRUM_DEBUG");
     if let Ok(s) = debug {
         if s == "1" {
@@ -104,9 +105,10 @@ fn debug_print_generated(ast: &syn::DeriveInput, toks: &TokenStream) {
     proc_macro_derive(StrumEnumString, attributes(strum))
 )]
 pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::from_string::from_string_inner(&ast);
+    let toks =
+        macros::from_string::from_string_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -133,20 +135,18 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Yellow,
 /// }
 ///
-/// fn main() {
-///     // uses the serialize string for Display
-///     let red = Color::Red;
-///     assert_eq!("redred", red.as_ref());
-///     // by default the variants Name
-///     let yellow = Color::Yellow;
-///     assert_eq!("Yellow", yellow.as_ref());
-///     // or for string formatting
-///     println!(
-///         "blue: {} green: {}",
-///         Color::Blue(10).as_ref(),
-///         Color::Green { range: 42 }.as_ref()
-///     );
-/// }
+/// // uses the serialize string for Display
+/// let red = Color::Red;
+/// assert_eq!("redred", red.as_ref());
+/// // by default the variants Name
+/// let yellow = Color::Yellow;
+/// assert_eq!("Yellow", yellow.as_ref());
+/// // or for string formatting
+/// println!(
+///     "blue: {} green: {}",
+///     Color::Blue(10).as_ref(),
+///     Color::Green { range: 42 }.as_ref()
+/// );
 /// ```
 #[cfg_attr(
     not(feature = "verbose-asrefstr-name"),
@@ -157,9 +157,10 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     proc_macro_derive(StrumAsRefStr, attributes(strum))
 )]
 pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::as_ref_str::as_ref_str_inner(&ast);
+    let toks =
+        macros::as_ref_str::as_ref_str_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -194,9 +195,10 @@ pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     proc_macro_derive(StrumEnumVariantNames, attributes(strum))
 )]
 pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::enum_variant_names::enum_variant_names_inner(&ast);
+    let toks = macros::enum_variant_names::enum_variant_names_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -210,12 +212,13 @@ pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     proc_macro_derive(AsStaticStr, attributes(strum))
 )]
 pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
 
     let toks = macros::as_ref_str::as_static_str_inner(
         &ast,
         macros::as_ref_str::GenerateTraitVariant::AsStaticStr,
-    );
+    )
+    .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -258,12 +261,13 @@ pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     proc_macro_derive(IntoStaticStr, attributes(strum))
 )]
 pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
 
     let toks = macros::as_ref_str::as_static_str_inner(
         &ast,
         macros::as_ref_str::GenerateTraitVariant::From,
-    );
+    )
+    .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -302,9 +306,10 @@ pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     proc_macro_derive(ToString, attributes(strum))
 )]
 pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::to_string::to_string_inner(&ast);
+    let toks =
+        macros::to_string::to_string_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -358,9 +363,9 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     proc_macro_derive(Display, attributes(strum))
 )]
 pub fn display(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::display::display_inner(&ast);
+    let toks = macros::display::display_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -407,9 +412,10 @@ pub fn display(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     proc_macro_derive(EnumIter, attributes(strum))
 )]
 pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::enum_iter::enum_iter_inner(&ast);
+    let toks =
+        macros::enum_iter::enum_iter_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -487,9 +493,10 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     proc_macro_derive(EnumMessage, attributes(strum))
 )]
 pub fn enum_messages(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::enum_messages::enum_message_inner(&ast);
+    let toks = macros::enum_messages::enum_message_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -545,9 +552,10 @@ pub fn enum_messages(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     proc_macro_derive(EnumProperty, attributes(strum))
 )]
 pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::enum_properties::enum_properties_inner(&ast);
+    let toks = macros::enum_properties::enum_properties_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -608,9 +616,10 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     proc_macro_derive(EnumDiscriminants, attributes(strum, strum_discriminants))
 )]
 pub fn enum_discriminants(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::enum_discriminants::enum_discriminants_inner(&ast);
+    let toks = macros::enum_discriminants::enum_discriminants_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
@@ -648,7 +657,7 @@ pub fn enum_discriminants(input: proc_macro::TokenStream) -> proc_macro::TokenSt
     proc_macro_derive(EnumCount, attributes(strum))
 )]
 pub fn enum_count(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = syn::parse(input).unwrap();
+    let ast = syn::parse_macro_input!(input as DeriveInput);
     let toks = macros::enum_count::enum_count_inner(&ast);
     debug_print_generated(&ast, &toks);
     toks.into()
