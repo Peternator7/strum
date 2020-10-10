@@ -15,8 +15,8 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let vis = &ast.vis;
 
-    let variants = match ast.data {
-        Data::Enum(ref v) => &v.variants,
+    let variants = match &ast.data {
+        Data::Enum(v) => &v.variants,
         _ => panic!("EnumDiscriminants only works on Enums"),
     };
 
@@ -84,12 +84,12 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             let ident = &variant.ident;
 
             use syn::Fields::*;
-            let params = match variant.fields {
+            let params = match &variant.fields {
                 Unit => quote! {},
-                Unnamed(ref _fields) => {
+                Unnamed(_fields) => {
                     quote! { (..) }
                 }
-                Named(ref _fields) => {
+                Named(_fields) => {
                     quote! { { .. } }
                 }
             };

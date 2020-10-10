@@ -24,7 +24,7 @@ pub struct StrumVariantProperties {
 
 impl StrumVariantProperties {
     pub fn get_preferred_name(&self, case_style: Option<CaseStyle>) -> String {
-        if let Some(ref to_string) = self.to_string {
+        if let Some(to_string) = &self.to_string {
             to_string.clone()
         } else {
             let mut serialized = self.serialize.clone();
@@ -42,7 +42,7 @@ impl StrumVariantProperties {
 
     pub fn get_serializations(&self, case_style: Option<CaseStyle>) -> Vec<String> {
         let mut attrs = self.serialize.clone();
-        if let Some(ref to_string) = self.to_string {
+        if let Some(to_string) = &self.to_string {
             attrs.push(to_string.clone());
         }
 

@@ -48,8 +48,8 @@ impl HasTypeProperties for DeriveInput {
         }
 
         for meta in discriminants_meta {
-            match meta {
-                Meta::List(ref ls) => {
+            match &meta {
+                Meta::List(ls) => {
                     if ls.path.is_ident("derive") {
                         let paths = ls
                             .nested

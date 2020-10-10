@@ -3,8 +3,8 @@ use quote::quote;
 use syn::{Data, DeriveInput};
 
 pub(crate) fn enum_count_inner(ast: &DeriveInput) -> TokenStream {
-    let n = match ast.data {
-        Data::Enum(ref v) => v.variants.len(),
+    let n = match &ast.data {
+        Data::Enum(v) => v.variants.len(),
         _ => panic!("EnumCount can only be used with enums"),
     };
 

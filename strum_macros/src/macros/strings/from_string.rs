@@ -7,8 +7,8 @@ use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
-    let variants = match ast.data {
-        Data::Enum(ref v) => &v.variants,
+    let variants = match &ast.data {
+        Data::Enum(v) => &v.variants,
         _ => panic!("FromString only works on Enums"),
     };
 
@@ -32,7 +32,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 panic!("Can't have multiple default variants");
             }
 
-            if let Unnamed(ref fields) = variant.fields {
+            if let Unnamed(fields) = &variant.fields {
                 if fields.unnamed.len() != 1 {
                     panic!("Default only works on unit structs with a single String parameter");
                 }
@@ -51,14 +51,14 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         // If we don't have any custom variants, add the default serialized name.
         let attrs = variant_properties.get_serializations(type_properties.case_style);
 
-        let params = match variant.fields {
+        let params = match &variant.fields {
             Unit => quote! {},
-            Unnamed(ref fields) => {
+            Unnamed(fields) => {
                 let defaults =
                     ::std::iter::repeat(quote!(Default::default())).take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
-            Named(ref fields) => {
+            Named(fields) => {
                 let fields = fields
                     .named
                     .iter()

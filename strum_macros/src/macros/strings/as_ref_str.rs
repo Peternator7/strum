@@ -7,8 +7,8 @@ use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
 fn get_arms(ast: &DeriveInput) -> syn::Result<Vec<TokenStream>> {
     let name = &ast.ident;
     let mut arms = Vec::new();
-    let variants = match ast.data {
-        Data::Enum(ref v) => &v.variants,
+    let variants = match &ast.data {
+        Data::Enum(v) => &v.variants,
         _ => panic!("This macro only works on Enums"),
     };
 

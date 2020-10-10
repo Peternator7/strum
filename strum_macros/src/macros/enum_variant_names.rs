@@ -9,8 +9,8 @@ pub fn enum_variant_names_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let gen = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
 
-    let variants = match ast.data {
-        Data::Enum(ref v) => &v.variants,
+    let variants = match &ast.data {
+        Data::Enum(v) => &v.variants,
         _ => panic!("EnumVariantNames only works on Enums"),
     };
 
