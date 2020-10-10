@@ -31,19 +31,12 @@ impl MetaHelpers for Meta {
 
 pub trait NestedMetaHelpers {
     fn expect_meta(&self, msg: &str) -> syn::Result<&Meta>;
-    fn expect_lit(&self, msg: &str) -> syn::Result<&Lit>;
 }
 
 impl NestedMetaHelpers for NestedMeta {
     fn expect_meta(&self, msg: &str) -> syn::Result<&Meta> {
         match self {
             NestedMeta::Meta(m) => Ok(m),
-            _ => Err(syn::Error::new_spanned(self, msg)),
-        }
-    }
-    fn expect_lit(&self, msg: &str) -> syn::Result<&Lit> {
-        match self {
-            NestedMeta::Lit(l) => Ok(l),
             _ => Err(syn::Error::new_spanned(self, msg)),
         }
     }
