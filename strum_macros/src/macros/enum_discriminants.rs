@@ -1,6 +1,6 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use syn::{parse_quote, Path};
+use syn::parse_quote;
 use syn::{Data, DeriveInput};
 
 use crate::helpers::HasTypeProperties;
@@ -30,19 +30,15 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     };
 
     // Work out the name
-    let default_name = Path::from(syn::Ident::new(
+    let default_name = syn::Ident::new(
         &format!("{}Discriminants", name.to_string()),
         Span::call_site(),
-    ));
+    );
 
     let discriminants_name = type_properties.discriminant_name.unwrap_or(default_name);
 
     // Pass through all other attributes
-    let pass_though_attributes = type_properties
-        .discriminant_others
-        .into_iter()
-        .map(|meta| quote! { #[ #meta ] })
-        .collect::<Vec<_>>();
+    let pass_though_attributes = type_properties.discriminant_others;
 
     // Add the variants without fields, but exclude the `strum` meta item
     let mut discriminants = Vec::new();
@@ -130,7 +126,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     Ok(quote! {
         /// Auto-generated discriminant enum variants
         #derives
-        #(#pass_though_attributes)*
+        #(#[ #pass_though_attributes ])*
         #vis enum #discriminants_name {
             #(#discriminants),*
         }
