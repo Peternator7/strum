@@ -1,5 +1,5 @@
 use heck::{CamelCase, KebabCase, MixedCase, ShoutySnakeCase, SnakeCase, TitleCase};
-use std::convert::TryFrom;
+use std::str::FromStr;
 use syn::{
     parse::{Parse, ParseStream},
     Ident, LitStr,
@@ -37,7 +37,7 @@ impl Parse for CaseStyle {
         let text = input.parse::<LitStr>()?;
         let val = text.value();
 
-        Self::try_from(val.as_str()).map_err(|_| {
+        val.as_str().parse().map_err(|_| {
             syn::Error::new_spanned(
                 &text,
                 format!(
@@ -49,10 +49,10 @@ impl Parse for CaseStyle {
     }
 }
 
-impl TryFrom<&'_ str> for CaseStyle {
-    type Error = ();
+impl FromStr for CaseStyle {
+    type Err = ();
 
-    fn try_from(text: &str) -> Result<CaseStyle, ()> {
+    fn from_str(text: &str) -> Result<CaseStyle, ()> {
         Ok(match text {
             "camel_case" | "PascalCase" => CaseStyle::PascalCase,
             "camelCase" => CaseStyle::CamelCase,
