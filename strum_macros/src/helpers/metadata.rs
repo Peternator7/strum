@@ -41,7 +41,7 @@ impl Parse for EnumMeta {
         let serialize_all_kw = input.parse::<kw::serialize_all>()?;
         input.parse::<Token![=]>()?;
         let case_style = input.parse()?;
-        Ok(Self::SerializeAll {
+        Ok(EnumMeta::SerializeAll {
             serialize_all_kw,
             case_style,
         })
@@ -51,7 +51,7 @@ impl Parse for EnumMeta {
 impl Spanned for EnumMeta {
     fn span(&self) -> Span {
         match self {
-            Self::SerializeAll {
+            EnumMeta::SerializeAll {
                 serialize_all_kw, ..
             } => serialize_all_kw.span(),
         }
@@ -71,7 +71,7 @@ impl Parse for EnumDiscriminantsMeta {
             let content;
             parenthesized!(content in input);
             let paths = content.parse_terminated::<_, Token![,]>(Path::parse)?;
-            Ok(Self::Derive {
+            Ok(EnumDiscriminantsMeta::Derive {
                 kw,
                 paths: paths.into_iter().collect(),
             })
@@ -80,13 +80,13 @@ impl Parse for EnumDiscriminantsMeta {
             let content;
             parenthesized!(content in input);
             let name = content.parse()?;
-            Ok(Self::Name { kw, name })
+            Ok(EnumDiscriminantsMeta::Name { kw, name })
         } else {
             let path = input.parse()?;
             let content;
             parenthesized!(content in input);
             let nested = content.parse()?;
-            Ok(Self::Other { path, nested })
+            Ok(EnumDiscriminantsMeta::Other { path, nested })
         }
     }
 }
@@ -94,9 +94,9 @@ impl Parse for EnumDiscriminantsMeta {
 impl Spanned for EnumDiscriminantsMeta {
     fn span(&self) -> Span {
         match self {
-            Self::Derive { kw, .. } => kw.span,
-            Self::Name { kw, .. } => kw.span,
-            Self::Other { path, .. } => path.span(),
+            EnumDiscriminantsMeta::Derive { kw, .. } => kw.span,
+            EnumDiscriminantsMeta::Name { kw, .. } => kw.span,
+            EnumDiscriminantsMeta::Other { path, .. } => path.span(),
         }
     }
 }
@@ -151,32 +151,32 @@ impl Parse for VariantMeta {
             let kw = input.parse()?;
             let _: Token![=] = input.parse()?;
             let value = input.parse()?;
-            Ok(Self::Message { kw, value })
+            Ok(VariantMeta::Message { kw, value })
         } else if lookahead.peek(kw::detailed_message) {
             let kw = input.parse()?;
             let _: Token![=] = input.parse()?;
             let value = input.parse()?;
-            Ok(Self::DetailedMessage { kw, value })
+            Ok(VariantMeta::DetailedMessage { kw, value })
         } else if lookahead.peek(kw::serialize) {
             let kw = input.parse()?;
             let _: Token![=] = input.parse()?;
             let value = input.parse()?;
-            Ok(Self::Serialize { kw, value })
+            Ok(VariantMeta::Serialize { kw, value })
         } else if lookahead.peek(kw::to_string) {
             let kw = input.parse()?;
             let _: Token![=] = input.parse()?;
             let value = input.parse()?;
-            Ok(Self::ToString { kw, value })
+            Ok(VariantMeta::ToString { kw, value })
         } else if lookahead.peek(kw::disabled) {
-            Ok(Self::Disabled(input.parse()?))
+            Ok(VariantMeta::Disabled(input.parse()?))
         } else if lookahead.peek(kw::default) {
-            Ok(Self::Default(input.parse()?))
+            Ok(VariantMeta::Default(input.parse()?))
         } else if lookahead.peek(kw::props) {
             let kw = input.parse()?;
             let content;
             parenthesized!(content in input);
             let props = content.parse_terminated::<_, Token![,]>(Prop::parse)?;
-            Ok(Self::Props {
+            Ok(VariantMeta::Props {
                 kw,
                 props: props
                     .into_iter()
@@ -199,20 +199,20 @@ impl Parse for Prop {
         let _: Token![=] = input.parse()?;
         let v = input.parse()?;
 
-        Ok(Self(k, v))
+        Ok(Prop(k, v))
     }
 }
 
 impl Spanned for VariantMeta {
     fn span(&self) -> Span {
         match self {
-            Self::Message { kw, .. } => kw.span,
-            Self::DetailedMessage { kw, .. } => kw.span,
-            Self::Serialize { kw, .. } => kw.span,
-            Self::ToString { kw, .. } => kw.span,
-            Self::Disabled(kw) => kw.span,
-            Self::Default(kw) => kw.span,
-            Self::Props { kw, .. } => kw.span,
+            VariantMeta::Message { kw, .. } => kw.span,
+            VariantMeta::DetailedMessage { kw, .. } => kw.span,
+            VariantMeta::Serialize { kw, .. } => kw.span,
+            VariantMeta::ToString { kw, .. } => kw.span,
+            VariantMeta::Disabled(kw) => kw.span,
+            VariantMeta::Default(kw) => kw.span,
+            VariantMeta::Props { kw, .. } => kw.span,
         }
     }
 }
