@@ -201,7 +201,7 @@ macro_rules! DocumentMacroRexports {
 // for docsrs. You can do a weird thing where you rename the macro
 // and then reference it through strum. The renaming feature should be deprecated now that
 // 2018 edition is almost 2 years old, but we'll need to give people some time to do that.
-DocumentMacroRexports!{
+DocumentMacroRexports! {
     AsRefStr,
     AsStaticStr,
     Display,

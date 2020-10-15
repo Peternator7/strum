@@ -24,8 +24,8 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         quote! { < () > }
     };
 
-    let variants = match ast.data {
-        Data::Enum(ref v) => &v.variants,
+    let variants = match &ast.data {
+        Data::Enum(v) => &v.variants,
         _ => panic!("EnumIter only works on Enums"),
     };
 
@@ -39,14 +39,14 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         let ident = &variant.ident;
-        let params = match variant.fields {
+        let params = match &variant.fields {
             Unit => quote! {},
-            Unnamed(ref fields) => {
+            Unnamed(fields) => {
                 let defaults = ::std::iter::repeat(quote!(::std::default::Default::default()))
                     .take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
-            Named(ref fields) => {
+            Named(fields) => {
                 let fields = fields
                     .named
                     .iter()
