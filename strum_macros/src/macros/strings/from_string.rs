@@ -1,50 +1,52 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput};
+use syn::{Data, DeriveInput, Fields};
 
-use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
+use crate::helpers::{
+    non_enum_error, occurrence_error, HasStrumVariantProperties, HasTypeProperties,
+};
 
 pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match &ast.data {
         Data::Enum(v) => &v.variants,
-        _ => panic!("FromString only works on Enums"),
+        _ => return Err(non_enum_error()),
     };
 
     let type_properties = ast.get_type_properties()?;
 
-    let mut has_default = false;
+    let mut default_kw = None;
     let mut default =
         quote! { _ => ::std::result::Result::Err(::strum::ParseError::VariantNotFound) };
     let mut arms = Vec::new();
     for variant in variants {
-        use syn::Fields::*;
         let ident = &variant.ident;
         let variant_properties = variant.get_variant_properties()?;
 
-        if variant_properties.is_disabled {
+        if variant_properties.disabled.is_some() {
             continue;
         }
 
-        if variant_properties.default {
-            if has_default {
-                panic!("Can't have multiple default variants");
+        if let Some(kw) = variant_properties.default {
+            if let Some(fst_kw) = default_kw {
+                return Err(occurrence_error(fst_kw, kw, "default"));
             }
 
-            if let Unnamed(fields) = &variant.fields {
-                if fields.unnamed.len() != 1 {
-                    panic!("Default only works on unit structs with a single String parameter");
+            match &variant.fields {
+                Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {}
+                _ => {
+                    return Err(syn::Error::new_spanned(
+                        variant,
+                        "Default only works on newtype structs with a single String field",
+                    ))
                 }
-
-                default = quote! {
-                    default => ::std::result::Result::Ok(#name::#ident (default.into()))
-                };
-            } else {
-                panic!("Default only works on unit structs with a single String parameter");
             }
 
-            has_default = true;
+            default_kw = Some(kw);
+            default = quote! {
+                default => ::std::result::Result::Ok(#name::#ident(default.into()))
+            };
             continue;
         }
 
@@ -52,13 +54,13 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let attrs = variant_properties.get_serializations(type_properties.case_style);
 
         let params = match &variant.fields {
-            Unit => quote! {},
-            Unnamed(fields) => {
+            Fields::Unit => quote! {},
+            Fields::Unnamed(fields) => {
                 let defaults =
                     ::std::iter::repeat(quote!(Default::default())).take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
-            Named(fields) => {
+            Fields::Named(fields) => {
                 let fields = fields
                     .named
                     .iter()

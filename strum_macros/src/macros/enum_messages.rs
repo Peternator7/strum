@@ -2,14 +2,14 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput};
 
-use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
 pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match &ast.data {
         Data::Enum(v) => &v.variants,
-        _ => panic!("EnumMessage only works on Enums"),
+        _ => return Err(non_enum_error()),
     };
 
     let type_properties = ast.get_type_properties()?;
@@ -46,7 +46,7 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         // But you can disable the messages.
-        if variant_properties.is_disabled {
+        if variant_properties.disabled.is_some() {
             continue;
         }
 

@@ -2,10 +2,12 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput};
 
-pub(crate) fn enum_count_inner(ast: &DeriveInput) -> TokenStream {
+use crate::helpers::non_enum_error;
+
+pub(crate) fn enum_count_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let n = match &ast.data {
         Data::Enum(v) => v.variants.len(),
-        _ => panic!("EnumCount can only be used with enums"),
+        _ => return Err(non_enum_error()),
     };
 
     // Used in the quasi-quotation below as `#name`
@@ -14,10 +16,10 @@ pub(crate) fn enum_count_inner(ast: &DeriveInput) -> TokenStream {
     // Helper is provided for handling complex generic types correctly and effortlessly
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
-    quote! {
+    Ok(quote! {
         // Implementation
         impl #impl_generics ::strum::EnumCount for #name #ty_generics #where_clause {
             const COUNT: usize = #n;
         }
-    }
+    })
 }

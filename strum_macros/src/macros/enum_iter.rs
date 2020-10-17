@@ -1,8 +1,8 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{Data, DeriveInput, Ident};
 
-use crate::helpers::HasStrumVariantProperties;
+use crate::helpers::{non_enum_error, HasStrumVariantProperties};
 
 pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -11,10 +11,11 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let vis = &ast.vis;
 
     if gen.lifetimes().count() > 0 {
-        panic!(
-            "Enum Iterator isn't supported on Enums with lifetimes. The resulting enums would \
-             be unbounded."
-        );
+        return Err(syn::Error::new(
+            Span::call_site(),
+            "This macro doesn't support enums with lifetimes. \
+             The resulting enums would be unbounded.",
+        ));
     }
 
     let phantom_data = if gen.type_params().count() > 0 {
@@ -26,7 +27,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let variants = match &ast.data {
         Data::Enum(v) => &v.variants,
-        _ => panic!("EnumIter only works on Enums"),
+        _ => return Err(non_enum_error()),
     };
 
     let mut arms = Vec::new();
@@ -34,7 +35,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     for variant in variants {
         use syn::Fields::*;
 
-        if variant.get_variant_properties()?.is_disabled {
+        if variant.get_variant_properties()?.disabled.is_some() {
             continue;
         }
 

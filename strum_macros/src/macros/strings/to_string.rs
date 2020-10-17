@@ -2,14 +2,14 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput};
 
-use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
 pub fn to_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match &ast.data {
         Data::Enum(v) => &v.variants,
-        _ => panic!("ToString only works on Enums"),
+        _ => return Err(non_enum_error()),
     };
 
     let type_properties = ast.get_type_properties()?;
@@ -19,7 +19,7 @@ pub fn to_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let ident = &variant.ident;
         let variant_properties = variant.get_variant_properties()?;
 
-        if variant_properties.is_disabled {
+        if variant_properties.disabled.is_some() {
             continue;
         }
 
@@ -36,7 +36,7 @@ pub fn to_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     }
 
     if arms.len() < variants.len() {
-        arms.push(quote! { _ => panic!("to_string() called on disabled variant.")})
+        arms.push(quote! { _ => panic!("to_string() called on disabled variant.") });
     }
 
     Ok(quote! {
