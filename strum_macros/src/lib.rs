@@ -658,7 +658,8 @@ pub fn enum_discriminants(input: proc_macro::TokenStream) -> proc_macro::TokenSt
 )]
 pub fn enum_count(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
-    let toks = macros::enum_count::enum_count_inner(&ast);
+    let toks =
+        macros::enum_count::enum_count_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }

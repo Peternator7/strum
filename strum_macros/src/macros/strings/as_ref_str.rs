@@ -2,14 +2,14 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{parse_quote, Data, DeriveInput};
 
-use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
 fn get_arms(ast: &DeriveInput) -> syn::Result<Vec<TokenStream>> {
     let name = &ast.ident;
     let mut arms = Vec::new();
     let variants = match &ast.data {
         Data::Enum(v) => &v.variants,
-        _ => panic!("This macro only works on Enums"),
+        _ => return Err(non_enum_error()),
     };
 
     let type_properties = ast.get_type_properties()?;
@@ -19,7 +19,7 @@ fn get_arms(ast: &DeriveInput) -> syn::Result<Vec<TokenStream>> {
         let ident = &variant.ident;
         let variant_properties = variant.get_variant_properties()?;
 
-        if variant_properties.is_disabled {
+        if variant_properties.disabled.is_some() {
             continue;
         }
 
@@ -38,9 +38,11 @@ fn get_arms(ast: &DeriveInput) -> syn::Result<Vec<TokenStream>> {
 
     if arms.len() < variants.len() {
         arms.push(quote! {
-        _ => panic!("AsRef::<str>::as_ref() or AsStaticRef::<str>::as_static() \
-                     called on disabled variant.")
-        })
+            _ => panic!(
+                "AsRef::<str>::as_ref() or AsStaticRef::<str>::as_static() \
+                 called on disabled variant.",
+            )
+        });
     }
 
     Ok(arms)

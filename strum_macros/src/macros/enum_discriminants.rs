@@ -3,7 +3,7 @@ use quote::quote;
 use syn::parse_quote;
 use syn::{Data, DeriveInput};
 
-use crate::helpers::HasTypeProperties;
+use crate::helpers::{non_enum_error, HasTypeProperties};
 
 /// Attributes to copy from the main enum's variants to the discriminant enum's variants.
 ///
@@ -17,7 +17,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let variants = match &ast.data {
         Data::Enum(v) => &v.variants,
-        _ => panic!("EnumDiscriminants only works on Enums"),
+        _ => return Err(non_enum_error()),
     };
 
     // Derives for the generated enum

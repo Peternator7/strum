@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput};
 
-use crate::helpers::{HasStrumVariantProperties, HasTypeProperties};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
 pub fn enum_variant_names_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -11,7 +11,7 @@ pub fn enum_variant_names_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let variants = match &ast.data {
         Data::Enum(v) => &v.variants,
-        _ => panic!("EnumVariantNames only works on Enums"),
+        _ => return Err(non_enum_error()),
     };
 
     // Derives for the generated enum

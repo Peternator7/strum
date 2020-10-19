@@ -9,7 +9,7 @@ use syn::{
 
 use super::case_style::CaseStyle;
 
-mod kw {
+pub mod kw {
     use syn::custom_keyword;
 
     // enum metadata
@@ -31,29 +31,24 @@ mod kw {
 
 pub enum EnumMeta {
     SerializeAll {
-        serialize_all_kw: kw::serialize_all,
+        kw: kw::serialize_all,
         case_style: CaseStyle,
     },
 }
 
 impl Parse for EnumMeta {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let serialize_all_kw = input.parse::<kw::serialize_all>()?;
+        let kw = input.parse::<kw::serialize_all>()?;
         input.parse::<Token![=]>()?;
         let case_style = input.parse()?;
-        Ok(EnumMeta::SerializeAll {
-            serialize_all_kw,
-            case_style,
-        })
+        Ok(EnumMeta::SerializeAll { kw, case_style })
     }
 }
 
 impl Spanned for EnumMeta {
     fn span(&self) -> Span {
         match self {
-            EnumMeta::SerializeAll {
-                serialize_all_kw, ..
-            } => serialize_all_kw.span(),
+            EnumMeta::SerializeAll { kw, .. } => kw.span(),
         }
     }
 }

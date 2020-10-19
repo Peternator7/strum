@@ -2,14 +2,14 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput};
 
-use crate::helpers::HasStrumVariantProperties;
+use crate::helpers::{non_enum_error, HasStrumVariantProperties};
 
 pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let variants = match &ast.data {
         Data::Enum(v) => &v.variants,
-        _ => panic!("EnumProp only works on Enums"),
+        _ => return Err(non_enum_error()),
     };
 
     let mut arms = Vec::new();
@@ -20,7 +20,7 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let mut bool_arms = Vec::new();
         let mut num_arms = Vec::new();
         // But you can disable the messages.
-        if variant_properties.is_disabled {
+        if variant_properties.disabled.is_some() {
             continue;
         }
 

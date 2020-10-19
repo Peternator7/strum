@@ -1,8 +1,9 @@
 use std::default::Default;
 use syn::{Ident, LitStr, Variant};
 
-use crate::helpers::case_style::{CaseStyle, CaseStyleHelpers};
-use crate::helpers::metadata::{VariantExt, VariantMeta};
+use super::case_style::{CaseStyle, CaseStyleHelpers};
+use super::metadata::{kw, VariantExt, VariantMeta};
+use super::occurrence_error;
 
 pub trait HasStrumVariantProperties {
     fn get_variant_properties(&self) -> syn::Result<StrumVariantProperties>;
@@ -10,8 +11,8 @@ pub trait HasStrumVariantProperties {
 
 #[derive(Clone, Eq, PartialEq, Debug, Default)]
 pub struct StrumVariantProperties {
-    pub is_disabled: bool,
-    pub default: bool,
+    pub disabled: Option<kw::disabled>,
+    pub default: Option<kw::default>,
     pub message: Option<LitStr>,
     pub detailed_message: Option<LitStr>,
     pub string_props: Vec<(LitStr, LitStr)>,
@@ -59,37 +60,55 @@ impl HasStrumVariantProperties for Variant {
         let mut output = StrumVariantProperties::default();
         output.ident = Some(self.ident.clone());
 
+        let mut message_kw = None;
+        let mut detailed_message_kw = None;
+        let mut to_string_kw = None;
+        let mut disabled_kw = None;
+        let mut default_kw = None;
         for meta in self.get_metadata()? {
             match meta {
-                VariantMeta::Message { value, .. } => {
-                    if output.message.is_some() {
-                        panic!("message is set twice on the same variant");
+                VariantMeta::Message { value, kw } => {
+                    if let Some(fst_kw) = message_kw {
+                        return Err(occurrence_error(fst_kw, kw, "message"));
                     }
 
+                    message_kw = Some(kw);
                     output.message = Some(value);
                 }
-                VariantMeta::DetailedMessage { value, .. } => {
-                    if output.detailed_message.is_some() {
-                        panic!("detailed message set twice on the same variant");
+                VariantMeta::DetailedMessage { value, kw } => {
+                    if let Some(fst_kw) = detailed_message_kw {
+                        return Err(occurrence_error(fst_kw, kw, "detailed_message"));
                     }
 
+                    detailed_message_kw = Some(kw);
                     output.detailed_message = Some(value);
                 }
                 VariantMeta::Serialize { value, .. } => {
                     output.serialize.push(value);
                 }
-                VariantMeta::ToString { value, .. } => {
-                    if output.to_string.is_some() {
-                        panic!("to_string is set twice on the same variant");
+                VariantMeta::ToString { value, kw } => {
+                    if let Some(fst_kw) = to_string_kw {
+                        return Err(occurrence_error(fst_kw, kw, "to_string"));
                     }
 
+                    to_string_kw = Some(kw);
                     output.to_string = Some(value);
                 }
-                VariantMeta::Disabled(_) => {
-                    output.is_disabled = true;
+                VariantMeta::Disabled(kw) => {
+                    if let Some(fst_kw) = disabled_kw {
+                        return Err(occurrence_error(fst_kw, kw, "disabled"));
+                    }
+
+                    disabled_kw = Some(kw);
+                    output.disabled = Some(kw);
                 }
-                VariantMeta::Default(_) => {
-                    output.default = true;
+                VariantMeta::Default(kw) => {
+                    if let Some(fst_kw) = default_kw {
+                        return Err(occurrence_error(fst_kw, kw, "default"));
+                    }
+
+                    default_kw = Some(kw);
+                    output.default = Some(kw);
                 }
                 VariantMeta::Props { props, .. } => {
                     output.string_props.extend(props);
