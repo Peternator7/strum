@@ -586,7 +586,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 ///     Variant1 { a: NonDefault },
 /// }
 ///
-/// // You can also rename the generated enum using the `#[strum_discriminants(name(OtherName))]` attribute:
+/// // You can rename the generated enum using the `#[strum_discriminants(name(OtherName))]` attribute:
 /// # #[allow(dead_code)]
 /// #[derive(Debug, EnumDiscriminants)]
 /// #[strum_discriminants(derive(EnumIter))]
@@ -594,6 +594,21 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// enum MyEnumR {
 ///     Variant0(bool),
 ///     Variant1 { a: bool },
+/// }
+///
+/// // You can also set the visibility of the generated enum using the `#[strum_discriminants(name(OtherName))]` attribute:
+/// mod inner {
+///     use strum_macros::{EnumDiscriminants, EnumString};
+///
+///     # #[allow(dead_code)]
+///     #[derive(Debug, EnumDiscriminants)]
+///     #[strum_discriminants(vis(pub))]
+///     #[strum_discriminants(name(PubVariants))]
+///     #[strum_discriminants(derive(EnumString))]
+///     enum MyEnumV {
+///         Variant0(bool),
+///         Variant1 { a: bool },
+///     }
 /// }
 ///
 /// // test simple example
@@ -605,6 +620,11 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// assert_eq!(
 ///     vec![MyVariants::Variant0, MyVariants::Variant1],
 ///     MyVariants::iter().collect::<Vec<_>>()
+/// );
+/// // test visibility example, `MyEnumV` should not be accessible here
+/// assert_eq!(
+///     inner::PubVariants::Variant0,
+///     inner::PubVariants::from_str("Variant0").unwrap()
 /// );
 /// ```
 #[cfg_attr(

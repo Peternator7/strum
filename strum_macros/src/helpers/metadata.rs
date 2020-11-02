@@ -4,7 +4,7 @@ use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
     spanned::Spanned,
-    Attribute, DeriveInput, Ident, LitStr, Path, Token, Variant,
+    Attribute, DeriveInput, Ident, LitStr, Path, Token, Variant, Visibility,
 };
 
 use super::case_style::CaseStyle;
@@ -18,6 +18,7 @@ pub mod kw {
     // enum discriminant metadata
     custom_keyword!(derive);
     custom_keyword!(name);
+    custom_keyword!(vis);
 
     // variant metadata
     custom_keyword!(message);
@@ -56,6 +57,7 @@ impl Spanned for EnumMeta {
 pub enum EnumDiscriminantsMeta {
     Derive { kw: kw::derive, paths: Vec<Path> },
     Name { kw: kw::name, name: Ident },
+    Vis { kw: kw::vis, vis: Visibility },
     Other { path: Path, nested: TokenStream },
 }
 
@@ -76,6 +78,12 @@ impl Parse for EnumDiscriminantsMeta {
             parenthesized!(content in input);
             let name = content.parse()?;
             Ok(EnumDiscriminantsMeta::Name { kw, name })
+        } else if input.peek(kw::vis) {
+            let kw = input.parse()?;
+            let content;
+            parenthesized!(content in input);
+            let vis = content.parse()?;
+            Ok(EnumDiscriminantsMeta::Vis { kw, vis })
         } else {
             let path = input.parse()?;
             let content;
@@ -91,6 +99,7 @@ impl Spanned for EnumDiscriminantsMeta {
         match self {
             EnumDiscriminantsMeta::Derive { kw, .. } => kw.span,
             EnumDiscriminantsMeta::Name { kw, .. } => kw.span,
+            EnumDiscriminantsMeta::Vis { kw, .. } => kw.span,
             EnumDiscriminantsMeta::Other { path, .. } => path.span(),
         }
     }
