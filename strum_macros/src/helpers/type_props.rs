@@ -58,7 +58,7 @@ impl HasTypeProperties for DeriveInput {
                 }
                 EnumDiscriminantsMeta::Vis { vis, kw } => {
                     if let Some(fst_kw) = vis_kw {
-                        return Err(occurrence_error(fst_kw, kw, "name"));
+                        return Err(occurrence_error(fst_kw, kw, "vis"));
                     }
 
                     vis_kw = Some(kw);
