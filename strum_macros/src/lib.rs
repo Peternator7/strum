@@ -603,9 +603,9 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 ///     # #[allow(dead_code)]
 ///     #[derive(Debug, EnumDiscriminants)]
 ///     #[strum_discriminants(vis(pub))]
-///     #[strum_discriminants(name(PubVariants))]
+///     #[strum_discriminants(name(PubDiscriminants))]
 ///     #[strum_discriminants(derive(EnumString))]
-///     enum MyEnumV {
+///     enum PrivateEnum {
 ///         Variant0(bool),
 ///         Variant1 { a: bool },
 ///     }
@@ -621,10 +621,10 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 ///     vec![MyVariants::Variant0, MyVariants::Variant1],
 ///     MyVariants::iter().collect::<Vec<_>>()
 /// );
-/// // test visibility example, `MyEnumV` should not be accessible here
+/// // test visibility example, `PrivateEnum` should not be accessible here
 /// assert_eq!(
-///     inner::PubVariants::Variant0,
-///     inner::PubVariants::from_str("Variant0").unwrap()
+///     inner::PubDiscriminants::Variant0,
+///     inner::PubDiscriminants::from_str("Variant0").unwrap()
 /// );
 /// ```
 #[cfg_attr(
