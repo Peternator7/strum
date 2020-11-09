@@ -602,7 +602,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 ///
 ///     # #[allow(dead_code)]
 ///     #[derive(Debug, EnumDiscriminants)]
-///     #[strum_discriminants(vis(r#pub))]
+///     #[strum_discriminants(vis(pub))]
 ///     #[strum_discriminants(name(PubDiscriminants))]
 ///     #[strum_discriminants(derive(EnumString))]
 ///     enum PrivateEnum {

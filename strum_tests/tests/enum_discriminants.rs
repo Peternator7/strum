@@ -231,9 +231,10 @@ fn override_visibility() {
         }
     }
 
-    use private::PubDiscriminants;
-
-    assert_ne!(PubDiscriminants::VariantA, PubDiscriminants::VariantB);
+    assert_ne!(
+        private::PubDiscriminants::VariantA,
+        private::PubDiscriminants::VariantB,
+    );
 }
 
 #[cfg(not(bare_pub))]
@@ -251,7 +252,8 @@ fn override_visibility() {
         }
     }
 
-    use self::private::PubDiscriminants;
-
-    assert_ne!(PubDiscriminants::VariantA, PubDiscriminants::VariantB);
+    assert_ne!(
+        private::PubDiscriminants::VariantA,
+        private::PubDiscriminants::VariantB,
+    );
 }
