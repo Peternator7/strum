@@ -215,3 +215,43 @@ fn filter_variant_attributes_pass_through() {
         VariantFilterAttrDiscs::from_str("dark_black").unwrap()
     );
 }
+
+#[cfg(bare_pub)]
+#[test]
+fn override_visibility() {
+    mod private {
+        use super::*;
+
+        #[allow(dead_code)]
+        #[derive(EnumDiscriminants)]
+        #[strum_discriminants(name(PubDiscriminants), vis(pub))]
+        enum PrivateEnum {
+            VariantA(bool),
+            VariantB(bool),
+        }
+    }
+
+    use private::PubDiscriminants;
+
+    assert_ne!(PubDiscriminants::VariantA, PubDiscriminants::VariantB);
+}
+
+#[cfg(not(bare_pub))]
+#[test]
+fn override_visibility() {
+    mod private {
+        use super::*;
+
+        #[allow(dead_code)]
+        #[derive(EnumDiscriminants)]
+        #[strum_discriminants(name(PubDiscriminants), vis(r#pub))]
+        enum PrivateEnum {
+            VariantA(bool),
+            VariantB(bool),
+        }
+    }
+
+    use private::PubDiscriminants;
+
+    assert_ne!(PubDiscriminants::VariantA, PubDiscriminants::VariantB);
+}
