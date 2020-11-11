@@ -596,21 +596,6 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 ///     Variant1 { a: bool },
 /// }
 ///
-/// // You can also set the visibility of the generated enum using the `#[strum_discriminants(name(OtherName))]` attribute:
-/// mod inner {
-///     use strum_macros::{EnumDiscriminants, EnumString};
-///
-///     # #[allow(dead_code)]
-///     #[derive(Debug, EnumDiscriminants)]
-///     #[strum_discriminants(vis(pub))]
-///     #[strum_discriminants(name(PubDiscriminants))]
-///     #[strum_discriminants(derive(EnumString))]
-///     enum PrivateEnum {
-///         Variant0(bool),
-///         Variant1 { a: bool },
-///     }
-/// }
-///
 /// // test simple example
 /// assert_eq!(
 ///     MyEnumDiscriminants::Variant0,
@@ -621,10 +606,33 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 ///     vec![MyVariants::Variant0, MyVariants::Variant1],
 ///     MyVariants::iter().collect::<Vec<_>>()
 /// );
+/// ```
+///
+/// It is also possible to specify the visibility (e.g. `pub`/`pub(crate)`/etc.)
+/// of the generated enum. By default, the generated enum inherits the
+/// visibility of the parent enum it was generated from.
+///
+/// ```nocompile
+/// use strum_macros::EnumDiscriminants;
+///
+/// // You can set the visibility of the generated enum using the `#[strum_discriminants(vis(..))]` attribute:
+/// mod inner {
+///     use strum_macros::EnumDiscriminants;
+///
+///     # #[allow(dead_code)]
+///     #[derive(Debug, EnumDiscriminants)]
+///     #[strum_discriminants(vis(pub))]
+///     #[strum_discriminants(name(PubDiscriminants))]
+///     enum PrivateEnum {
+///         Variant0(bool),
+///         Variant1 { a: bool },
+///     }
+/// }
+///
 /// // test visibility example, `PrivateEnum` should not be accessible here
-/// assert_eq!(
+/// assert_ne!(
 ///     inner::PubDiscriminants::Variant0,
-///     inner::PubDiscriminants::from_str("Variant0").unwrap()
+///     inner::PubDiscriminants::Variant1,
 /// );
 /// ```
 #[cfg_attr(
