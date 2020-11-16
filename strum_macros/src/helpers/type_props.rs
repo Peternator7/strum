@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::default::Default;
-use syn::{DeriveInput, Ident, Path};
+use syn::{DeriveInput, Ident, Path, Visibility};
 
 use super::case_style::CaseStyle;
 use super::metadata::{DeriveInputExt, EnumDiscriminantsMeta, EnumMeta};
@@ -17,6 +17,7 @@ pub struct StrumTypeProperties {
     pub discriminant_derives: Vec<Path>,
     pub discriminant_name: Option<Ident>,
     pub discriminant_others: Vec<TokenStream>,
+    pub discriminant_vis: Option<Visibility>,
 }
 
 impl HasTypeProperties for DeriveInput {
@@ -41,6 +42,7 @@ impl HasTypeProperties for DeriveInput {
         }
 
         let mut name_kw = None;
+        let mut vis_kw = None;
         for meta in discriminants_meta {
             match meta {
                 EnumDiscriminantsMeta::Derive { paths, .. } => {
@@ -53,6 +55,14 @@ impl HasTypeProperties for DeriveInput {
 
                     name_kw = Some(kw);
                     output.discriminant_name = Some(name);
+                }
+                EnumDiscriminantsMeta::Vis { vis, kw } => {
+                    if let Some(fst_kw) = vis_kw {
+                        return Err(occurrence_error(fst_kw, kw, "vis"));
+                    }
+
+                    vis_kw = Some(kw);
+                    output.discriminant_vis = Some(vis);
                 }
                 EnumDiscriminantsMeta::Other { path, nested } => {
                     output.discriminant_others.push(quote! { #path(#nested) });

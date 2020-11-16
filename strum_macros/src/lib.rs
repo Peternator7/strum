@@ -586,7 +586,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 ///     Variant1 { a: NonDefault },
 /// }
 ///
-/// // You can also rename the generated enum using the `#[strum_discriminants(name(OtherName))]` attribute:
+/// // You can rename the generated enum using the `#[strum_discriminants(name(OtherName))]` attribute:
 /// # #[allow(dead_code)]
 /// #[derive(Debug, EnumDiscriminants)]
 /// #[strum_discriminants(derive(EnumIter))]
@@ -605,6 +605,34 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// assert_eq!(
 ///     vec![MyVariants::Variant0, MyVariants::Variant1],
 ///     MyVariants::iter().collect::<Vec<_>>()
+/// );
+/// ```
+///
+/// It is also possible to specify the visibility (e.g. `pub`/`pub(crate)`/etc.)
+/// of the generated enum. By default, the generated enum inherits the
+/// visibility of the parent enum it was generated from.
+///
+/// ```nocompile
+/// use strum_macros::EnumDiscriminants;
+///
+/// // You can set the visibility of the generated enum using the `#[strum_discriminants(vis(..))]` attribute:
+/// mod inner {
+///     use strum_macros::EnumDiscriminants;
+///
+///     # #[allow(dead_code)]
+///     #[derive(Debug, EnumDiscriminants)]
+///     #[strum_discriminants(vis(pub))]
+///     #[strum_discriminants(name(PubDiscriminants))]
+///     enum PrivateEnum {
+///         Variant0(bool),
+///         Variant1 { a: bool },
+///     }
+/// }
+///
+/// // test visibility example, `PrivateEnum` should not be accessible here
+/// assert_ne!(
+///     inner::PubDiscriminants::Variant0,
+///     inner::PubDiscriminants::Variant1,
 /// );
 /// ```
 #[cfg_attr(
