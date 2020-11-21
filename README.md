@@ -22,11 +22,11 @@ Cargo.toml. Strum_macros contains the macros needed to derive all the traits in 
 
 ```toml
 [dependencies]
-strum = "0.19"
-strum_macros = "0.19"
+strum = "0.20"
+strum_macros = "0.20"
 
 # You can also use the "derive" feature, and import the macros directly from "strum"
-# strum = { version = "0.19", features = ["derive"] }
+# strum = { version = "0.20", features = ["derive"] }
 ```
 
 # Strum Macros
@@ -68,14 +68,14 @@ information through strings.
 Strumming is also a very whimsical motion, much like writing Rust code.
 
 [Macro-Renames]: https://github.com/Peternator7/strum/wiki/Macro-Renames
-[EnumString]: https://docs.rs/strum_macros/0.19.3/strum_macros/derive.EnumString.html
-[Display]: https://docs.rs/strum_macros/0.19.3/strum_macros/derive.Display.html
-[AsRefStr]: https://docs.rs/strum_macros/0.19.3/strum_macros/derive.AsRefStr.html
-[IntoStaticStr]: https://docs.rs/strum_macros/0.19.3/strum_macros/derive.IntoStaticStr.html
-[EnumVariantNames]: https://docs.rs/strum_macros/0.19.4/strum_macros/derive.EnumVariantNames.html
-[EnumIter]: https://docs.rs/strum_macros/0.19.4/strum_macros/derive.EnumIter.html
-[EnumProperty]: https://docs.rs/strum_macros/0.19.4/strum_macros/derive.EnumProperty.html
-[EnumMessage]: https://docs.rs/strum_macros/0.19.4/strum_macros/derive.EnumMessage.html
-[EnumDiscriminants]: https://docs.rs/strum_macros/0.19.4/strum_macros/derive.EnumDiscriminants.html
-[EnumCount]: https://docs.rs/strum_macros/0.19.4/strum_macros/derive.EnumCount.html
-[ToString]: https://docs.rs/strum_macros/0.19.3/strum_macros/derive.ToString.html
+[EnumString]: https://docs.rs/strum_macros/0.20.0/strum_macros/derive.EnumString.html
+[Display]: https://docs.rs/strum_macros/0.20.0/strum_macros/derive.Display.html
+[AsRefStr]: https://docs.rs/strum_macros/0.20.0/strum_macros/derive.AsRefStr.html
+[IntoStaticStr]: https://docs.rs/strum_macros/0.20.0/strum_macros/derive.IntoStaticStr.html
+[EnumVariantNames]: https://docs.rs/strum_macros/0.20.0/strum_macros/derive.EnumVariantNames.html
+[EnumIter]: https://docs.rs/strum_macros/0.20.0/strum_macros/derive.EnumIter.html
+[EnumProperty]: https://docs.rs/strum_macros/0.20.0/strum_macros/derive.EnumProperty.html
+[EnumMessage]: https://docs.rs/strum_macros/0.20.0/strum_macros/derive.EnumMessage.html
+[EnumDiscriminants]: https://docs.rs/strum_macros/0.20.0/strum_macros/derive.EnumDiscriminants.html
+[EnumCount]: https://docs.rs/strum_macros/0.20.0/strum_macros/derive.EnumCount.html
+[ToString]: https://docs.rs/strum_macros/0.20.0/strum_macros/derive.ToString.html

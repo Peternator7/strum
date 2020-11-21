@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.20.0
+
+* Refactors to do better error handling. Thanks @jplatte for these changes
+  * [#133](https://github.com/Peternator7/strum/pull/133)
+  * [#134](https://github.com/Peternator7/strum/pull/134)
+  * [#135](https://github.com/Peternator7/strum/pull/135)
+
+* Adding `vis(scope)` to EnumDiscriminants. [#137](https://github.com/Peternator7/strum/pull/137)
+  * This feature works best with versions of rust >= 1.34 due to a rustc parsing error in
+    earlier versions.
+  * Earlier versions can still use `vis(r#pub)`
+
+* These changes should not be breaking, but the amount of code modified was significant.
+
+* FYI about [#122](https://github.com/Peternator7/strum/issues/122). The macro renames feature
+  will be removed in early 2021. This feature was only necessary in rust 2015 because macros
+  didn't support qualified imports so macro names could collide between crates.
+
 ## 0.19.4 / 0.19.5
 
 * Updated docs
