@@ -19,6 +19,7 @@ pub mod kw {
     custom_keyword!(derive);
     custom_keyword!(name);
     custom_keyword!(vis);
+    custom_keyword!(doc);
 
     // variant metadata
     custom_keyword!(message);
@@ -58,6 +59,7 @@ pub enum EnumDiscriminantsMeta {
     Derive { kw: kw::derive, paths: Vec<Path> },
     Name { kw: kw::name, name: Ident },
     Vis { kw: kw::vis, vis: Visibility },
+    Doc { kw: kw::doc, doc: LitStr },
     Other { path: Path, nested: TokenStream },
 }
 
@@ -84,6 +86,12 @@ impl Parse for EnumDiscriminantsMeta {
             parenthesized!(content in input);
             let vis = content.parse()?;
             Ok(EnumDiscriminantsMeta::Vis { kw, vis })
+        } else if input.peek(kw::doc) {
+            let kw = input.parse()?;
+            let content;
+            parenthesized!(content in input);
+            let doc = content.parse()?;
+            Ok(EnumDiscriminantsMeta::Doc { kw, doc })
         } else {
             let path = input.parse()?;
             let content;
@@ -100,6 +108,7 @@ impl Spanned for EnumDiscriminantsMeta {
             EnumDiscriminantsMeta::Derive { kw, .. } => kw.span,
             EnumDiscriminantsMeta::Name { kw, .. } => kw.span,
             EnumDiscriminantsMeta::Vis { kw, .. } => kw.span,
+            EnumDiscriminantsMeta::Doc { kw, .. } => kw.span,
             EnumDiscriminantsMeta::Other { path, .. } => path.span(),
         }
     }
