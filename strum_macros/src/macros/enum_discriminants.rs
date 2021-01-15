@@ -99,7 +99,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let impl_from = quote! {
-        impl #impl_generics ::std::convert::From< #name #ty_generics > for #discriminants_name #where_clause {
+        impl #impl_generics ::core::convert::From< #name #ty_generics > for #discriminants_name #where_clause {
             fn from(val: #name #ty_generics) -> #discriminants_name {
                 #from_fn_body
             }
@@ -116,7 +116,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let (impl_generics, _, _) = generics.split_for_impl();
 
         quote! {
-            impl #impl_generics ::std::convert::From< #enum_life #name #ty_generics > for #discriminants_name #where_clause {
+            impl #impl_generics ::core::convert::From< #enum_life #name #ty_generics > for #discriminants_name #where_clause {
                 fn from(val: #enum_life #name #ty_generics) -> #discriminants_name {
                     #from_fn_body
                 }

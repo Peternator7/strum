@@ -43,7 +43,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let params = match &variant.fields {
             Unit => quote! {},
             Unnamed(fields) => {
-                let defaults = ::std::iter::repeat(quote!(::std::default::Default::default()))
+                let defaults = ::std::iter::repeat(quote!(::core::default::Default::default()))
                     .take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
@@ -52,16 +52,16 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     .named
                     .iter()
                     .map(|field| field.ident.as_ref().unwrap());
-                quote! { {#(#fields: ::std::default::Default::default()),*} }
+                quote! { {#(#fields: ::core::default::Default::default()),*} }
             }
         };
 
-        arms.push(quote! {#idx => ::std::option::Option::Some(#name::#ident #params)});
+        arms.push(quote! {#idx => ::core::option::Option::Some(#name::#ident #params)});
         idx += 1;
     }
 
     let variant_count = arms.len();
-    arms.push(quote! { _ => ::std::option::Option::None });
+    arms.push(quote! { _ => ::core::option::Option::None });
     let iter_name = syn::parse_str::<Ident>(&format!("{}Iter", name)).unwrap();
 
     Ok(quote! {
@@ -69,7 +69,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         #vis struct #iter_name #ty_generics {
             idx: usize,
             back_idx: usize,
-            marker: ::std::marker::PhantomData #phantom_data,
+            marker: ::core::marker::PhantomData #phantom_data,
         }
 
         impl #impl_generics #iter_name #ty_generics #where_clause {
@@ -86,7 +86,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 #iter_name {
                     idx: 0,
                     back_idx: 0,
-                    marker: ::std::marker::PhantomData,
+                    marker: ::core::marker::PhantomData,
                 }
             }
         }
