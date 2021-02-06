@@ -32,12 +32,12 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         };
 
         for (key, value) in variant_properties.string_props {
-            string_arms.push(quote! { #key => ::std::option::Option::Some( #value )})
+            string_arms.push(quote! { #key => ::core::option::Option::Some( #value )})
         }
 
-        string_arms.push(quote! { _ => ::std::option::Option::None });
-        bool_arms.push(quote! { _ => ::std::option::Option::None });
-        num_arms.push(quote! { _ => ::std::option::Option::None });
+        string_arms.push(quote! { _ => ::core::option::Option::None });
+        bool_arms.push(quote! { _ => ::core::option::Option::None });
+        num_arms.push(quote! { _ => ::core::option::Option::None });
 
         arms.push(quote! {
             &#name::#ident #params => {
@@ -49,12 +49,12 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     }
 
     if arms.len() < variants.len() {
-        arms.push(quote! { _ => ::std::option::Option::None });
+        arms.push(quote! { _ => ::core::option::Option::None });
     }
 
     Ok(quote! {
         impl #impl_generics ::strum::EnumProperty for #name #ty_generics #where_clause {
-            fn get_str(&self, prop: &str) -> ::std::option::Option<&'static str> {
+            fn get_str(&self, prop: &str) -> ::core::option::Option<&'static str> {
                 match self {
                     #(#arms),*
                 }

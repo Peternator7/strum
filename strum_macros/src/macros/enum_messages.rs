@@ -54,7 +54,7 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             let params = params.clone();
 
             // Push the simple message.
-            let tokens = quote! { &#name::#ident #params => ::std::option::Option::Some(#msg) };
+            let tokens = quote! { &#name::#ident #params => ::core::option::Option::Some(#msg) };
             arms.push(tokens.clone());
 
             if detailed_messages.is_none() {
@@ -66,27 +66,27 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             let params = params.clone();
             // Push the simple message.
             detailed_arms
-                .push(quote! { &#name::#ident #params => ::std::option::Option::Some(#msg) });
+                .push(quote! { &#name::#ident #params => ::core::option::Option::Some(#msg) });
         }
     }
 
     if arms.len() < variants.len() {
-        arms.push(quote! { _ => ::std::option::Option::None });
+        arms.push(quote! { _ => ::core::option::Option::None });
     }
 
     if detailed_arms.len() < variants.len() {
-        detailed_arms.push(quote! { _ => ::std::option::Option::None });
+        detailed_arms.push(quote! { _ => ::core::option::Option::None });
     }
 
     Ok(quote! {
         impl #impl_generics ::strum::EnumMessage for #name #ty_generics #where_clause {
-            fn get_message(&self) -> ::std::option::Option<&str> {
+            fn get_message(&self) -> ::core::option::Option<&str> {
                 match self {
                     #(#arms),*
                 }
             }
 
-            fn get_detailed_message(&self) -> ::std::option::Option<&str> {
+            fn get_detailed_message(&self) -> ::core::option::Option<&str> {
                 match self {
                     #(#detailed_arms),*
                 }
