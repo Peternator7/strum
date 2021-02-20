@@ -38,10 +38,10 @@ environment:
 ### MSVC Toolchains ###
 
   # MSRC 64-bit MSVC
-    - channel: 1.31.1
+    - channel: 1.32.0
       target: x86_64-pc-windows-msvc
   # MSRC 32-bit MSVC
-    - channel: 1.31.1
+    - channel: 1.32.0
       target: i686-pc-windows-msvc
   # Stable 64-bit MSVC
     - channel: stable
@@ -67,10 +67,10 @@ environment:
 ### GNU Toolchains ###
 
   # MSRC 64-bit GNU
-    - channel: 1.31.1
+    - channel: 1.32.0
       target: x86_64-pc-windows-gnu
   # MSRC 32-bit GNU
-    - channel: 1.31.1
+    - channel: 1.32.0
       target: i686-pc-windows-gnu
   # Stable 64-bit GNU
     - channel: stable
