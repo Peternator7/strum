@@ -36,7 +36,9 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     );
 
     let discriminants_name = type_properties.discriminant_name.unwrap_or(default_name);
-    let discriminants_vis = type_properties.discriminant_vis.unwrap_or_else(|| vis.clone());
+    let discriminants_vis = type_properties
+        .discriminant_vis
+        .unwrap_or_else(|| vis.clone());
 
     // Pass through all other attributes
     let pass_though_attributes = type_properties.discriminant_others;
