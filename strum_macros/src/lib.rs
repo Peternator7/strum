@@ -562,13 +562,13 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 
 /// Generate a new type with only the discriminant names.
 ///
-/// Given an enum named `MyEnum`, generates another enum called `MyEnumDiscriminants` with the same variants but without any data fields.
-/// This is useful when you wish to determine the variant of an `enum` from a `String`, but one or more of the variants contains a
-/// non-`Default` field.
+/// Given an enum named `MyEnum`, generates another enum called `MyEnumDiscriminants` with the same
+/// variants but without any data fields. This is useful when you wish to determine the variant of
+/// an `enum` from a `String`, but one or more of the variants contains a non-`Default` field.
 ///
-/// By default, the generated enum has the following derives:
-/// `Clone, Copy, Debug, PartialEq, Eq`. You can add additional derives using the
-/// `#[strum_discriminants(derive(AdditionalDerive))]` attribute.
+/// By default, the generated enum has the following derives: `Clone, Copy, Debug, PartialEq, Eq`.
+/// You can add additional derives using the `#[strum_discriminants(derive(AdditionalDerive))]`
+/// attribute.
 ///
 /// ```
 /// // Bring trait into scope
