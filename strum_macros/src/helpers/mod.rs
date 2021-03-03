@@ -9,9 +9,17 @@ pub mod variant_props;
 
 use proc_macro2::Span;
 use quote::ToTokens;
+use syn::spanned::Spanned;
 
 pub fn non_enum_error() -> syn::Error {
     syn::Error::new(Span::call_site(), "This macro only supports enums.")
+}
+
+pub fn strum_discriminants_passthrough_error(span: impl Spanned) -> syn::Error {
+    syn::Error::new(
+        span.span(),
+        "expected a pass-through attribute, e.g. #[strum_discriminants(serde(rename = \"var0\"))]",
+    )
 }
 
 pub fn occurrence_error<T: ToTokens>(fst: T, snd: T, attr: &str) -> syn::Error {

@@ -572,11 +572,16 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// You can add additional derives using the `#[strum_discriminants(derive(AdditionalDerive))]`
 /// attribute.
 ///
+/// Note, the variant attributes passed to the discriminant enum are filtered to avoid compilation
+/// errors due to the derives mismatches, thus only `#[doc]`, `#[cfg]`, `#[allow]`, and `#[deny]`
+/// are passed through by default. If you want to specify a custom attribute on the discriminant
+/// variant, wrap it with `#[strum_discriminants(...)]` attribute.
+///
 /// ```
 /// // Bring trait into scope
 /// use std::str::FromStr;
-/// use strum::IntoEnumIterator;
-/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString};
+/// use strum::{IntoEnumIterator, EnumMessage};
+/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString, EnumMessage};
 ///
 /// #[derive(Debug)]
 /// struct NonDefault;
@@ -584,8 +589,9 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// // simple example
 /// # #[allow(dead_code)]
 /// #[derive(Debug, EnumDiscriminants)]
-/// #[strum_discriminants(derive(EnumString))]
+/// #[strum_discriminants(derive(EnumString, EnumMessage))]
 /// enum MyEnum {
+///     #[strum_discriminants(strum(message = "Variant zero"))]
 ///     Variant0(NonDefault),
 ///     Variant1 { a: NonDefault },
 /// }
@@ -620,6 +626,12 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// assert_eq!(
 ///     MyEnumDiscriminants::Variant0,
 ///     MyEnumDiscriminants::from(MyEnum::Variant0(NonDefault))
+/// );
+///
+/// // Make use of the EnumMessage on the `MyEnumDiscriminants` discriminant.
+/// assert_eq!(
+///     MyEnumDiscriminants::Variant0.get_message(),
+///     Some("Variant zero")
 /// );
 /// ```
 ///
