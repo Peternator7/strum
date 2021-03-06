@@ -26,17 +26,3 @@ syn = { version = "1.0", features = ["parsing", "extra-traits"] }
 
 [dev-dependencies]
 strum = "0.20"
-
-[features]
-verbose-enumstring-name = []
-verbose-asrefstr-name = []
-verbose-variant-names = []
-verbose-asstaticstr-name = []
-verbose-intostaticstr-name = []
-verbose-tostring-name = []
-verbose-display-name = []
-verbose-enumiter-name = []
-verbose-enummessage-name = []
-verbose-enumproperty-name = []
-verbose-enumdiscriminants-name = []
-verbose-enumcount-name = []

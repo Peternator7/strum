@@ -96,14 +96,7 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// // however the variant is still normally usable
 /// println!("{:?}", Color::Yellow);
 /// ```
-#[cfg_attr(
-    not(feature = "verbose-enumstring-name"),
-    proc_macro_derive(EnumString, attributes(strum))
-)]
-#[cfg_attr(
-    feature = "verbose-enumstring-name",
-    proc_macro_derive(StrumEnumString, attributes(strum))
-)]
+#[proc_macro_derive(EnumString, attributes(strum))]
 pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -148,14 +141,7 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Color::Green { range: 42 }.as_ref()
 /// );
 /// ```
-#[cfg_attr(
-    not(feature = "verbose-asrefstr-name"),
-    proc_macro_derive(AsRefStr, attributes(strum))
-)]
-#[cfg_attr(
-    feature = "verbose-asrefstr-name",
-    proc_macro_derive(StrumAsRefStr, attributes(strum))
-)]
+#[proc_macro_derive(AsRefStr, attributes(strum))]
 pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -186,14 +172,7 @@ pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 /// assert_eq!(["red", "blue", "yellow", "rebecca-purple"], Color::VARIANTS);
 /// ```
-#[cfg_attr(
-    not(feature = "verbose-variant-names"),
-    proc_macro_derive(EnumVariantNames, attributes(strum))
-)]
-#[cfg_attr(
-    feature = "verbose-variant-names",
-    proc_macro_derive(StrumEnumVariantNames, attributes(strum))
-)]
+#[proc_macro_derive(EnumVariantNames, attributes(strum))]
 pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -203,14 +182,7 @@ pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     toks.into()
 }
 
-#[cfg_attr(
-    feature = "verbose-asstaticstr-name",
-    proc_macro_derive(StrumAsStaticStr, attributes(strum))
-)]
-#[cfg_attr(
-    not(feature = "verbose-asstaticstr-name"),
-    proc_macro_derive(AsStaticStr, attributes(strum))
-)]
+#[proc_macro_derive(AsStaticStr, attributes(strum))]
 pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -252,14 +224,7 @@ pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 ///
 /// verify_state(&"hello world".to_string());
 /// ```
-#[cfg_attr(
-    feature = "verbose-intostaticstr-name",
-    proc_macro_derive(StrumIntoStaticStr, attributes(strum))
-)]
-#[cfg_attr(
-    not(feature = "verbose-intostaticstr-name"),
-    proc_macro_derive(IntoStaticStr, attributes(strum))
-)]
+#[proc_macro_derive(IntoStaticStr, attributes(strum))]
 pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -297,14 +262,7 @@ pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// let yellow = Color::Yellow;
 /// assert_eq!(String::from("Yellow"), yellow.to_string());
 /// ```
-#[cfg_attr(
-    feature = "verbose-tostring-name",
-    proc_macro_derive(StrumToString, attributes(strum))
-)]
-#[cfg_attr(
-    not(feature = "verbose-tostring-name"),
-    proc_macro_derive(ToString, attributes(strum))
-)]
+#[proc_macro_derive(ToString, attributes(strum))]
 pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -354,14 +312,7 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Color::Green { range: 42 }
 /// );
 /// ```
-#[cfg_attr(
-    feature = "verbose-display-name",
-    proc_macro_derive(StrumDisplay, attributes(strum))
-)]
-#[cfg_attr(
-    not(feature = "verbose-display-name"),
-    proc_macro_derive(Display, attributes(strum))
-)]
+#[proc_macro_derive(Display, attributes(strum))]
 pub fn display(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -403,14 +354,7 @@ pub fn display(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert_eq!(Some(Color::Yellow), ci.next());
 /// assert_eq!(None, ci.next());
 /// ```
-#[cfg_attr(
-    feature = "verbose-enumiter-name",
-    proc_macro_derive(StrumEnumIter, attributes(strum))
-)]
-#[cfg_attr(
-    not(feature = "verbose-enumiter-name"),
-    proc_macro_derive(EnumIter, attributes(strum))
-)]
+#[proc_macro_derive(EnumIter, attributes(strum))]
 pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -484,14 +428,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert_eq!("This is very red", c.get_detailed_message().unwrap());
 /// assert_eq!(["Red"], c.get_serializations());
 /// ```
-#[cfg_attr(
-    feature = "verbose-enummessage-name",
-    proc_macro_derive(StrumEnumMessage, attributes(strum))
-)]
-#[cfg_attr(
-    not(feature = "verbose-enummessage-name"),
-    proc_macro_derive(EnumMessage, attributes(strum))
-)]
+#[proc_macro_derive(EnumMessage, attributes(strum))]
 pub fn enum_messages(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -543,14 +480,7 @@ pub fn enum_messages(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// assert_eq!("My color is Red. It\'s RGB is 255,0,0", &display);
 /// ```
 
-#[cfg_attr(
-    feature = "verbose-enumproperty-name",
-    proc_macro_derive(StrumEnumProperty, attributes(strum))
-)]
-#[cfg_attr(
-    not(feature = "verbose-enumproperty-name"),
-    proc_macro_derive(EnumProperty, attributes(strum))
-)]
+#[proc_macro_derive(EnumProperty, attributes(strum))]
 pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -650,14 +580,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 ///     inner::PubDiscriminants::Variant1,
 /// );
 /// ```
-#[cfg_attr(
-    feature = "verbose-enumdiscriminants-name",
-    proc_macro_derive(StrumEnumDiscriminants, attributes(strum, strum_discriminants))
-)]
-#[cfg_attr(
-    not(feature = "verbose-enumdiscriminants-name"),
-    proc_macro_derive(EnumDiscriminants, attributes(strum, strum_discriminants))
-)]
+#[proc_macro_derive(EnumDiscriminants, attributes(strum, strum_discriminants))]
 pub fn enum_discriminants(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -691,14 +614,7 @@ pub fn enum_discriminants(input: proc_macro::TokenStream) -> proc_macro::TokenSt
 /// assert_eq!(Week::iter().count(), Week::COUNT);
 ///
 /// ```
-#[cfg_attr(
-    feature = "verbose-enumcount-name",
-    proc_macro_derive(StrumEnumCount, attributes(strum))
-)]
-#[cfg_attr(
-    not(feature = "verbose-enumcount-name"),
-    proc_macro_derive(EnumCount, attributes(strum))
-)]
+#[proc_macro_derive(EnumCount, attributes(strum))]
 pub fn enum_count(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
     let toks =
