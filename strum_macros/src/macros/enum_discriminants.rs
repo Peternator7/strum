@@ -1,15 +1,15 @@
-use proc_macro2::{Span, TokenStream};
-use quote::quote;
+use proc_macro2::{Span, TokenStream, TokenTree};
+use quote::{quote, ToTokens};
 use syn::parse_quote;
 use syn::{Data, DeriveInput};
 
-use crate::helpers::{non_enum_error, HasTypeProperties};
+use crate::helpers::{non_enum_error, strum_discriminants_passthrough_error, HasTypeProperties};
 
 /// Attributes to copy from the main enum's variants to the discriminant enum's variants.
 ///
 /// Attributes not in this list may be for other `proc_macro`s on the main enum, and may cause
 /// compilation problems when copied across.
-const ATTRIBUTES_TO_COPY: &[&str] = &["doc", "cfg", "allow", "deny"];
+const ATTRIBUTES_TO_COPY: &[&str] = &["doc", "cfg", "allow", "deny", "strum_discriminants"];
 
 pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -48,12 +48,39 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     for variant in variants {
         let ident = &variant.ident;
 
-        // Don't copy across the "strum" meta attribute.
-        let attrs = variant.attrs.iter().filter(|attr| {
-            ATTRIBUTES_TO_COPY
-                .iter()
-                .any(|attr_whitelisted| attr.path.is_ident(attr_whitelisted))
-        });
+        // Don't copy across the "strum" meta attribute. Only passthrough the whitelisted
+        // attributes and proxy `#[strum_discriminants(...)]` attributes
+        let attrs = variant
+            .attrs
+            .iter()
+            .filter(|attr| {
+                ATTRIBUTES_TO_COPY
+                    .iter()
+                    .any(|attr_whitelisted| attr.path.is_ident(attr_whitelisted))
+            })
+            .map(|attr| {
+                if attr.path.is_ident("strum_discriminants") {
+                    let passthrough_group = attr
+                        .tokens
+                        .clone()
+                        .into_iter()
+                        .next()
+                        .ok_or_else(|| strum_discriminants_passthrough_error(attr))?;
+                    let passthrough_attribute = match passthrough_group {
+                        TokenTree::Group(ref group) => group.stream(),
+                        _ => {
+                            return Err(strum_discriminants_passthrough_error(passthrough_group));
+                        }
+                    };
+                    if passthrough_attribute.is_empty() {
+                        return Err(strum_discriminants_passthrough_error(passthrough_group));
+                    }
+                    Ok(quote! { #[#passthrough_attribute] })
+                } else {
+                    Ok(attr.to_token_stream())
+                }
+            })
+            .collect::<Result<Vec<_>, _>>()?;
 
         discriminants.push(quote! { #(#attrs)* #ident });
     }

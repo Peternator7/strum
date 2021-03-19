@@ -1,5 +1,5 @@
 use enum_variant_type::EnumVariantType;
-use strum::{Display, EnumDiscriminants, EnumIter, EnumString, IntoEnumIterator};
+use strum::{Display, EnumDiscriminants, EnumIter, EnumMessage, EnumString, IntoEnumIterator};
 
 #[allow(dead_code)]
 #[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
@@ -80,6 +80,28 @@ enum WithDefault {
 #[test]
 fn with_default_test() {
     assert!(WithDefaultDiscriminants::A != WithDefaultDiscriminants::B);
+}
+
+// This test exists to ensure that we can pass attributes to the discriminant variants.
+#[allow(dead_code)]
+#[derive(Debug, EnumDiscriminants)]
+#[strum_discriminants(derive(EnumMessage))]
+enum WithPassthroughAttributes {
+    #[strum_discriminants(strum(message = "AAA"))]
+    A(String),
+    B,
+}
+
+#[test]
+fn with_passthrough_attributes_test() {
+    assert_eq!(
+        WithPassthroughAttributesDiscriminants::A.get_message(),
+        Some("AAA")
+    );
+    assert_eq!(
+        WithPassthroughAttributesDiscriminants::B.get_message(),
+        None
+    );
 }
 
 #[allow(dead_code)]
