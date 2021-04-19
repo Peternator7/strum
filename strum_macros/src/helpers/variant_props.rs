@@ -13,6 +13,7 @@ pub trait HasStrumVariantProperties {
 pub struct StrumVariantProperties {
     pub disabled: Option<kw::disabled>,
     pub default: Option<kw::default>,
+    pub ascii_case_insensitive: Option<bool>,
     pub message: Option<LitStr>,
     pub detailed_message: Option<LitStr>,
     pub string_props: Vec<(LitStr, LitStr)>,
@@ -65,6 +66,7 @@ impl HasStrumVariantProperties for Variant {
         let mut to_string_kw = None;
         let mut disabled_kw = None;
         let mut default_kw = None;
+        let mut ascii_case_insensitive_kw = None;
         for meta in self.get_metadata()? {
             match meta {
                 VariantMeta::Message { value, kw } => {
@@ -109,6 +111,14 @@ impl HasStrumVariantProperties for Variant {
 
                     default_kw = Some(kw);
                     output.default = Some(kw);
+                }
+                VariantMeta::AsciiCaseInsensitive { kw, value } => {
+                    if let Some(fst_kw) = ascii_case_insensitive_kw {
+                        return Err(occurrence_error(fst_kw, kw, "ascii_case_insensitive"));
+                    }
+
+                    ascii_case_insensitive_kw = Some(kw);
+                    output.ascii_case_insensitive = Some(value);
                 }
                 VariantMeta::Props { props, .. } => {
                     output.string_props.extend(props);

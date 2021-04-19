@@ -14,6 +14,7 @@ pub trait HasTypeProperties {
 #[derive(Debug, Clone, Default)]
 pub struct StrumTypeProperties {
     pub case_style: Option<CaseStyle>,
+    pub ascii_case_insensitive: bool,
     pub discriminant_derives: Vec<Path>,
     pub discriminant_name: Option<Ident>,
     pub discriminant_others: Vec<TokenStream>,
@@ -28,6 +29,7 @@ impl HasTypeProperties for DeriveInput {
         let discriminants_meta = self.get_discriminants_metadata()?;
 
         let mut serialize_all_kw = None;
+        let mut ascii_case_insensitive_kw = None;
         for meta in strum_meta {
             match meta {
                 EnumMeta::SerializeAll { case_style, kw } => {
@@ -37,6 +39,14 @@ impl HasTypeProperties for DeriveInput {
 
                     serialize_all_kw = Some(kw);
                     output.case_style = Some(case_style);
+                }
+                EnumMeta::AsciiCaseInsensitive(kw) => {
+                    if let Some(fst_kw) = ascii_case_insensitive_kw {
+                        return Err(occurrence_error(fst_kw, kw, "ascii_case_insensitive"));
+                    }
+
+                    ascii_case_insensitive_kw = Some(kw);
+                    output.ascii_case_insensitive = true;
                 }
             }
         }

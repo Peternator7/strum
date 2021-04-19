@@ -4,7 +4,7 @@ use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
     spanned::Spanned,
-    Attribute, DeriveInput, Ident, LitStr, Path, Token, Variant, Visibility,
+    Attribute, DeriveInput, Ident, LitBool, LitStr, Path, Token, Variant, Visibility,
 };
 
 use super::case_style::CaseStyle;
@@ -28,6 +28,7 @@ pub mod kw {
     custom_keyword!(disabled);
     custom_keyword!(default);
     custom_keyword!(props);
+    custom_keyword!(ascii_case_insensitive);
 }
 
 pub enum EnumMeta {
@@ -35,14 +36,23 @@ pub enum EnumMeta {
         kw: kw::serialize_all,
         case_style: CaseStyle,
     },
+    AsciiCaseInsensitive(kw::ascii_case_insensitive),
 }
 
 impl Parse for EnumMeta {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let kw = input.parse::<kw::serialize_all>()?;
-        input.parse::<Token![=]>()?;
-        let case_style = input.parse()?;
-        Ok(EnumMeta::SerializeAll { kw, case_style })
+        let lookahead = input.lookahead1();
+        if lookahead.peek(kw::serialize_all) {
+            let kw = input.parse::<kw::serialize_all>()?;
+            input.parse::<Token![=]>()?;
+            let case_style = input.parse()?;
+            Ok(EnumMeta::SerializeAll { kw, case_style })
+        } else if lookahead.peek(kw::ascii_case_insensitive) {
+            let kw = input.parse()?;
+            Ok(EnumMeta::AsciiCaseInsensitive(kw))
+        } else {
+            Err(lookahead.error())
+        }
     }
 }
 
@@ -50,6 +60,7 @@ impl Spanned for EnumMeta {
     fn span(&self) -> Span {
         match self {
             EnumMeta::SerializeAll { kw, .. } => kw.span(),
+            EnumMeta::AsciiCaseInsensitive(kw) => kw.span(),
         }
     }
 }
@@ -142,6 +153,10 @@ pub enum VariantMeta {
     },
     Disabled(kw::disabled),
     Default(kw::default),
+    AsciiCaseInsensitive {
+        kw: kw::ascii_case_insensitive,
+        value: bool,
+    },
     Props {
         kw: kw::props,
         props: Vec<(LitStr, LitStr)>,
@@ -175,6 +190,15 @@ impl Parse for VariantMeta {
             Ok(VariantMeta::Disabled(input.parse()?))
         } else if lookahead.peek(kw::default) {
             Ok(VariantMeta::Default(input.parse()?))
+        } else if lookahead.peek(kw::ascii_case_insensitive) {
+            let kw = input.parse()?;
+            let value = if input.peek(Token![=]) {
+                let _: Token![=] = input.parse()?;
+                input.parse::<LitBool>()?.value()
+            } else {
+                true
+            };
+            Ok(VariantMeta::AsciiCaseInsensitive { kw, value })
         } else if lookahead.peek(kw::props) {
             let kw = input.parse()?;
             let content;
@@ -216,6 +240,7 @@ impl Spanned for VariantMeta {
             VariantMeta::ToString { kw, .. } => kw.span,
             VariantMeta::Disabled(kw) => kw.span,
             VariantMeta::Default(kw) => kw.span,
+            VariantMeta::AsciiCaseInsensitive { kw, .. } => kw.span,
             VariantMeta::Props { kw, .. } => kw.span,
         }
     }

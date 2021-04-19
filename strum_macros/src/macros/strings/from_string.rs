@@ -50,8 +50,20 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             continue;
         }
 
+        let is_ascii_case_insensitive = variant_properties
+            .ascii_case_insensitive
+            .unwrap_or(type_properties.ascii_case_insensitive);
         // If we don't have any custom variants, add the default serialized name.
-        let attrs = variant_properties.get_serializations(type_properties.case_style);
+        let attrs = variant_properties
+            .get_serializations(type_properties.case_style)
+            .into_iter()
+            .map(|serialization| {
+                if is_ascii_case_insensitive {
+                    quote! { s if s.eq_ignore_ascii_case(#serialization) }
+                } else {
+                    quote! { #serialization }
+                }
+            });
 
         let params = match &variant.fields {
             Fields::Unit => quote! {},
@@ -69,7 +81,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
 
-        arms.push(quote! { #(#attrs)|* => ::std::result::Result::Ok(#name::#ident #params) });
+        arms.push(quote! { #(#attrs => ::std::result::Result::Ok(#name::#ident #params)),* });
     }
 
     arms.push(default);
