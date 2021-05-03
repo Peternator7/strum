@@ -13,6 +13,8 @@ enum Color {
     Green(String),
     #[strum(to_string = "purp")]
     Purple,
+    #[strum(serialize = "blk", serialize = "Black", ascii_case_insensitive)]
+    Black,
 }
 
 #[test]
@@ -42,6 +44,12 @@ fn color_default() {
         Color::Green(String::from("not found")),
         Color::from_str("not found").unwrap()
     );
+}
+
+#[test]
+fn color_ascii_case_insensitive() {
+    assert_eq!(Color::Black, Color::from_str("BLK").unwrap());
+    assert_eq!(Color::Black, Color::from_str("bLaCk").unwrap());
 }
 
 #[derive(Debug, Eq, PartialEq, EnumString)]
@@ -121,4 +129,43 @@ enum Generic<T: Default> {
 #[test]
 fn generic_test() {
     assert_eq!(Generic::Gen(""), Generic::from_str("Gen").unwrap());
+}
+
+#[derive(Debug, Eq, PartialEq, EnumString)]
+#[strum(ascii_case_insensitive)]
+enum CaseInsensitiveEnum {
+    NoAttr,
+    #[strum(ascii_case_insensitive = false)]
+    NoCaseInsensitive,
+    #[strum(ascii_case_insensitive = true)]
+    CaseInsensitive,
+}
+
+#[test]
+fn case_insensitive_enum_no_attr() {
+    assert_eq!(
+        CaseInsensitiveEnum::NoAttr,
+        CaseInsensitiveEnum::from_str("noattr").unwrap()
+    );
+}
+
+#[test]
+fn case_insensitive_enum_no_case_insensitive() {
+    assert_eq!(
+        CaseInsensitiveEnum::NoCaseInsensitive,
+        CaseInsensitiveEnum::from_str("NoCaseInsensitive").unwrap(),
+    );
+    assert!(CaseInsensitiveEnum::from_str("nocaseinsensitive").is_err());
+}
+
+#[test]
+fn case_insensitive_enum_case_insensitive() {
+    assert_eq!(
+        CaseInsensitiveEnum::CaseInsensitive,
+        CaseInsensitiveEnum::from_str("CaseInsensitive").unwrap(),
+    );
+    assert_eq!(
+        CaseInsensitiveEnum::CaseInsensitive,
+        CaseInsensitiveEnum::from_str("caseinsensitive").unwrap(),
+    );
 }

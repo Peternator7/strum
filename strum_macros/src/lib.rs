@@ -66,6 +66,10 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 ///     // Notice that we can disable certain variants from being found
 ///     #[strum(disabled)]
 ///     Yellow,
+///
+///     // We can make the comparison case insensitive (however Unicode is not supported at the moment)
+///     #[strum(ascii_case_insensitive)]
+///     Black,
 /// }
 ///
 /// /*
@@ -77,7 +81,9 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 ///         match s {
 ///             "Red" => ::std::result::Result::Ok(Color::Red),
 ///             "Green" => ::std::result::Result::Ok(Color::Green { range:Default::default() }),
-///             "blue" | "b" => ::std::result::Result::Ok(Color::Blue(Default::default())),
+///             "blue" => ::std::result::Result::Ok(Color::Blue(Default::default())),
+///             "b" => ::std::result::Result::Ok(Color::Blue(Default::default())),
+///             s if s.eq_ignore_ascii_case("Black") => ::std::result::Result::Ok(Color::Black),
 ///             _ => ::std::result::Result::Err(::strum::ParseError::VariantNotFound),
 ///         }
 ///     }
@@ -95,6 +101,8 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// assert!(color_variant.is_err());
 /// // however the variant is still normally usable
 /// println!("{:?}", Color::Yellow);
+/// let color_variant = Color::from_str("bLACk").unwrap();
+/// assert_eq!(Color::Black, color_variant);
 /// ```
 #[proc_macro_derive(EnumString, attributes(strum))]
 pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

@@ -34,6 +34,9 @@
 //! );
 //! ```
 //!
+//! You can also apply the `#[strum(ascii_case_insensitive)]` attribute to the enum,
+//! and this has the same effect of applying it to every variant.
+//!
 //! Custom attributes are applied to a variant by adding `#[strum(parameter="value")]` to the variant.
 //!
 //! - `serialize="..."`: Changes the text that `FromStr()` looks for when parsing a string. This attribute can
@@ -57,6 +60,10 @@
 //!     on your enum.
 //!
 //! - `disabled`: removes variant from generated code.
+//!
+//! - `ascii_case_insensitive`: makes the comparison to this variant case insensitive (ASCII only).
+//!   If the whole enum is marked `ascii_case_insensitive`, you can specify `ascii_case_insensitive = false`
+//!   to disable case insensitivity on this variant.
 //!
 //! - `message=".."`: Adds a message to enum variant. This is used in conjunction with the `EnumMessage`
 //!    trait to associate a message with a variant. If `detailed_message` is not provided,
