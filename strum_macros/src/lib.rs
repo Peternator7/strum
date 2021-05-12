@@ -396,7 +396,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// // Generated code looks like more or less like this:
 /// /*
 /// impl ::strum::EnumMessage for Color {
-///     fn get_message(&self) -> ::std::option::Option<&str> {
+///     fn get_message(&self) -> ::std::option::Option<&'static str> {
 ///         match self {
 ///             &Color::Red => ::std::option::Option::Some("Red"),
 ///             &Color::Green {..} => ::std::option::Option::Some("Simply Green"),
@@ -404,7 +404,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         }
 ///     }
 ///
-///     fn get_detailed_message(&self) -> ::std::option::Option<&str> {
+///     fn get_detailed_message(&self) -> ::std::option::Option<&'static str> {
 ///         match self {
 ///             &Color::Red => ::std::option::Option::Some("This is very red"),
 ///             &Color::Green {..}=> ::std::option::Option::Some("Simply Green"),
@@ -412,7 +412,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         }
 ///     }
 ///
-///     fn get_serializations(&self) -> &[&str] {
+///     fn get_serializations(&self) -> &'static [&'static str] {
 ///         match self {
 ///             &Color::Red => {
 ///                 static ARR: [&'static str; 1] = ["Red"];
