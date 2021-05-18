@@ -118,9 +118,9 @@ pub trait IntoEnumIterator: Sized {
 /// assert_eq!("I have a dog", my_pet.get_message().unwrap());
 /// ```
 pub trait EnumMessage {
-    fn get_message(&self) -> Option<&str>;
-    fn get_detailed_message(&self) -> Option<&str>;
-    fn get_serializations(&self) -> &[&str];
+    fn get_message(&self) -> Option<&'static str>;
+    fn get_detailed_message(&self) -> Option<&'static str>;
+    fn get_serializations(&self) -> &'static [&'static str];
 }
 
 /// EnumProperty is a trait that makes it possible to store additional information
