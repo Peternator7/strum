@@ -87,6 +87,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     arms.push(default);
 
     Ok(quote! {
+        #[allow(clippy::use_self)]
         impl #impl_generics ::std::str::FromStr for #name #ty_generics #where_clause {
             type Err = ::strum::ParseError;
             fn from_str(s: &str) -> ::std::result::Result< #name #ty_generics , Self::Err> {
