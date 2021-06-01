@@ -194,7 +194,7 @@ impl Parse for VariantMeta {
             let kw = input.parse()?;
             let value = if input.peek(Token![=]) {
                 let _: Token![=] = input.parse()?;
-                input.parse::<LitBool>()?.value()
+                input.parse::<LitBool>()?.value
             } else {
                 true
             };
