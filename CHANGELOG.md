@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.21.1
+
+* [#164](https://github.com/Peternator7/strum/pull/164) Improve compatibility with older versions of `syn`.
+
 ## 0.21.0
 
 * Replace `std::` with `core::` to support no-std projects. [#145](https://github.com/Peternator7/strum/pull/145)
