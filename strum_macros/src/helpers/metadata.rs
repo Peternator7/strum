@@ -2,6 +2,7 @@ use proc_macro2::{Span, TokenStream};
 use syn::{
     parenthesized,
     parse::{Parse, ParseStream},
+    parse2, parse_str,
     punctuated::Punctuated,
     spanned::Spanned,
     Attribute, DeriveInput, Ident, LitBool, LitStr, Path, Token, Variant, Visibility,
@@ -14,6 +15,7 @@ pub mod kw {
 
     // enum metadata
     custom_keyword!(serialize_all);
+    custom_keyword!(crate_path);
 
     // enum discriminant metadata
     custom_keyword!(derive);
@@ -37,6 +39,10 @@ pub enum EnumMeta {
         case_style: CaseStyle,
     },
     AsciiCaseInsensitive(kw::ascii_case_insensitive),
+    CratePath {
+        kw: kw::crate_path,
+        path: Path,
+    },
 }
 
 impl Parse for EnumMeta {
@@ -47,6 +53,13 @@ impl Parse for EnumMeta {
             input.parse::<Token![=]>()?;
             let case_style = input.parse()?;
             Ok(EnumMeta::SerializeAll { kw, case_style })
+        } else if lookahead.peek(kw::crate_path) {
+            let kw = input.parse::<kw::crate_path>()?;
+            input.parse::<Token![=]>()?;
+            let path_str: LitStr = input.parse()?;
+            let path_tokens = parse_str(&path_str.value())?;
+            let path = parse2(path_tokens)?;
+            Ok(EnumMeta::CratePath { kw, path })
         } else if lookahead.peek(kw::ascii_case_insensitive) {
             let kw = input.parse()?;
             Ok(EnumMeta::AsciiCaseInsensitive(kw))
@@ -61,6 +74,7 @@ impl Spanned for EnumMeta {
         match self {
             EnumMeta::SerializeAll { kw, .. } => kw.span(),
             EnumMeta::AsciiCaseInsensitive(kw) => kw.span(),
+            EnumMeta::CratePath { kw, .. } => kw.span(),
         }
     }
 }

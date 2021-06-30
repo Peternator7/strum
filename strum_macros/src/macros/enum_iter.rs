@@ -2,13 +2,15 @@ use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{Data, DeriveInput, Ident};
 
-use crate::helpers::{non_enum_error, HasStrumVariantProperties};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
 pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
     let vis = &ast.vis;
+    let type_properties = ast.get_type_properties()?;
+    let strum = type_properties.get_crate_path();
 
     if gen.lifetimes().count() > 0 {
         return Err(syn::Error::new(
@@ -80,7 +82,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
-        impl #impl_generics ::strum::IntoEnumIterator for #name #ty_generics #where_clause {
+        impl #impl_generics #strum::IntoEnumIterator for #name #ty_generics #where_clause {
             type Iterator = #iter_name #ty_generics;
             fn iter() -> #iter_name #ty_generics {
                 #iter_name {
