@@ -175,3 +175,33 @@ fn take_nth_test() {
     assert_eq!(None, iter.next());
     assert_eq!(None, iter.next_back());
 }
+
+#[test]
+fn crate_module_path_test() {
+    use strum as custom_module_path;
+
+    #[derive(Debug, Eq, PartialEq, EnumIter)]
+    #[strum(Crate = "custom_module_path")]
+    enum Week {
+        Sunday,
+        Monday,
+        Tuesday,
+        Wednesday,
+        Thursday,
+        Friday,
+        Saturday,
+    }
+
+    let results = Week::iter().collect::<Vec<_>>();
+    let expected = vec![
+        Week::Sunday,
+        Week::Monday,
+        Week::Tuesday,
+        Week::Wednesday,
+        Week::Thursday,
+        Week::Friday,
+        Week::Saturday,
+    ];
+
+    assert_eq!(expected, results);
+}

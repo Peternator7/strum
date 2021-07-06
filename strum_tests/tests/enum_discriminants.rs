@@ -279,3 +279,23 @@ fn override_visibility() {
         private::PubDiscriminants::VariantB,
     );
 }
+
+#[test]
+fn crate_module_path_test() {
+    #[allow(unused_imports)]
+    use strum as custom_module_path;
+
+    #[allow(dead_code)]
+    #[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
+    #[strum_discriminants(derive(EnumIter))]
+    #[strum(Crate = "custom_module_path")]
+    enum Simple {
+        Variant0,
+        Variant1,
+    }
+
+    let discriminants = SimpleDiscriminants::iter().collect::<Vec<_>>();
+    let expected = vec![SimpleDiscriminants::Variant0, SimpleDiscriminants::Variant1];
+
+    assert_eq!(expected, discriminants);
+}

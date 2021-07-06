@@ -76,3 +76,27 @@ fn get_serializations() {
         (Brightness::BrightWhite).get_serializations()
     );
 }
+
+#[test]
+fn crate_module_path_test() {
+    use strum as custom_module_path;
+
+    #[allow(dead_code)]
+    #[derive(Debug, Eq, PartialEq, EnumMessage)]
+    #[strum(Crate = "custom_module_path")]
+    enum Pets {
+        #[strum(message = "I'm a dog")]
+        Dog,
+        #[strum(message = "I'm a cat")]
+        #[strum(detailed_message = "I'm a very exquisite striped cat")]
+        Cat,
+        #[strum(detailed_message = "My fish is named Charles McFish")]
+        Fish,
+        Bird,
+        #[strum(disabled)]
+        Hamster,
+    }
+
+    assert_eq!("I'm a dog", (Pets::Dog).get_message().unwrap());
+    assert_eq!("I'm a dog", (Pets::Dog).get_detailed_message().unwrap());
+}

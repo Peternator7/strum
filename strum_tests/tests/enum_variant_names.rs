@@ -104,3 +104,21 @@ fn clap_and_structopt() {
         color: Color,
     }
 }
+
+#[test]
+fn crate_module_path_test() {
+    use strum as custom_module_path;
+
+    #[allow(dead_code)]
+    #[derive(EnumVariantNames)]
+    #[strum(Crate = "custom_module_path")]
+    enum Color {
+        Red,
+        #[strum(serialize = "b")]
+        Blue,
+        #[strum(to_string = "y", serialize = "yy")]
+        Yellow,
+    }
+
+    assert_eq!(Color::VARIANTS, &["Red", "b", "y"]);
+}
