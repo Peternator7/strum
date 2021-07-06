@@ -10,7 +10,7 @@ pub(crate) fn enum_count_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         _ => return Err(non_enum_error()),
     };
     let type_properties = ast.get_type_properties()?;
-    let strum = type_properties.get_crate_path();
+    let strum_module_path = type_properties.crate_module_path();
 
     // Used in the quasi-quotation below as `#name`
     let name = &ast.ident;
@@ -20,7 +20,7 @@ pub(crate) fn enum_count_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     Ok(quote! {
         // Implementation
-        impl #impl_generics #strum::EnumCount for #name #ty_generics #where_clause {
+        impl #impl_generics #strum_module_path::EnumCount for #name #ty_generics #where_clause {
             const COUNT: usize = #n;
         }
     })

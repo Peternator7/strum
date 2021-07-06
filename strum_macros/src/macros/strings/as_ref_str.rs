@@ -76,7 +76,7 @@ pub fn as_static_str_inner(
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let arms = get_arms(ast)?;
     let type_properties = ast.get_type_properties()?;
-    let strum = type_properties.get_crate_path();
+    let strum_module_path = type_properties.crate_module_path();
 
     let mut generics = ast.generics.clone();
     generics
@@ -90,7 +90,7 @@ pub fn as_static_str_inner(
 
     Ok(match trait_variant {
         GenerateTraitVariant::AsStaticStr => quote! {
-            impl #impl_generics #strum::AsStaticRef<str> for #name #ty_generics #where_clause {
+            impl #impl_generics #strum_module_path::AsStaticRef<str> for #name #ty_generics #where_clause {
                 fn as_static(&self) -> &'static str {
                     match *self {
                         #(#arms),*

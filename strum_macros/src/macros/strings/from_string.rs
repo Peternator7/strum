@@ -15,11 +15,11 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     };
 
     let type_properties = ast.get_type_properties()?;
-    let strum = type_properties.get_crate_path();
+    let strum_module_path = type_properties.crate_module_path();
 
     let mut default_kw = None;
     let mut default =
-        quote! { _ => ::std::result::Result::Err(#strum::ParseError::VariantNotFound) };
+        quote! { _ => ::std::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) };
     let mut arms = Vec::new();
     for variant in variants {
         let ident = &variant.ident;
@@ -90,7 +90,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     Ok(quote! {
         #[allow(clippy::use_self)]
         impl #impl_generics ::std::str::FromStr for #name #ty_generics #where_clause {
-            type Err = #strum::ParseError;
+            type Err = #strum_module_path::ParseError;
             fn from_str(s: &str) -> ::std::result::Result< #name #ty_generics , Self::Err> {
                 match s {
                     #(#arms),*
