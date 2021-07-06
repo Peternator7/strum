@@ -178,10 +178,14 @@ fn take_nth_test() {
 
 #[test]
 fn crate_module_path_test() {
-    use strum as custom_module_path;
+    pub mod nested {
+        pub mod module {
+            pub use strum;
+        }
+    }
 
     #[derive(Debug, Eq, PartialEq, EnumIter)]
-    #[strum(Crate = "custom_module_path")]
+    #[strum(Crate = "nested::module::strum")]
     enum Week {
         Sunday,
         Monday,

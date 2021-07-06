@@ -282,13 +282,16 @@ fn override_visibility() {
 
 #[test]
 fn crate_module_path_test() {
-    #[allow(unused_imports)]
-    use strum as custom_module_path;
+    pub mod nested {
+        pub mod module {
+            pub use strum;
+        }
+    }
 
     #[allow(dead_code)]
     #[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
     #[strum_discriminants(derive(EnumIter))]
-    #[strum(Crate = "custom_module_path")]
+    #[strum(Crate = "nested::module::strum")]
     enum Simple {
         Variant0,
         Variant1,

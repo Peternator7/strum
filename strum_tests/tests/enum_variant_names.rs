@@ -107,11 +107,15 @@ fn clap_and_structopt() {
 
 #[test]
 fn crate_module_path_test() {
-    use strum as custom_module_path;
+    pub mod nested {
+        pub mod module {
+            pub use strum;
+        }
+    }
 
     #[allow(dead_code)]
     #[derive(EnumVariantNames)]
-    #[strum(Crate = "custom_module_path")]
+    #[strum(Crate = "nested::module::strum")]
     enum Color {
         Red,
         #[strum(serialize = "b")]

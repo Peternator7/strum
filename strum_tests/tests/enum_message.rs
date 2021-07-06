@@ -79,11 +79,15 @@ fn get_serializations() {
 
 #[test]
 fn crate_module_path_test() {
-    use strum as custom_module_path;
+    pub mod nested {
+        pub mod module {
+            pub use strum;
+        }
+    }
 
     #[allow(dead_code)]
     #[derive(Debug, Eq, PartialEq, EnumMessage)]
-    #[strum(Crate = "custom_module_path")]
+    #[strum(Crate = "nested::module::strum")]
     enum Pets {
         #[strum(message = "I'm a dog")]
         Dog,

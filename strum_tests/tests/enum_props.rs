@@ -27,11 +27,15 @@ fn prop_test_not_found_2() {
 
 #[test]
 fn crate_module_path_test() {
-    use strum as custom_module_path;
+    pub mod nested {
+        pub mod module {
+            pub use strum;
+        }
+    }
 
     #[allow(dead_code)]
     #[derive(Debug, EnumProperty)]
-    #[strum(Crate = "custom_module_path")]
+    #[strum(Crate = "nested::module::strum")]
     enum Test {
         #[strum(props(key = "value"))]
         A,
