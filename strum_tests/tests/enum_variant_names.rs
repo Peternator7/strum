@@ -115,7 +115,7 @@ fn crate_module_path_test() {
 
     #[allow(dead_code)]
     #[derive(EnumVariantNames)]
-    #[strum(Crate = "nested::module::strum")]
+    #[strum(crate = "nested::module::strum")]
     enum Color {
         Red,
         #[strum(serialize = "b")]

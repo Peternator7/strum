@@ -11,11 +11,11 @@ use syn::{
 use super::case_style::CaseStyle;
 
 pub mod kw {
+    pub use syn::token::Crate;
     use syn::custom_keyword;
 
     // enum metadata
     custom_keyword!(serialize_all);
-    custom_keyword!(Crate);
 
     // enum discriminant metadata
     custom_keyword!(derive);

@@ -185,7 +185,7 @@ fn crate_module_path_test() {
     }
 
     #[derive(Debug, Eq, PartialEq, EnumIter)]
-    #[strum(Crate = "nested::module::strum")]
+    #[strum(crate = "nested::module::strum")]
     enum Week {
         Sunday,
         Monday,
