@@ -104,3 +104,25 @@ fn clap_and_structopt() {
         color: Color,
     }
 }
+
+#[test]
+fn crate_module_path_test() {
+    pub mod nested {
+        pub mod module {
+            pub use strum;
+        }
+    }
+
+    #[allow(dead_code)]
+    #[derive(EnumVariantNames)]
+    #[strum(crate = "nested::module::strum")]
+    enum Color {
+        Red,
+        #[strum(serialize = "b")]
+        Blue,
+        #[strum(to_string = "y", serialize = "yy")]
+        Yellow,
+    }
+
+    assert_eq!(Color::VARIANTS, &["Red", "b", "y"]);
+}

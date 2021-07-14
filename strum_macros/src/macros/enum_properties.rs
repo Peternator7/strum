@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput};
 
-use crate::helpers::{non_enum_error, HasStrumVariantProperties};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
 pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -11,6 +11,8 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         Data::Enum(v) => &v.variants,
         _ => return Err(non_enum_error()),
     };
+    let type_properties = ast.get_type_properties()?;
+    let strum_module_path = type_properties.crate_module_path();
 
     let mut arms = Vec::new();
     for variant in variants {
@@ -53,7 +55,7 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     }
 
     Ok(quote! {
-        impl #impl_generics ::strum::EnumProperty for #name #ty_generics #where_clause {
+        impl #impl_generics #strum_module_path::EnumProperty for #name #ty_generics #where_clause {
             fn get_str(&self, prop: &str) -> ::core::option::Option<&'static str> {
                 match self {
                     #(#arms),*
