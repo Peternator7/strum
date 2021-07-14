@@ -11,8 +11,8 @@ use syn::{
 use super::case_style::CaseStyle;
 
 pub mod kw {
-    pub use syn::token::Crate;
     use syn::custom_keyword;
+    pub use syn::token::Crate;
 
     // enum metadata
     custom_keyword!(serialize_all);
