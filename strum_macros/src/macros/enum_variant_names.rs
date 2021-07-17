@@ -16,6 +16,7 @@ pub fn enum_variant_names_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     // Derives for the generated enum
     let type_properties = ast.get_type_properties()?;
+    let strum_module_path = type_properties.crate_module_path();
 
     let names = variants
         .iter()
@@ -26,7 +27,7 @@ pub fn enum_variant_names_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         .collect::<syn::Result<Vec<_>>>()?;
 
     Ok(quote! {
-        impl #impl_generics ::strum::VariantNames for #name #ty_generics #where_clause {
+        impl #impl_generics #strum_module_path::VariantNames for #name #ty_generics #where_clause {
             const VARIANTS: &'static [&'static str] = &[ #(#names),* ];
         }
     })

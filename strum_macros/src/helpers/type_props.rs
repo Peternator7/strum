@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::default::Default;
-use syn::{DeriveInput, Ident, Path, Visibility};
+use syn::{parse_quote, DeriveInput, Ident, Path, Visibility};
 
 use super::case_style::CaseStyle;
 use super::metadata::{DeriveInputExt, EnumDiscriminantsMeta, EnumMeta};
@@ -15,6 +15,7 @@ pub trait HasTypeProperties {
 pub struct StrumTypeProperties {
     pub case_style: Option<CaseStyle>,
     pub ascii_case_insensitive: bool,
+    pub crate_module_path: Option<Path>,
     pub discriminant_derives: Vec<Path>,
     pub discriminant_name: Option<Ident>,
     pub discriminant_others: Vec<TokenStream>,
@@ -30,6 +31,7 @@ impl HasTypeProperties for DeriveInput {
 
         let mut serialize_all_kw = None;
         let mut ascii_case_insensitive_kw = None;
+        let mut crate_module_path_kw = None;
         for meta in strum_meta {
             match meta {
                 EnumMeta::SerializeAll { case_style, kw } => {
@@ -47,6 +49,17 @@ impl HasTypeProperties for DeriveInput {
 
                     ascii_case_insensitive_kw = Some(kw);
                     output.ascii_case_insensitive = true;
+                }
+                EnumMeta::Crate {
+                    crate_module_path,
+                    kw,
+                } => {
+                    if let Some(fst_kw) = crate_module_path_kw {
+                        return Err(occurrence_error(fst_kw, kw, "Crate"));
+                    }
+
+                    crate_module_path_kw = Some(kw);
+                    output.crate_module_path = Some(crate_module_path);
                 }
             }
         }
@@ -81,5 +94,15 @@ impl HasTypeProperties for DeriveInput {
         }
 
         Ok(output)
+    }
+}
+
+impl StrumTypeProperties {
+    pub fn crate_module_path(&self) -> Path {
+        if let Some(path) = &self.crate_module_path {
+            parse_quote!(#path)
+        } else {
+            parse_quote!(::strum)
+        }
     }
 }

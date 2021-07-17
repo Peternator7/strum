@@ -13,6 +13,7 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     };
 
     let type_properties = ast.get_type_properties()?;
+    let strum_module_path = type_properties.crate_module_path();
 
     let mut arms = Vec::new();
     let mut detailed_arms = Vec::new();
@@ -79,7 +80,7 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     }
 
     Ok(quote! {
-        impl #impl_generics ::strum::EnumMessage for #name #ty_generics #where_clause {
+        impl #impl_generics #strum_module_path::EnumMessage for #name #ty_generics #where_clause {
             fn get_message(&self) -> ::core::option::Option<&'static str> {
                 match self {
                     #(#arms),*
