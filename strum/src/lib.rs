@@ -36,6 +36,7 @@ pub enum ParseError {
     VariantNotFound,
 }
 
+#[cfg(feature = "std")]
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         // We could use our macro here, but this way we don't take a dependency on the
@@ -46,6 +47,7 @@ impl std::fmt::Display for ParseError {
     }
 }
 
+#[cfg(feature = "std")]
 impl std::error::Error for ParseError {
     fn description(&self) -> &str {
         match self {

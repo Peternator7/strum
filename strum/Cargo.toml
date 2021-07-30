@@ -24,7 +24,9 @@ strum_macros = { path = "../strum_macros", version = "0.21" }
 travis-ci = { repository = "Peternator7/strum" }
 
 [features]
+default = ["std"]
 derive = ["strum_macros"]
+std = []
 
 [package.metadata.docs.rs]
 features = ["derive"]
