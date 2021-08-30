@@ -152,6 +152,20 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
     };
+    let impl_discriminants = {
+        let type_properties = ast.get_type_properties()?;
+        let strum_module_path = type_properties.crate_module_path();
+
+        quote! {
+            impl #impl_generics #strum_module_path::EnumDiscriminants for #name #ty_generics #where_clause {
+                type Discriminants = #discriminants_name;
+
+                fn discriminants(&self) -> Self::Discriminants {
+                    <Self::Discriminants as ::core::convert::From<&Self>>::from(self)
+                }
+            }
+        }
+    };
 
     Ok(quote! {
         /// Auto-generated discriminant enum variants
@@ -163,5 +177,6 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         #impl_from
         #impl_from_ref
+        #impl_discriminants
     })
 }
