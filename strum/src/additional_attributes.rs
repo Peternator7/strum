@@ -9,7 +9,7 @@
 //! use strum;
 //! use strum_macros;
 //!
-//! #[derive(Debug, Eq, PartialEq, strum_macros::ToString)]
+//! #[derive(Debug, Eq, PartialEq, strum_macros::Display)]
 //! #[strum(serialize_all = "snake_case")]
 //! enum Brightness {
 //!     DarkBlack,
@@ -43,7 +43,7 @@
 //!    be applied multiple times to an element and the enum variant will be parsed if any of them match.
 //!
 //! - `to_string="..."`: Similar to `serialize`. This value will be included when using `FromStr()`. More importantly,
-//!    this specifies what text to use when calling `variant.to_string()` with the `ToString` derivation, or when calling `variant.as_ref()` with `AsRefStr`.
+//!    this specifies what text to use when calling `variant.to_string()` with the `Display` derivation, or when calling `variant.as_ref()` with `AsRefStr`.
 //!
 //! - `default`: Applied to a single variant of an enum. The variant must be a Tuple-like
 //!    variant with a single piece of data that can be create from a `&str` i.e. `T: From<&str>`.
@@ -63,7 +63,7 @@
 //!
 //! - `ascii_case_insensitive`: makes the comparison to this variant case insensitive (ASCII only).
 //!   If the whole enum is marked `ascii_case_insensitive`, you can specify `ascii_case_insensitive = false`
-//!   to disable case insensitivity on this variant.
+//!   to disable case insensitivity on this v ariant.
 //!
 //! - `message=".."`: Adds a message to enum variant. This is used in conjunction with the `EnumMessage`
 //!    trait to associate a message with a variant. If `detailed_message` is not provided,
