@@ -191,6 +191,7 @@ pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 }
 
 #[proc_macro_derive(AsStaticStr, attributes(strum))]
+#[deprecated(since="0.22.0", note="please use `#[derive(IntoStaticStr)]` instead")]
 pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
