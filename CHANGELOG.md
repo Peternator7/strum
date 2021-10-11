@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.22.0
+
+* [#180](https://github.com/Peternator7/strum/pull/180): Deprecates `ToString` derive. You should use `Display`
+  instead.
+
+* [#178](https://github.com/Peternator7/strum/pull/178): Deprecates AsStaticStr. This has been undocumented for a while.
+  The recommended method is to derive `IntoStaticStr` instead.
+
+* [#171](https://github.com/Peternator7/strum/pull/171): Improve `no-std` support. 
+
+* [#170](https://github.com/Peternator7/strum/pull/170): enable changing the path to strum traits. This is necessary
+  if you re-export strum as a submodule in another crate.
+
 ## 0.21.1
 
 * [#164](https://github.com/Peternator7/strum/pull/164) Improve compatibility with older versions of `syn`.
