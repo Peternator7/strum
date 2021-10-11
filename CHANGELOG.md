@@ -2,6 +2,9 @@
 
 ## 0.22.0
 
+* [#180](https://github.com/Peternator7/strum/pull/180): Deprecates `ToString` derive. You should use `Display`
+  instead.
+
 * [#178](https://github.com/Peternator7/strum/pull/178): Deprecates AsStaticStr. This has been undocumented for a while.
   The recommended method is to derive `IntoStaticStr` instead.
 
