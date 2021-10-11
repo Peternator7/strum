@@ -1,41 +1,57 @@
 //! # Documentation for Additional Attributes
+//! 
+//! ## Attributes on Enums
 //!
-//! Strum supports several custom attributes to modify the generated code. At the enum level, the
-//! `#[strum(serialize_all = "snake_case")]` attribute can be used to change the case used when
-//! serializing to and deserializing from strings:
+//! Strum supports several custom attributes to modify the generated code. At the enum level, the following attributes are supported:
+//! 
+//! - `#[strum(serialize_all = "case_style")]` attribute can be used to change the case used when serializing to and deserializing 
+//!   from strings. This feature is enabled by [withoutboats/heck](https://github.com/withoutboats/heck) and supported case styles are:
+//! 
+//!   - `camelCase`
+//!   - `PascalCase`
+//!   - `kebab-case`
+//!   - `snake_case`
+//!   - `SCREAMING_SNAKE_CASE`
+//!   - `SCREAMING-KEBAB-CASE`
+//!   - `lowercase`
+//!   - `UPPERCASE`
+//!   - `title_case`
+//!   - `mixed_case`
+//! 
+//!   ```rust
+//!   use std::string::ToString;
+//!   use strum;
+//!   use strum_macros;
+//!   
+//!   #[derive(Debug, Eq, PartialEq, strum_macros::ToString)]
+//!   #[strum(serialize_all = "snake_case")]
+//!   enum Brightness {
+//!       DarkBlack,
+//!       Dim {
+//!           glow: usize,
+//!       },
+//!       #[strum(serialize = "bright")]
+//!       BrightWhite,
+//!   }
+//!   
+//!   assert_eq!(
+//!       String::from("dark_black"),
+//!       Brightness::DarkBlack.to_string().as_ref()
+//!   );
+//!   assert_eq!(
+//!       String::from("dim"),
+//!       Brightness::Dim { glow: 0 }.to_string().as_ref()
+//!   );
+//!   assert_eq!(
+//!       String::from("bright"),
+//!       Brightness::BrightWhite.to_string().as_ref()
+//!   );
+//!   ```
 //!
-//! ```rust
-//! use std::string::ToString;
-//! use strum;
-//! use strum_macros;
-//!
-//! #[derive(Debug, Eq, PartialEq, strum_macros::ToString)]
-//! #[strum(serialize_all = "snake_case")]
-//! enum Brightness {
-//!     DarkBlack,
-//!     Dim {
-//!         glow: usize,
-//!     },
-//!     #[strum(serialize = "bright")]
-//!     BrightWhite,
-//! }
-//!
-//! assert_eq!(
-//!     String::from("dark_black"),
-//!     Brightness::DarkBlack.to_string().as_ref()
-//! );
-//! assert_eq!(
-//!     String::from("dim"),
-//!     Brightness::Dim { glow: 0 }.to_string().as_ref()
-//! );
-//! assert_eq!(
-//!     String::from("bright"),
-//!     Brightness::BrightWhite.to_string().as_ref()
-//! );
-//! ```
-//!
-//! You can also apply the `#[strum(ascii_case_insensitive)]` attribute to the enum,
-//! and this has the same effect of applying it to every variant.
+//! - You can also apply the `#[strum(ascii_case_insensitive)]` attribute to the enum,
+//!   and this has the same effect of applying it to every variant.
+//! 
+//! ## Attributes on Variants
 //!
 //! Custom attributes are applied to a variant by adding `#[strum(parameter="value")]` to the variant.
 //!
@@ -43,7 +59,7 @@
 //!    be applied multiple times to an element and the enum variant will be parsed if any of them match.
 //!
 //! - `to_string="..."`: Similar to `serialize`. This value will be included when using `FromStr()`. More importantly,
-//!    this specifies what text to use when calling `variant.to_string()` with the `ToString` derivation, or when calling `variant.as_ref()` with `AsRefStr`.
+//!    this specifies what text to use when calling `variant.to_string()` with the `Display` derivation, or when calling `variant.as_ref()` with `AsRefStr`.
 //!
 //! - `default`: Applied to a single variant of an enum. The variant must be a Tuple-like
 //!    variant with a single piece of data that can be create from a `&str` i.e. `T: From<&str>`.
@@ -63,7 +79,7 @@
 //!
 //! - `ascii_case_insensitive`: makes the comparison to this variant case insensitive (ASCII only).
 //!   If the whole enum is marked `ascii_case_insensitive`, you can specify `ascii_case_insensitive = false`
-//!   to disable case insensitivity on this variant.
+//!   to disable case insensitivity on this v ariant.
 //!
 //! - `message=".."`: Adds a message to enum variant. This is used in conjunction with the `EnumMessage`
 //!    trait to associate a message with a variant. If `detailed_message` is not provided,

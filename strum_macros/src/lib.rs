@@ -271,6 +271,7 @@ pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// let yellow = Color::Yellow;
 /// assert_eq!(String::from("Yellow"), yellow.to_string());
 /// ```
+#[deprecated(since="0.22.0", note="please use `#[derive(Display)]` instead. See issue https://github.com/Peternator7/strum/issues/132")]
 #[proc_macro_derive(ToString, attributes(strum))]
 pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
