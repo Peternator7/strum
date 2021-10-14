@@ -37,7 +37,7 @@ Strum has implemented the following macros:
 | --- | ----------- |
 | [EnumString] | Converts strings to enum variants based on their name |
 | [Display] | Converts enum variants to strings |
-| [AsRefStr] | Converts enum variants to `&'static str` |
+| [AsRefStr] | Implement `AsRef<str>` for `MyEnum` |
 | [IntoStaticStr] | Implements `From<MyEnum> for &'static str` on an enum |
 | [EnumVariantNames] | Adds an associated `VARIANTS` constant which is an array of discriminant names |
 | [EnumIter] | Creates a new type that iterates of the variants of an enum. |
