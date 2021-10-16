@@ -7,10 +7,7 @@ use crate::helpers::{non_enum_error, HasStrumVariantProperties};
 pub fn enum_const_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
-    let (_impl_generics, ty_generics, _where_clause) = gen.split_for_impl();
     let vis = &ast.vis;
-    //let type_properties = ast.get_type_properties()?;
-    //let strum_module_path = type_properties.crate_module_path();
 
     if gen.lifetimes().count() > 0 {
         return Err(syn::Error::new(
@@ -75,7 +72,7 @@ pub fn enum_const_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     Ok(quote! {
         impl #name #gen {
-            #vis const fn const_get(idx: usize) -> Option<#name #ty_generics> {
+            #vis const fn const_get(idx: usize) -> Option<#name #gen> {
                 match idx {
                     #(#arms),*
                 }
