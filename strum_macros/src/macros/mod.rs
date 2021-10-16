@@ -1,3 +1,4 @@
+pub mod enum_const_index;
 pub mod enum_count;
 pub mod enum_discriminants;
 pub mod enum_iter;

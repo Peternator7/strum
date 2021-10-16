@@ -374,6 +374,16 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
+#[proc_macro_derive(EnumConstIndex, attributes(strum))]
+pub fn enum_const_index(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks =
+        macros::enum_const_index::enum_const_index_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
 /// Add a verbose message to an enum variant.
 ///
 /// Encode strings into the enum itself. The `strum_macros::EmumMessage` macro implements the `strum::EnumMessage` trait.
