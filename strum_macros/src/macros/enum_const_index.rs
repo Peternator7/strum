@@ -2,12 +2,12 @@ use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{Data, DeriveInput};
 
-use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties};
 
 pub fn enum_const_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
-    let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
+    let (_impl_generics, ty_generics, _where_clause) = gen.split_for_impl();
     let vis = &ast.vis;
     //let type_properties = ast.get_type_properties()?;
     //let strum_module_path = type_properties.crate_module_path();
@@ -50,6 +50,22 @@ pub fn enum_const_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 quote! { {#(#fields: ::core::default::Default::default()),*} }
             }
         };
+
+        if let Some((_eq,expr)) = &variant.discriminant {
+            if let syn::Expr::Lit(expr_lit) = expr {
+                if let syn::Lit::Int(int_lit) = &expr_lit.lit {
+                    if let Ok(v) = int_lit.base10_parse() {
+                        idx = v;
+                    } else {
+                        panic!()
+                    }
+                } else {
+                    panic!();
+                }
+            } else {
+                panic!();
+            }
+        }
 
         arms.push(quote! {#idx => ::core::option::Option::Some(#name::#ident #params)});
         idx += 1;
