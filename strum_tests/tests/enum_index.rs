@@ -1,6 +1,7 @@
 use strum::{EnumIndex};
 
 #[derive(Debug, EnumIndex, PartialEq)]
+#[repr(u8)]
 enum Week {
     Sunday,
     Monday,
@@ -13,10 +14,11 @@ enum Week {
 
 #[test]
 fn simple_test() {
-    assert_eq!(Week::const_get(0), Some(Week::Sunday));
-    assert_eq!(Week::const_get(7), None);
-    assert_eq!(Week::const_get(8), Some(Week::Saturday));
-    assert_eq!(Week::const_get(9), None);
+    assert_eq!(Week::const_index(0), Some(Week::Sunday));
+    assert_eq!(Week::const_index(1), Some(Week::Monday));
+    assert_eq!(Week::const_index(7), None);
+    assert_eq!(Week::const_index(8), Some(Week::Saturday));
+    assert_eq!(Week::const_index(9), None);
 }
 
 #[test]
@@ -39,7 +41,7 @@ fn crate_module_path_test() {
         Saturday,
     }
 
-    assert_eq!(Week::const_get(0), Some(Week::Sunday));
-    assert_eq!(Week::const_get(6), Some(Week::Saturday));
-    assert_eq!(Week::const_get(7), None);
+    assert_eq!(Week::const_index(0), Some(Week::Sunday));
+    assert_eq!(Week::const_index(6), Some(Week::Saturday));
+    assert_eq!(Week::const_index(7), None);
 }

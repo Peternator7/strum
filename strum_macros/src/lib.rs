@@ -404,6 +404,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert_eq!(None, Color::index(4));
 ///
 /// #[derive(EnumIndex, Debug, PartialEq)]
+/// #[repr(u8)]
 /// enum Vehicle {
 ///     Car = 1,
 ///     Truck = 3,
