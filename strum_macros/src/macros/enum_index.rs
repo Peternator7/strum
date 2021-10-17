@@ -4,7 +4,7 @@ use syn::{Data, DeriveInput};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties};
 
-pub fn enum_const_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
+pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let vis = &ast.vis;
@@ -24,6 +24,7 @@ pub fn enum_const_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let mut arms = Vec::new();
     let mut idx = 0usize;
+    let mut has_additional_data = false;
     for variant in variants {
         use syn::Fields::*;
 
@@ -35,11 +36,13 @@ pub fn enum_const_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let params = match &variant.fields {
             Unit => quote! {},
             Unnamed(fields) => {
+                has_additional_data = true;
                 let defaults = ::std::iter::repeat(quote!(::core::default::Default::default()))
                     .take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
             Named(fields) => {
+                has_additional_data = true;
                 let fields = fields
                     .named
                     .iter()
@@ -70,13 +73,29 @@ pub fn enum_const_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     arms.push(quote! { _ => ::core::option::Option::None });
 
+    let const_impl = if has_additional_data {
+        quote! {}
+    } else {
+        quote! {
+            impl #name #gen {
+                #vis const fn const_index(idx: usize) -> Option<#name #gen> {
+                    match idx {
+                        #(#arms),*
+                    }
+                }
+            }
+        }
+    };
+
     Ok(quote! {
         impl #name #gen {
-            #vis const fn const_get(idx: usize) -> Option<#name #gen> {
+            #vis fn index(idx: usize) -> Option<#name #gen> {
                 match idx {
                     #(#arms),*
                 }
             }
         }
+
+        #const_impl
     })
 }

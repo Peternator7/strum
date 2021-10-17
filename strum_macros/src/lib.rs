@@ -374,12 +374,54 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-#[proc_macro_derive(EnumConstIndex, attributes(strum))]
-pub fn enum_const_index(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+/// Add a function to enum that allows accessing variants by index
+///
+/// The macro adds up to two standalone functions. The macro adds `index(idx: usize) -> Option<YourEnum>` which
+/// will use `Default::default()` for any additional data on the variant. For enums where there is
+/// no additional data on any, a seocnd function `const_index(idx: usize) -> Option<YourEnum>` is added. 
+/// This function is marked `const` allowing it to be used in a `const` context. Since
+/// `Default::default()` is not `const` it is not possible to use it to accomodate additional data.
+///
+/// You cannot derive `EnumIndex` on any type with a lifetime bound (`<'a>`) because the function would surely
+/// create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
+///
+/// ```
+///
+/// use strum_macros::EnumIndex;
+///
+/// #[derive(EnumIndex, Debug, PartialEq)]
+/// enum Color {
+///     Red,
+///     Green { range: usize },
+///     Blue(usize),
+///     Yellow,
+/// }
+///
+/// assert_eq!(Some(Color::Red), Color::index(0));
+/// assert_eq!(Some(Color::Green {range: 0}), Color::index(1));
+/// assert_eq!(Some(Color::Blue(0)), Color::index(2));
+/// assert_eq!(Some(Color::Yellow), Color::index(3));
+/// assert_eq!(None, Color::index(4));
+///
+/// #[derive(EnumIndex, Debug, PartialEq)]
+/// enum Vehicle {
+///     Car = 1,
+///     Truck = 3,
+/// }
+///
+/// assert_eq!(None, Vehicle::const_index(0));
+/// assert_eq!(Some(Vehicle::Car), Vehicle::const_index(1));
+/// assert_eq!(None, Vehicle::const_index(2));
+/// assert_eq!(Some(Vehicle::Truck), Vehicle::const_index(3));
+/// assert_eq!(None, Vehicle::const_index(4));
+/// ```
+
+#[proc_macro_derive(EnumIndex, attributes(strum))]
+pub fn enum_index(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
     let toks =
-        macros::enum_const_index::enum_const_index_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
+        macros::enum_index::enum_index_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }

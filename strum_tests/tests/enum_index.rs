@@ -1,6 +1,6 @@
-use strum::{EnumConstIndex};
+use strum::{EnumIndex};
 
-#[derive(Debug, EnumConstIndex, PartialEq)]
+#[derive(Debug, EnumIndex, PartialEq)]
 enum Week {
     Sunday,
     Monday,
@@ -27,7 +27,7 @@ fn crate_module_path_test() {
         }
     }
 
-    #[derive(Debug, EnumConstIndex, PartialEq)]
+    #[derive(Debug, EnumIndex, PartialEq)]
     #[strum(crate = "nested::module::strum")]
     enum Week {
         Sunday,
