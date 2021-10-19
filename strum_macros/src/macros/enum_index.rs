@@ -45,7 +45,7 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
         if let Some(seg) = inner_path.path.segments.last() {
-            for t in ["u8","u16","u32","u64","usize","i8","i16","i32","i64","isize"] {
+            for t in &["u8","u16","u32","u64","usize","i8","i16","i32","i64","isize"] {
                 if seg.ident == t {
                     index_type = typ_paren;
                     break
