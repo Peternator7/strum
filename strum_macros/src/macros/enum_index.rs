@@ -10,8 +10,6 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let vis = &ast.vis;
     let attrs = &ast.attrs;
 
-    let mod_name = quote::format_ident!("{}Index",name);
-
     let mut index_type: Type = syn::parse("usize".parse().unwrap()).unwrap();
     for attr in attrs {
         let path = &attr.path;
@@ -69,9 +67,8 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let mut arms = Vec::new();
     let mut const_defs = Vec::new();
-    let mut var_idx = 0usize;
     let mut has_additional_data = false;
-    let mut prev_const_var_name = None;
+    let mut prev_const_var_ident = None;
     for variant in variants {
         use syn::Fields::*;
 
@@ -98,12 +95,15 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
 
-        let const_var_name = syn::parse_str::<Ident>(&format!("VARIANT{}", var_idx)).unwrap();
+        use heck::ShoutySnakeCase;
+        let const_var_name = format!("{}{}",name, variant.ident.to_string()).to_shouty_snake_case();
+        let const_var_ident = syn::parse_str::<Ident>(&const_var_name).unwrap();
+
         let mut discriminant_found = false;
         if let Some((_eq,expr)) = &variant.discriminant {
             if let syn::Expr::Lit(expr_lit) = expr {
                 if let syn::Lit::Int(int_lit) = &expr_lit.lit {
-                    const_defs.push(quote! {pub const #const_var_name: #index_type = #int_lit;});
+                    const_defs.push(quote! {pub const #const_var_ident: #index_type = #int_lit;});
                     discriminant_found = true;
                 } else {
                     panic!();
@@ -113,16 +113,15 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
         if !discriminant_found {
-            if let Some(prev) = &prev_const_var_name {
-                const_defs.push(quote! {pub const #const_var_name: #index_type = #prev + 1;});
+            if let Some(prev) = &prev_const_var_ident {
+                const_defs.push(quote! {pub const #const_var_ident: #index_type = #prev + 1;});
             } else {
-                const_defs.push(quote! {pub const #const_var_name: #index_type = 0;});
+                const_defs.push(quote! {pub const #const_var_ident: #index_type = 0;});
             }
         }
 
-        arms.push(quote! {v if v == #mod_name::#const_var_name => ::core::option::Option::Some(#name::#ident #params)});
-        prev_const_var_name = Some(const_var_name);
-        var_idx += 1;
+        arms.push(quote! {v if v == #const_var_ident => ::core::option::Option::Some(#name::#ident #params)});
+        prev_const_var_ident = Some(const_var_ident);
     }
 
     arms.push(quote! { _ => ::core::option::Option::None });
@@ -140,9 +139,7 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     };
 
     Ok(quote! {
-        mod #mod_name {
-            #(#const_defs)*
-        }
+        #(#const_defs)*
 
         impl #name #gen {
             fn index(idx: #index_type) -> Option<#name #gen> {
