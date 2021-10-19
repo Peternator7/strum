@@ -1,8 +1,10 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use syn::{Data, DeriveInput, PathArguments, Type, TypeParen, Ident};
+use syn::{Data, DeriveInput, Ident, PathArguments, Type, TypeParen};
 
-use crate::helpers::{non_enum_error, HasStrumVariantProperties};
+use crate::helpers::{
+    non_enum_error, non_integer_literal_discriminant_error, HasStrumVariantProperties,
+};
 
 pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -15,38 +17,33 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let path = &attr.path;
         let tokens = &attr.tokens;
         if path.leading_colon.is_some() {
-            continue
+            continue;
         }
         if path.segments.len() != 1 {
-            continue
+            continue;
         }
         let segment = path.segments.first().unwrap();
         if segment.ident != "repr" {
-            continue
+            continue;
         }
         if segment.arguments != PathArguments::None {
-            continue
+            continue;
         }
         let typ_paren = match syn::parse2::<Type>(tokens.clone()) {
-            Ok(Type::Paren(TypeParen {
-                elem,
-                ..
-            })) => *elem,
-            _ => {
-                continue
-            }
+            Ok(Type::Paren(TypeParen { elem, .. })) => *elem,
+            _ => continue,
         };
         let inner_path = match &typ_paren {
             Type::Path(t) => t,
-            _ => {
-                continue
-            }
+            _ => continue,
         };
         if let Some(seg) = inner_path.path.segments.last() {
-            for t in &["u8","u16","u32","u64","usize","i8","i16","i32","i64","isize"] {
+            for t in &[
+                "u8", "u16", "u32", "u64", "usize", "i8", "i16", "i32", "i64", "isize",
+            ] {
                 if seg.ident == t {
                     index_type = typ_paren;
-                    break
+                    break;
                 }
             }
         }
@@ -96,20 +93,23 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         };
 
         use heck::ShoutySnakeCase;
-        let const_var_name = format!("{}{}",name, variant.ident.to_string()).to_shouty_snake_case();
+        let const_var_name =
+            format!("{}{}", name, variant.ident.to_string()).to_shouty_snake_case();
         let const_var_ident = syn::parse_str::<Ident>(&const_var_name).unwrap();
 
         let mut discriminant_found = false;
-        if let Some((_eq,expr)) = &variant.discriminant {
+        if let Some((_eq, expr)) = &variant.discriminant {
             if let syn::Expr::Lit(expr_lit) = expr {
                 if let syn::Lit::Int(int_lit) = &expr_lit.lit {
                     const_defs.push(quote! {pub const #const_var_ident: #index_type = #int_lit;});
                     discriminant_found = true;
                 } else {
-                    panic!();
+                    // Not sure if this is even reachable
+                    return Err(non_integer_literal_discriminant_error());
                 }
             } else {
-                panic!();
+                // Not sure if this is even reachable
+                return Err(non_integer_literal_discriminant_error());
             }
         }
         if !discriminant_found {

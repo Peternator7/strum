@@ -15,6 +15,13 @@ pub fn non_enum_error() -> syn::Error {
     syn::Error::new(Span::call_site(), "This macro only supports enums.")
 }
 
+pub fn non_integer_literal_discriminant_error() -> syn::Error {
+    syn::Error::new(
+        Span::call_site(),
+        "This macro only supports integer literal discriminants.",
+    )
+}
+
 pub fn strum_discriminants_passthrough_error(span: impl Spanned) -> syn::Error {
     syn::Error::new(
         span.span(),

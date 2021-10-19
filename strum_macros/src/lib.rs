@@ -384,7 +384,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// `const_index(idx: usize) -> Option<YourEnum>` is added.  This function is marked `const` allowing
 /// it to be used in a `const` context. Since `Default::default()` is not `const` it is not possible
 /// to define this function if there is additional data on any variant, therefore it is omitted
-/// entirely. For these enums, a constant is also added for each variant of the form 
+/// entirely. For these enums, a constant is also added for each variant of the form
 /// `const {ENUM}_{VARIANT}: {repr_int_type} = {discriminant}`
 ///
 /// You cannot derive `EnumIndex` on any type with a lifetime bound (`<'a>`) because the function would surely

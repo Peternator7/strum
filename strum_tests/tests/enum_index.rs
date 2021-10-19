@@ -1,4 +1,4 @@
-use strum::{EnumIndex};
+use strum::EnumIndex;
 
 #[derive(Debug, EnumIndex, PartialEq)]
 #[repr(u8)]
@@ -9,7 +9,7 @@ enum Week {
     Wednesday,
     Thursday,
     Friday,
-    Saturday=8,
+    Saturday = 8,
 }
 
 #[test]
