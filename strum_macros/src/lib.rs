@@ -376,11 +376,16 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Add a function to enum that allows accessing variants by index
 ///
-/// The macro adds up to two standalone functions. The macro adds `index(idx: usize) -> Option<YourEnum>` which
-/// will use `Default::default()` for any additional data on the variant. For enums where there is
-/// no additional data on any, a seocnd function `const_index(idx: usize) -> Option<YourEnum>` is added. 
-/// This function is marked `const` allowing it to be used in a `const` context. Since
-/// `Default::default()` is not `const` it is not possible to use it to accomodate additional data.
+/// The macro adds up to two standalone functions as well as numeric constants for each variant. The
+/// macro adds `index(idx: usize) -> Option<YourEnum>` which will use `Default::default()` for any
+/// additional data on the variant.
+///
+/// For enums where there is no additional data on any, a second function
+/// `const_index(idx: usize) -> Option<YourEnum>` is added.  This function is marked `const` allowing
+/// it to be used in a `const` context. Since `Default::default()` is not `const` it is not possible
+/// to define this function if there is additional data on any variant, therefore it is omitted
+/// entirely. For these enums, a constant is also added for each variant of the form 
+/// `const {ENUM}_{VARIANT}: {repr_int_type} = {discriminant}`
 ///
 /// You cannot derive `EnumIndex` on any type with a lifetime bound (`<'a>`) because the function would surely
 /// create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
@@ -415,6 +420,8 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert_eq!(None, Vehicle::const_index(2));
 /// assert_eq!(Some(Vehicle::Truck), Vehicle::const_index(3));
 /// assert_eq!(None, Vehicle::const_index(4));
+/// assert_eq!(VEHICLE_CAR, 1);
+/// assert_eq!(VEHICLE_TRUCK, 3);
 /// ```
 
 #[proc_macro_derive(EnumIndex, attributes(strum))]

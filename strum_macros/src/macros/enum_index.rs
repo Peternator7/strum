@@ -126,11 +126,10 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     arms.push(quote! { _ => ::core::option::Option::None });
 
-    let const_impl = if has_additional_data {
-        quote! {}
-    } else {
-        quote! {
-            #vis const fn const_index(idx: #index_type) -> Option<#name #gen> {
+    let nonconst_impl = quote! {
+        impl #name #gen {
+            fn index(idx: #index_type) -> Option<#name #gen> {
+                #(#const_defs)*
                 match idx {
                     #(#arms),*
                 }
@@ -138,17 +137,24 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
     };
 
-    Ok(quote! {
-        #(#const_defs)*
-
-        impl #name #gen {
-            fn index(idx: #index_type) -> Option<#name #gen> {
-                match idx {
-                    #(#arms),*
+    let const_impl = if has_additional_data {
+        quote! {}
+    } else {
+        quote! {
+            #(#const_defs)*
+            impl #name #gen {
+                #vis const fn const_index(idx: #index_type) -> Option<#name #gen> {
+                    match idx {
+                        #(#arms),*
+                    }
                 }
             }
-            #const_impl
         }
+    };
 
+    Ok(quote! {
+        #nonconst_impl
+
+        #const_impl
     })
 }
