@@ -30,7 +30,8 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 
 /// Converts strings to enum variants based on their name.
 ///
-/// auto-derives `std::str::FromStr` on the enum. Each variant of the enum will match on it's own name.
+/// auto-derives `std::str::FromStr` on the enum (for Rust 1.34 and above, std::convert::TryFrom<&str>
+/// will be derived as well). Each variant of the enum will match on it's own name.
 /// This can be overridden using `serialize="DifferentName"` or `to_string="DifferentName"`
 /// on the attribute as shown below.
 /// Multiple deserializations can be added to the same variant. If the variant contains additional data,

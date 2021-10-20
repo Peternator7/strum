@@ -17,39 +17,56 @@ enum Color {
     Black,
 }
 
+#[rustversion::since(1.34)]
+fn assert_from_str<'a, T>(a: T, from: &'a str)
+where
+    T: PartialEq + std::str::FromStr + std::convert::TryFrom<&'a str> + std::fmt::Debug,
+    <T as std::str::FromStr>::Err: std::fmt::Debug,
+    <T as std::convert::TryFrom<&'a str>>::Error: std::fmt::Debug,
+{
+    assert_eq!(a, T::from_str(from).unwrap());
+    assert_eq!(a, std::convert::TryFrom::try_from(from).unwrap());
+}
+
+#[rustversion::before(1.34)]
+fn assert_from_str<T>(a: T, from: &str)
+where
+    T: PartialEq + std::str::FromStr + std::fmt::Debug,
+    <T as std::str::FromStr>::Err: std::fmt::Debug,
+{
+    assert_eq!(a, T::from_str(from).unwrap());
+}
+
 #[test]
 fn color_simple() {
-    assert_eq!(Color::Red, Color::from_str("Red").unwrap());
+    assert_from_str(Color::Red, "Red");
 }
 
 #[test]
 fn color_value() {
-    assert_eq!(Color::Blue { hue: 0 }, Color::from_str("Blue").unwrap());
+    assert_from_str(Color::Blue { hue: 0 }, "Blue");
 }
 
 #[test]
 fn color_serialize() {
-    assert_eq!(Color::Yellow, Color::from_str("y").unwrap());
-    assert_eq!(Color::Yellow, Color::from_str("yellow").unwrap());
+    assert_from_str(Color::Yellow, "y");
+    assert_from_str(Color::Yellow, "yellow");
 }
 
 #[test]
 fn color_to_string() {
-    assert_eq!(Color::Purple, Color::from_str("purp").unwrap());
+    assert_from_str(Color::Purple, "purp");
 }
 
 #[test]
 fn color_default() {
-    assert_eq!(
-        Color::Green(String::from("not found")),
-        Color::from_str("not found").unwrap()
-    );
+    assert_from_str(Color::Green(String::from("not found")), "not found");
 }
 
 #[test]
 fn color_ascii_case_insensitive() {
-    assert_eq!(Color::Black, Color::from_str("BLK").unwrap());
-    assert_eq!(Color::Black, Color::from_str("bLaCk").unwrap());
+    assert_from_str(Color::Black, "BLK");
+    assert_from_str(Color::Black, "bLaCk");
 }
 
 #[derive(Debug, Eq, PartialEq, EnumString)]
@@ -65,18 +82,9 @@ enum Brightness {
 
 #[test]
 fn brightness_serialize_all() {
-    assert_eq!(
-        Brightness::DarkBlack,
-        Brightness::from_str("dark_black").unwrap()
-    );
-    assert_eq!(
-        Brightness::Dim { glow: 0 },
-        Brightness::from_str("dim").unwrap()
-    );
-    assert_eq!(
-        Brightness::BrightWhite,
-        Brightness::from_str("Bright").unwrap()
-    );
+    assert_from_str(Brightness::DarkBlack, "dark_black");
+    assert_from_str(Brightness::Dim { glow: 0 }, "dim");
+    assert_from_str(Brightness::BrightWhite, "Bright");
 }
 
 #[derive(Debug, Eq, PartialEq, EnumString)]
@@ -100,13 +108,13 @@ fn week_not_found() {
 
 #[test]
 fn week_found() {
-    assert_eq!(Result::Ok(Week::Sunday), Week::from_str("Sunday"));
-    assert_eq!(Result::Ok(Week::Monday), Week::from_str("Monday"));
-    assert_eq!(Result::Ok(Week::Tuesday), Week::from_str("Tuesday"));
-    assert_eq!(Result::Ok(Week::Wednesday), Week::from_str("Wednesday"));
-    assert_eq!(Result::Ok(Week::Thursday), Week::from_str("Thursday"));
-    assert_eq!(Result::Ok(Week::Friday), Week::from_str("Friday"));
-    assert_eq!(Result::Ok(Week::Saturday), Week::from_str("Saturday"));
+    assert_from_str(Week::Sunday, "Sunday");
+    assert_from_str(Week::Monday, "Monday");
+    assert_from_str(Week::Tuesday, "Tuesday");
+    assert_from_str(Week::Wednesday, "Wednesday");
+    assert_from_str(Week::Thursday, "Thursday");
+    assert_from_str(Week::Friday, "Friday");
+    assert_from_str(Week::Saturday, "Saturday");
 }
 
 #[derive(Debug, Eq, PartialEq, EnumString)]
@@ -117,7 +125,7 @@ enum Lifetime<'a> {
 
 #[test]
 fn lifetime_test() {
-    assert_eq!(Lifetime::Life(""), Lifetime::from_str("Life").unwrap());
+    assert_from_str(Lifetime::Life(""), "Life");
 }
 
 #[derive(Debug, Eq, PartialEq, EnumString)]
@@ -128,7 +136,7 @@ enum Generic<T: Default> {
 
 #[test]
 fn generic_test() {
-    assert_eq!(Generic::Gen(""), Generic::from_str("Gen").unwrap());
+    assert_from_str(Generic::Gen(""), "Gen");
 }
 
 #[derive(Debug, Eq, PartialEq, EnumString)]
@@ -143,29 +151,27 @@ enum CaseInsensitiveEnum {
 
 #[test]
 fn case_insensitive_enum_no_attr() {
-    assert_eq!(
-        CaseInsensitiveEnum::NoAttr,
-        CaseInsensitiveEnum::from_str("noattr").unwrap()
-    );
+    assert_from_str(CaseInsensitiveEnum::NoAttr, "noattr");
 }
 
 #[test]
 fn case_insensitive_enum_no_case_insensitive() {
-    assert_eq!(
-        CaseInsensitiveEnum::NoCaseInsensitive,
-        CaseInsensitiveEnum::from_str("NoCaseInsensitive").unwrap(),
-    );
+    assert_from_str(CaseInsensitiveEnum::NoCaseInsensitive, "NoCaseInsensitive");
     assert!(CaseInsensitiveEnum::from_str("nocaseinsensitive").is_err());
+}
+
+#[rustversion::since(1.34)]
+#[test]
+fn case_insensitive_enum_no_case_insensitive_try_from() {
+    assert_from_str(CaseInsensitiveEnum::NoCaseInsensitive, "NoCaseInsensitive");
+    assert!(
+        <CaseInsensitiveEnum as std::convert::TryFrom<&str>>::try_from("nocaseinsensitive")
+            .is_err()
+    );
 }
 
 #[test]
 fn case_insensitive_enum_case_insensitive() {
-    assert_eq!(
-        CaseInsensitiveEnum::CaseInsensitive,
-        CaseInsensitiveEnum::from_str("CaseInsensitive").unwrap(),
-    );
-    assert_eq!(
-        CaseInsensitiveEnum::CaseInsensitive,
-        CaseInsensitiveEnum::from_str("caseinsensitive").unwrap(),
-    );
+    assert_from_str(CaseInsensitiveEnum::CaseInsensitive, "CaseInsensitive");
+    assert_from_str(CaseInsensitiveEnum::CaseInsensitive, "caseinsensitive");
 }
