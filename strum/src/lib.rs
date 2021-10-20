@@ -212,6 +212,7 @@ DocumentMacroRexports! {
     Display,
     EnumCount,
     EnumDiscriminants,
+    EnumIndex,
     EnumIter,
     EnumMessage,
     EnumProperty,

@@ -9,6 +9,7 @@ strum = { path = "../strum", features = ["derive"] }
 strum_macros = { path = "../strum_macros", features = [] }
 clap = "2.33.0"
 enum_variant_type = "=0.2.0"
+rustversion = "1.0"
 structopt = "0.2.18"
 bitflags = "=1.2"
 

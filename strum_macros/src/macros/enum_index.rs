@@ -6,6 +6,19 @@ use crate::helpers::{
     non_enum_error, non_integer_literal_discriminant_error, HasStrumVariantProperties,
 };
 
+/// This ignores the const_impl before 1.46 since the const_impl does not compile
+#[rustversion::before(1.46)]
+fn combine_impls(nonconst_impl: TokenStream, _const_impl: TokenStream) -> TokenStream {
+    nonconst_impl
+}
+
+#[rustversion::since(1.46)]
+fn combine_impls(nonconst_impl: TokenStream, const_impl: TokenStream) -> TokenStream {
+    let mut combined_impl = nonconst_impl;
+    combined_impl.extend(const_impl);
+    combined_impl
+}
+
 pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
@@ -152,9 +165,5 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
     };
 
-    Ok(quote! {
-        #nonconst_impl
-
-        #const_impl
-    })
+    Ok(combine_impls(nonconst_impl, const_impl))
 }

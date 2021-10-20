@@ -380,7 +380,8 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// macro adds `index(idx: usize) -> Option<YourEnum>` which will use `Default::default()` for any
 /// additional data on the variant.
 ///
-/// For enums where there is no additional data on any, a second function
+/// For rust compiler versions >= 1.46 where there is no additional data on any of the enum
+/// variants, a second function
 /// `const_index(idx: usize) -> Option<YourEnum>` is added.  This function is marked `const` allowing
 /// it to be used in a `const` context. Since `Default::default()` is not `const` it is not possible
 /// to define this function if there is additional data on any variant, therefore it is omitted
@@ -415,13 +416,20 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Truck = 3,
 /// }
 ///
-/// assert_eq!(None, Vehicle::const_index(0));
-/// assert_eq!(Some(Vehicle::Car), Vehicle::const_index(1));
-/// assert_eq!(None, Vehicle::const_index(2));
-/// assert_eq!(Some(Vehicle::Truck), Vehicle::const_index(3));
-/// assert_eq!(None, Vehicle::const_index(4));
-/// assert_eq!(VEHICLE_CAR, 1);
-/// assert_eq!(VEHICLE_TRUCK, 3);
+/// assert_eq!(None, Vehicle::index(0));
+/// #[rustversion::before(1.46)]
+/// fn const_test() { }
+/// #[rustversion::since(1.46)]
+/// fn const_test() {
+///     assert_eq!(None, Vehicle::const_index(0));
+///     assert_eq!(Some(Vehicle::Car), Vehicle::const_index(1));
+///     assert_eq!(None, Vehicle::const_index(2));
+///     assert_eq!(Some(Vehicle::Truck), Vehicle::const_index(3));
+///     assert_eq!(None, Vehicle::const_index(4));
+///     assert_eq!(VEHICLE_CAR, 1);
+///     assert_eq!(VEHICLE_TRUCK, 3);
+/// }
+/// const_test()
 /// ```
 
 #[proc_macro_derive(EnumIndex, attributes(strum))]
