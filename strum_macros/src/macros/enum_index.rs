@@ -20,6 +20,7 @@ fn combine_impls(nonconst_impl: TokenStream, const_impl: TokenStream) -> TokenSt
 pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
+    let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
     let vis = &ast.vis;
     let attrs = &ast.attrs;
 
@@ -128,7 +129,7 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     arms.push(quote! { _ => ::core::option::Option::None });
 
     let nonconst_impl = quote! {
-        impl #name #gen {
+        impl #impl_generics #name #ty_generics #where_clause {
             fn index(idx: #index_type) -> Option<#name #gen> {
                 #(#const_defs)*
                 match idx {
@@ -143,8 +144,8 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     } else {
         quote! {
             #(#const_defs)*
-            impl #name #gen {
-                #vis const fn const_index(idx: #index_type) -> Option<#name #gen> {
+            impl #impl_generics #name #ty_generics #where_clause {
+                #vis const fn const_index(idx: #index_type) -> Option<#name #ty_generics> {
                     match idx {
                         #(#arms),*
                     }
