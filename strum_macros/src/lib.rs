@@ -378,15 +378,16 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// The macro adds up to two standalone functions as well as numeric constants for each variant. The
 /// macro adds `index(idx: usize) -> Option<YourEnum>` which will use `Default::default()` for any
-/// additional data on the variant.
+/// additional data on the variant. `idx` follows the same rules as the discriminant numbering,
+/// where it starts at 0 and subsequent variants are incremented by 1 over the previous variant,
+/// except for variants where the discriminant is specified. These indices are also made available
+/// as constants of the form `const {ENUM}_{VARIANT}: {repr_int_type} = {discriminant}`
 ///
-/// For rust compiler versions >= 1.46 where there is no additional data on any of the enum
-/// variants, a second function
-/// `const_index(idx: usize) -> Option<YourEnum>` is added.  This function is marked `const` allowing
-/// it to be used in a `const` context. Since `Default::default()` is not `const` it is not possible
-/// to define this function if there is additional data on any variant, therefore it is omitted
-/// entirely. For these enums, a constant is also added for each variant of the form
-/// `const {ENUM}_{VARIANT}: {repr_int_type} = {discriminant}`
+/// For rust compiler versions >= 1.46 where there is no additional data on any of the enum variants,
+/// a second function `const_index(idx: usize) -> Option<YourEnum>` is added.  This function is
+/// marked `const` allowing it to be used in a `const` context. Since `Default::default()` is not
+/// `const` it is not possible to define this function if there is additional data on any variant,
+/// therefore it is omitted entirely.
 ///
 /// You cannot derive `EnumIndex` on any type with a lifetime bound (`<'a>`) because the function would surely
 /// create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).

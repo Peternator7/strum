@@ -75,7 +75,7 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     };
 
     let mut arms = Vec::new();
-    let mut const_defs = Vec::new();
+    let mut constant_defs = Vec::new();
     let mut has_additional_data = false;
     let mut prev_const_var_ident = None;
     for variant in variants {
@@ -111,14 +111,14 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         let mut discriminant_found = false;
         if let Some((_eq, expr)) = &variant.discriminant {
-            const_defs.push(quote! {pub const #const_var_ident: #index_type = #expr;});
+            constant_defs.push(quote! {pub const #const_var_ident: #index_type = #expr;});
             discriminant_found = true;
         }
         if !discriminant_found {
             if let Some(prev) = &prev_const_var_ident {
-                const_defs.push(quote! {pub const #const_var_ident: #index_type = #prev + 1;});
+                constant_defs.push(quote! {pub const #const_var_ident: #index_type = #prev + 1;});
             } else {
-                const_defs.push(quote! {pub const #const_var_ident: #index_type = 0;});
+                constant_defs.push(quote! {pub const #const_var_ident: #index_type = 0;});
             }
         }
 
@@ -129,9 +129,10 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     arms.push(quote! { _ => ::core::option::Option::None });
 
     let nonconst_impl = quote! {
+        #(#constant_defs)*
+
         impl #impl_generics #name #ty_generics #where_clause {
             fn index(idx: #index_type) -> Option<#name #gen> {
-                #(#const_defs)*
                 match idx {
                     #(#arms),*
                 }
@@ -143,7 +144,6 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         quote! {}
     } else {
         quote! {
-            #(#const_defs)*
             impl #impl_generics #name #ty_generics #where_clause {
                 #vis const fn const_index(idx: #index_type) -> Option<#name #ty_generics> {
                     match idx {
