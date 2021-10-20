@@ -2,9 +2,7 @@ use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{Data, DeriveInput, Ident, PathArguments, Type, TypeParen};
 
-use crate::helpers::{
-    non_enum_error, non_integer_literal_discriminant_error, HasStrumVariantProperties,
-};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties};
 
 /// This ignores the const_impl before 1.46 since the const_impl does not compile
 #[rustversion::before(1.46)]
@@ -112,18 +110,8 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         let mut discriminant_found = false;
         if let Some((_eq, expr)) = &variant.discriminant {
-            if let syn::Expr::Lit(expr_lit) = expr {
-                if let syn::Lit::Int(int_lit) = &expr_lit.lit {
-                    const_defs.push(quote! {pub const #const_var_ident: #index_type = #int_lit;});
-                    discriminant_found = true;
-                } else {
-                    // Not sure if this is even reachable
-                    return Err(non_integer_literal_discriminant_error());
-                }
-            } else {
-                // Not sure if this is even reachable
-                return Err(non_integer_literal_discriminant_error());
-            }
+            const_defs.push(quote! {pub const #const_var_ident: #index_type = #expr;});
+            discriminant_found = true;
         }
         if !discriminant_found {
             if let Some(prev) = &prev_const_var_ident {

@@ -8,7 +8,7 @@ enum Week {
     Tuesday,
     Wednesday,
     Thursday,
-    Friday,
+    Friday = 4 + 3,
     Saturday = 8,
 }
 
@@ -16,7 +16,8 @@ enum Week {
 fn simple_test() {
     assert_eq!(Week::index(0), Some(Week::Sunday));
     assert_eq!(Week::index(1), Some(Week::Monday));
-    assert_eq!(Week::index(7), None);
+    assert_eq!(Week::index(6), None);
+    assert_eq!(Week::index(7), Some(Week::Friday));
     assert_eq!(Week::index(8), Some(Week::Saturday));
     assert_eq!(Week::index(9), None);
 }
@@ -26,7 +27,8 @@ fn simple_test() {
 fn const_test() {
     assert_eq!(Week::const_index(0), Some(Week::Sunday));
     assert_eq!(Week::const_index(1), Some(Week::Monday));
-    assert_eq!(Week::const_index(7), None);
+    assert_eq!(Week::const_index(6), None);
+    assert_eq!(Week::const_index(7), Some(Week::Friday));
     assert_eq!(Week::const_index(8), Some(Week::Saturday));
     assert_eq!(Week::const_index(9), None);
 }
