@@ -19,7 +19,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let mut default_kw = None;
     let mut default =
-        quote! { _ => ::std::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) };
+        quote! { _ => ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) };
     let mut arms = Vec::new();
     for variant in variants {
         let ident = &variant.ident;
@@ -46,7 +46,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             default_kw = Some(kw);
             default = quote! {
-                default => ::std::result::Result::Ok(#name::#ident(default.into()))
+                default => ::core::result::Result::Ok(#name::#ident(default.into()))
             };
             continue;
         }
@@ -82,16 +82,16 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
 
-        arms.push(quote! { #(#attrs => ::std::result::Result::Ok(#name::#ident #params)),* });
+        arms.push(quote! { #(#attrs => ::core::result::Result::Ok(#name::#ident #params)),* });
     }
 
     arms.push(default);
 
     Ok(quote! {
         #[allow(clippy::use_self)]
-        impl #impl_generics ::std::str::FromStr for #name #ty_generics #where_clause {
+        impl #impl_generics ::core::str::FromStr for #name #ty_generics #where_clause {
             type Err = #strum_module_path::ParseError;
-            fn from_str(s: &str) -> ::std::result::Result< #name #ty_generics , Self::Err> {
+            fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , Self::Err> {
                 match s {
                     #(#arms),*
                 }
