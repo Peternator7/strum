@@ -1,10 +1,10 @@
 pub mod enum_count;
 pub mod enum_discriminants;
-pub mod enum_index;
 pub mod enum_iter;
 pub mod enum_messages;
 pub mod enum_properties;
 pub mod enum_variant_names;
+pub mod from_discriminant;
 
 mod strings;
 

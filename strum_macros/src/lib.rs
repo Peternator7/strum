@@ -374,29 +374,33 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-/// Add a function to enum that allows accessing variants by index
+/// Add a function to enum that allows accessing variants by its discriminant
 ///
-/// The macro adds up to two standalone functions as well as numeric constants for each variant. The
-/// macro adds `index(idx: usize) -> Option<YourEnum>` which will use `Default::default()` for any
-/// additional data on the variant. `idx` follows the same rules as the discriminant numbering,
-/// where it starts at 0 and subsequent variants are incremented by 1 over the previous variant,
-/// except for variants where the discriminant is specified. These indices are also made available
-/// as constants of the form `const {ENUM}_{VARIANT}: {repr_int_type} = {discriminant}`
+/// This macro adds a standalone function to obtain an enum variant by its discriminant. The macro adds
+/// `from_discriminant(discriminant: usize) -> Option<YourEnum>` as a standalone function on the enum. For
+/// variants with additional data, the returned variant will use the `Default` trait to fill the
+/// data. The discriminant follows the same rules as `rustc`. The first discriminant is zero and each
+/// successive variant has a discriminant of one greater than the previous variant, expect where an
+/// explicit discriminant is specified. The type of the discriminant will match the `repr` type if
+/// it is specifed.
 ///
-/// For rust compiler versions >= 1.46 where there is no additional data on any of the enum variants,
-/// a second function `const_index(idx: usize) -> Option<YourEnum>` is added.  This function is
-/// marked `const` allowing it to be used in a `const` context. Since `Default::default()` is not
-/// `const` it is not possible to define this function if there is additional data on any variant,
-/// therefore it is omitted entirely.
+/// The macro also adds numeric constants for each variant equal to its discriminant. The form for
+/// the constant is `YourEnum::{VARIANT}_DISCRIMINANT` where `{VARIANT}` is replaced by the shouty
+/// snake case version of the variant name.
 ///
-/// You cannot derive `EnumIndex` on any type with a lifetime bound (`<'a>`) because the function would surely
+/// When the macro is applied using rustc >= 1.46 and when there is no additional data on any of
+/// the variants, the `from_discriminant` function is marked `const`. rustc >= 1.46 is required
+/// to allow `match` statements in `const fn`. The no additional data requirement is due to the
+/// inability to use `Default::default()` in a `const fn`.
+///
+/// You cannot derive `FromDiscriminant` on any type with a lifetime bound (`<'a>`) because the function would surely
 /// create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
 ///
 /// ```
 ///
-/// use strum_macros::EnumIndex;
+/// use strum_macros::FromDiscriminant;
 ///
-/// #[derive(EnumIndex, Debug, PartialEq)]
+/// #[derive(FromDiscriminant, Debug, PartialEq)]
 /// enum Color {
 ///     Red,
 ///     Green { range: usize },
@@ -404,41 +408,45 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Yellow,
 /// }
 ///
-/// assert_eq!(Some(Color::Red), Color::index(0));
-/// assert_eq!(Some(Color::Green {range: 0}), Color::index(1));
-/// assert_eq!(Some(Color::Blue(0)), Color::index(2));
-/// assert_eq!(Some(Color::Yellow), Color::index(3));
-/// assert_eq!(None, Color::index(4));
+/// assert_eq!(Some(Color::Red), Color::from_discriminant(0));
+/// assert_eq!(Some(Color::Green {range: 0}), Color::from_discriminant(1));
+/// assert_eq!(Some(Color::Blue(0)), Color::from_discriminant(2));
+/// assert_eq!(Some(Color::Yellow), Color::from_discriminant(3));
+/// assert_eq!(None, Color::from_discriminant(4));
 ///
-/// #[derive(EnumIndex, Debug, PartialEq)]
+/// #[derive(FromDiscriminant, Debug, PartialEq)]
 /// #[repr(u8)]
 /// enum Vehicle {
 ///     Car = 1,
 ///     Truck = 3,
 /// }
 ///
-/// assert_eq!(None, Vehicle::index(0));
+/// assert_eq!(None, Vehicle::from_discriminant(0));
 /// #[rustversion::before(1.46)]
 /// fn const_test() { }
 /// #[rustversion::since(1.46)]
 /// fn const_test() {
-///     assert_eq!(None, Vehicle::const_index(0));
-///     assert_eq!(Some(Vehicle::Car), Vehicle::const_index(1));
-///     assert_eq!(None, Vehicle::const_index(2));
-///     assert_eq!(Some(Vehicle::Truck), Vehicle::const_index(3));
-///     assert_eq!(None, Vehicle::const_index(4));
-///     assert_eq!(VEHICLE_CAR, 1);
-///     assert_eq!(VEHICLE_TRUCK, 3);
+///     // This is to test that it works in a const fn
+///     const fn from_discriminant(discriminant: u8) -> Option<Vehicle> {
+///         Vehicle::from_discriminant(discriminant)
+///     }
+///     assert_eq!(None, from_discriminant(0));
+///     assert_eq!(Some(Vehicle::Car), from_discriminant(1));
+///     assert_eq!(None, from_discriminant(2));
+///     assert_eq!(Some(Vehicle::Truck), from_discriminant(3));
+///     assert_eq!(None, from_discriminant(4));
+///     assert_eq!(Vehicle::CAR_DISCRIMINANT, 1);
+///     assert_eq!(Vehicle::TRUCK_DISCRIMINANT, 3);
 /// }
 /// const_test()
 /// ```
 
-#[proc_macro_derive(EnumIndex, attributes(strum))]
-pub fn enum_index(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+#[proc_macro_derive(FromDiscriminant, attributes(strum))]
+pub fn from_discriminant(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks =
-        macros::enum_index::enum_index_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
+    let toks = macros::from_discriminant::from_discriminant_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }

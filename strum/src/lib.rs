@@ -212,12 +212,12 @@ DocumentMacroRexports! {
     Display,
     EnumCount,
     EnumDiscriminants,
-    EnumIndex,
     EnumIter,
     EnumMessage,
     EnumProperty,
     EnumString,
     EnumVariantNames,
+    FromDiscriminant,
     IntoStaticStr,
     ToString
 }

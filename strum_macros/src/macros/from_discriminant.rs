@@ -1,30 +1,17 @@
 use proc_macro2::{Span, TokenStream};
-use quote::quote;
-use syn::{Data, DeriveInput, Ident, PathArguments, Type, TypeParen};
+use quote::{format_ident, quote};
+use syn::{Data, DeriveInput, PathArguments, Type, TypeParen};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties};
 
-/// This ignores the const_impl before 1.46 since the const_impl does not compile
-#[rustversion::before(1.46)]
-fn combine_impls(nonconst_impl: TokenStream, _const_impl: TokenStream) -> TokenStream {
-    nonconst_impl
-}
-
-#[rustversion::since(1.46)]
-fn combine_impls(nonconst_impl: TokenStream, const_impl: TokenStream) -> TokenStream {
-    let mut combined_impl = nonconst_impl;
-    combined_impl.extend(const_impl);
-    combined_impl
-}
-
-pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
+pub fn from_discriminant_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
     let vis = &ast.vis;
     let attrs = &ast.attrs;
 
-    let mut index_type: Type = syn::parse("usize".parse().unwrap()).unwrap();
+    let mut discriminant_type: Type = syn::parse("usize".parse().unwrap()).unwrap();
     for attr in attrs {
         let path = &attr.path;
         let tokens = &attr.tokens;
@@ -54,7 +41,7 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 "u8", "u16", "u32", "u64", "usize", "i8", "i16", "i32", "i64", "isize",
             ] {
                 if seg.ident == t {
-                    index_type = typ_paren;
+                    discriminant_type = typ_paren;
                     break;
                 }
             }
@@ -77,7 +64,7 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let mut arms = Vec::new();
     let mut constant_defs = Vec::new();
     let mut has_additional_data = false;
-    let mut prev_const_var_ident = None;
+    let mut prev_qualified_var_name = None;
     for variant in variants {
         use syn::Fields::*;
 
@@ -105,54 +92,50 @@ pub fn enum_index_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         };
 
         use heck::ShoutySnakeCase;
-        let const_var_name =
-            format!("{}{}", name, variant.ident.to_string()).to_shouty_snake_case();
-        let const_var_ident = syn::parse_str::<Ident>(&const_var_name).unwrap();
+        let const_var_str = format!("{}_DISCRIMINANT", variant.ident).to_shouty_snake_case();
+        let const_var_ident = format_ident!("{}", const_var_str);
+        let qualified_var_name = quote! { Self::#const_var_ident };
 
-        let mut discriminant_found = false;
-        if let Some((_eq, expr)) = &variant.discriminant {
-            constant_defs.push(quote! {pub const #const_var_ident: #index_type = #expr;});
-            discriminant_found = true;
-        }
-        if !discriminant_found {
-            if let Some(prev) = &prev_const_var_ident {
-                constant_defs.push(quote! {pub const #const_var_ident: #index_type = #prev + 1;});
-            } else {
-                constant_defs.push(quote! {pub const #const_var_ident: #index_type = 0;});
-            }
-        }
+        let const_val_expr = match &variant.discriminant {
+            Some((_, expr)) => quote! { #expr },
+            None => match &prev_qualified_var_name {
+                Some(prev) => quote! { #prev + 1 },
+                None => quote! { 0 },
+            },
+        };
 
-        arms.push(quote! {v if v == #const_var_ident => ::core::option::Option::Some(#name::#ident #params)});
-        prev_const_var_ident = Some(const_var_ident);
+        constant_defs
+            .push(quote! {pub const #const_var_ident: #discriminant_type = #const_val_expr;});
+        arms.push(quote! {v if v == #qualified_var_name => ::core::option::Option::Some(#name::#ident #params)});
+
+        prev_qualified_var_name = Some(qualified_var_name);
     }
 
     arms.push(quote! { _ => ::core::option::Option::None });
 
-    let nonconst_impl = quote! {
-        #(#constant_defs)*
+    let const_if_possible = if has_additional_data {
+        quote! {}
+    } else {
+        #[rustversion::before(1.46)]
+        fn filter_by_rust_version(s: TokenStream) -> TokenStream {
+            quote! {}
+        }
 
+        #[rustversion::since(1.46)]
+        fn filter_by_rust_version(s: TokenStream) -> TokenStream {
+            s
+        }
+        filter_by_rust_version(quote! { const })
+    };
+
+    Ok(quote! {
         impl #impl_generics #name #ty_generics #where_clause {
-            fn index(idx: #index_type) -> Option<#name #gen> {
-                match idx {
+            #(#constant_defs)*
+            #vis #const_if_possible fn from_discriminant(discriminant: #discriminant_type) -> Option<#name #ty_generics> {
+                match discriminant {
                     #(#arms),*
                 }
             }
         }
-    };
-
-    let const_impl = if has_additional_data {
-        quote! {}
-    } else {
-        quote! {
-            impl #impl_generics #name #ty_generics #where_clause {
-                #vis const fn const_index(idx: #index_type) -> Option<#name #ty_generics> {
-                    match idx {
-                        #(#arms),*
-                    }
-                }
-            }
-        }
-    };
-
-    Ok(combine_impls(nonconst_impl, const_impl))
+    })
 }
