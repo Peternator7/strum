@@ -64,7 +64,7 @@ pub fn from_discriminant_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let mut arms = Vec::new();
     let mut constant_defs = Vec::new();
     let mut has_additional_data = false;
-    let mut prev_qualified_var_name = None;
+    let mut prev_const_var_ident = None;
     for variant in variants {
         use syn::Fields::*;
 
@@ -94,21 +94,20 @@ pub fn from_discriminant_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         use heck::ShoutySnakeCase;
         let const_var_str = format!("{}_DISCRIMINANT", variant.ident).to_shouty_snake_case();
         let const_var_ident = format_ident!("{}", const_var_str);
-        let qualified_var_name = quote! { Self::#const_var_ident };
 
         let const_val_expr = match &variant.discriminant {
             Some((_, expr)) => quote! { #expr },
-            None => match &prev_qualified_var_name {
+            None => match &prev_const_var_ident {
                 Some(prev) => quote! { #prev + 1 },
                 None => quote! { 0 },
             },
         };
 
         constant_defs
-            .push(quote! {pub const #const_var_ident: #discriminant_type = #const_val_expr;});
-        arms.push(quote! {v if v == #qualified_var_name => ::core::option::Option::Some(#name::#ident #params)});
+            .push(quote! {const #const_var_ident: #discriminant_type = #const_val_expr;});
+        arms.push(quote! {v if v == #const_var_ident => ::core::option::Option::Some(#name::#ident #params)});
 
-        prev_qualified_var_name = Some(qualified_var_name);
+        prev_const_var_ident = Some(const_var_ident);
     }
 
     arms.push(quote! { _ => ::core::option::Option::None });
@@ -130,8 +129,8 @@ pub fn from_discriminant_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     Ok(quote! {
         impl #impl_generics #name #ty_generics #where_clause {
-            #(#constant_defs)*
             #vis #const_if_possible fn from_discriminant(discriminant: #discriminant_type) -> Option<#name #ty_generics> {
+                #(#constant_defs)*
                 match discriminant {
                     #(#arms),*
                 }

@@ -384,10 +384,6 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// explicit discriminant is specified. The type of the discriminant will match the `repr` type if
 /// it is specifed.
 ///
-/// The macro also adds numeric constants for each variant equal to its discriminant. The form for
-/// the constant is `YourEnum::{VARIANT}_DISCRIMINANT` where `{VARIANT}` is replaced by the shouty
-/// snake case version of the variant name.
-///
 /// When the macro is applied using rustc >= 1.46 and when there is no additional data on any of
 /// the variants, the `from_discriminant` function is marked `const`. rustc >= 1.46 is required
 /// to allow `match` statements in `const fn`. The no additional data requirement is due to the
@@ -435,8 +431,6 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     assert_eq!(None, from_discriminant(2));
 ///     assert_eq!(Some(Vehicle::Truck), from_discriminant(3));
 ///     assert_eq!(None, from_discriminant(4));
-///     assert_eq!(Vehicle::CAR_DISCRIMINANT, 1);
-///     assert_eq!(Vehicle::TRUCK_DISCRIMINANT, 3);
 /// }
 /// const_test()
 /// ```
