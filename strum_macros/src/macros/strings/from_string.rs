@@ -87,7 +87,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     arms.push(default);
 
-    Ok(quote! {
+    let from_str = quote! {
         #[allow(clippy::use_self)]
         impl #impl_generics ::std::str::FromStr for #name #ty_generics #where_clause {
             type Err = #strum_module_path::ParseError;
@@ -97,5 +97,48 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 }
             }
         }
+    };
+
+    let try_from_str = try_from_str(
+        name,
+        impl_generics,
+        ty_generics,
+        where_clause,
+        strum_module_path,
+    );
+
+    Ok(quote! {
+        #from_str
+        #try_from_str
     })
+}
+
+#[rustversion::before(1.34)]
+fn try_from_str(
+    _name: &proc_macro2::Ident,
+    _impl_generics: syn::ImplGenerics,
+    _ty_generics: syn::TypeGenerics,
+    _where_clause: Option<&syn::WhereClause>,
+    _strum_module_path: syn::Path,
+) -> TokenStream {
+    Default::default()
+}
+
+#[rustversion::since(1.34)]
+fn try_from_str(
+    name: &proc_macro2::Ident,
+    impl_generics: syn::ImplGenerics,
+    ty_generics: syn::TypeGenerics,
+    where_clause: Option<&syn::WhereClause>,
+    strum_module_path: syn::Path,
+) -> TokenStream {
+    quote! {
+        #[allow(clippy::use_self)]
+        impl #impl_generics ::std::convert::TryFrom<&str> for #name #ty_generics #where_clause {
+            type Error = #strum_module_path::ParseError;
+            fn try_from(s: &str) -> ::std::result::Result< #name #ty_generics , Self::Error> {
+                ::std::str::FromStr::from_str(s)
+            }
+        }
+    }
 }
