@@ -410,6 +410,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert_eq!(Some(Color::Yellow), Color::from_discriminant(3));
 /// assert_eq!(None, Color::from_discriminant(4));
 ///
+/// // Custom discriminant tests
 /// #[derive(FromDiscriminant, Debug, PartialEq)]
 /// #[repr(u8)]
 /// enum Vehicle {
@@ -418,22 +419,30 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 ///
 /// assert_eq!(None, Vehicle::from_discriminant(0));
-/// #[rustversion::before(1.46)]
-/// fn const_test() { }
-/// #[rustversion::since(1.46)]
-/// fn const_test() {
-///     // This is to test that it works in a const fn
-///     const fn from_discriminant(discriminant: u8) -> Option<Vehicle> {
-///         Vehicle::from_discriminant(discriminant)
-///     }
-///     assert_eq!(None, from_discriminant(0));
-///     assert_eq!(Some(Vehicle::Car), from_discriminant(1));
-///     assert_eq!(None, from_discriminant(2));
-///     assert_eq!(Some(Vehicle::Truck), from_discriminant(3));
-///     assert_eq!(None, from_discriminant(4));
-/// }
-/// const_test()
 /// ```
+#[rustversion::attr(since(1.46),doc="
+`const` tests (only works in rust >= 1.46)
+```
+use strum_macros::FromDiscriminant;
+
+#[derive(FromDiscriminant, Debug, PartialEq)]
+#[repr(u8)]
+enum Number {
+    One = 1,
+    Three = 3,
+}
+
+// This test confirms that the function works in a `const` context
+const fn number_from_discriminant(d: u8) -> Option<Number> {
+    Number::from_discriminant(d)
+}
+assert_eq!(None, number_from_discriminant(0));
+assert_eq!(Some(Number::One), number_from_discriminant(1));
+assert_eq!(None, number_from_discriminant(2));
+assert_eq!(Some(Number::Three), number_from_discriminant(3));
+assert_eq!(None, number_from_discriminant(4));
+```
+")]
 
 #[proc_macro_derive(FromDiscriminant, attributes(strum))]
 pub fn from_discriminant(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
