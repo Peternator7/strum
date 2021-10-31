@@ -4,7 +4,7 @@ use syn::{Data, DeriveInput, PathArguments, Type, TypeParen};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties};
 
-pub fn from_discriminant_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
+pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
@@ -129,7 +129,7 @@ pub fn from_discriminant_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     Ok(quote! {
         impl #impl_generics #name #ty_generics #where_clause {
-            #vis #const_if_possible fn from_discriminant(discriminant: #discriminant_type) -> Option<#name #ty_generics> {
+            #vis #const_if_possible fn from_repr(discriminant: #discriminant_type) -> Option<#name #ty_generics> {
                 #(#constant_defs)*
                 match discriminant {
                     #(#arms),*

@@ -217,7 +217,7 @@ DocumentMacroRexports! {
     EnumProperty,
     EnumString,
     EnumVariantNames,
-    FromDiscriminant,
+    FromRepr,
     IntoStaticStr,
     ToString
 }
