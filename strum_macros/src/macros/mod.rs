@@ -4,6 +4,7 @@ pub mod enum_iter;
 pub mod enum_messages;
 pub mod enum_properties;
 pub mod enum_variant_names;
+pub mod from_repr;
 
 mod strings;
 

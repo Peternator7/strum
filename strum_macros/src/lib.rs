@@ -375,6 +375,86 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
+/// Add a function to enum that allows accessing variants by its discriminant
+///
+/// This macro adds a standalone function to obtain an enum variant by its discriminant. The macro adds
+/// `from_repr(discriminant: usize) -> Option<YourEnum>` as a standalone function on the enum. For
+/// variants with additional data, the returned variant will use the `Default` trait to fill the
+/// data. The discriminant follows the same rules as `rustc`. The first discriminant is zero and each
+/// successive variant has a discriminant of one greater than the previous variant, expect where an
+/// explicit discriminant is specified. The type of the discriminant will match the `repr` type if
+/// it is specifed.
+///
+/// When the macro is applied using rustc >= 1.46 and when there is no additional data on any of
+/// the variants, the `from_repr` function is marked `const`. rustc >= 1.46 is required
+/// to allow `match` statements in `const fn`. The no additional data requirement is due to the
+/// inability to use `Default::default()` in a `const fn`.
+///
+/// You cannot derive `FromRepr` on any type with a lifetime bound (`<'a>`) because the function would surely
+/// create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
+///
+/// ```
+///
+/// use strum_macros::FromRepr;
+///
+/// #[derive(FromRepr, Debug, PartialEq)]
+/// enum Color {
+///     Red,
+///     Green { range: usize },
+///     Blue(usize),
+///     Yellow,
+/// }
+///
+/// assert_eq!(Some(Color::Red), Color::from_repr(0));
+/// assert_eq!(Some(Color::Green {range: 0}), Color::from_repr(1));
+/// assert_eq!(Some(Color::Blue(0)), Color::from_repr(2));
+/// assert_eq!(Some(Color::Yellow), Color::from_repr(3));
+/// assert_eq!(None, Color::from_repr(4));
+///
+/// // Custom discriminant tests
+/// #[derive(FromRepr, Debug, PartialEq)]
+/// #[repr(u8)]
+/// enum Vehicle {
+///     Car = 1,
+///     Truck = 3,
+/// }
+///
+/// assert_eq!(None, Vehicle::from_repr(0));
+/// ```
+#[rustversion::attr(since(1.46),doc="
+`const` tests (only works in rust >= 1.46)
+```
+use strum_macros::FromRepr;
+
+#[derive(FromRepr, Debug, PartialEq)]
+#[repr(u8)]
+enum Number {
+    One = 1,
+    Three = 3,
+}
+
+// This test confirms that the function works in a `const` context
+const fn number_from_repr(d: u8) -> Option<Number> {
+    Number::from_repr(d)
+}
+assert_eq!(None, number_from_repr(0));
+assert_eq!(Some(Number::One), number_from_repr(1));
+assert_eq!(None, number_from_repr(2));
+assert_eq!(Some(Number::Three), number_from_repr(3));
+assert_eq!(None, number_from_repr(4));
+```
+")]
+
+#[proc_macro_derive(FromRepr, attributes(strum))]
+pub fn from_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks = macros::from_repr::from_repr_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
 /// Add a verbose message to an enum variant.
 ///
 /// Encode strings into the enum itself. The `strum_macros::EmumMessage` macro implements the `strum::EnumMessage` trait.
