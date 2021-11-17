@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.23.0
+
+* [#185](https://github.com/Peternator7/strum/pull/185) Adds the `FromRepr` derive that adds a `from_repr(x: usize) -> Option<Self>`
+  method to your enum. This lets you convert integer values to your enum. If you specify a #[repr(..)] attribute on your enum, or use
+  an explicit discriminant, this will be incorporated into the derive.
+  * `from_repr` will be `const` if you use a recent rust version.
+  * This cannot be a trait method currently because only inherent methods support `const`.
+
+* [#186](https://github.com/Peternator7/strum/pull/186) Automatically implement `TryFrom<str>` for enums that implement `EnumString`.
+  This is only enabled for rustc >= 1.34 which is when `TryFrom was stabilized.
+  * This is a small breaking change. If you had manually implemented `TryFrom<str>` for your enum, this will cause a conflict. You
+    can probably remove your manual implementation.
+
+* [#189](https://github.com/Peternator7/strum/pull/189) Use `core::result::Result` instead of `std::result::Result`. This should be
+  more portable in no-std environments.
+
 ## 0.22.0
 
 * [#180](https://github.com/Peternator7/strum/pull/180): Deprecates `ToString` derive. You should use `Display`

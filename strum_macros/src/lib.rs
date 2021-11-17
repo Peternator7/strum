@@ -421,29 +421,34 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// assert_eq!(None, Vehicle::from_repr(0));
 /// ```
-#[rustversion::attr(since(1.46),doc="
-`const` tests (only works in rust >= 1.46)
-```
-use strum_macros::FromRepr;
-
-#[derive(FromRepr, Debug, PartialEq)]
-#[repr(u8)]
-enum Number {
-    One = 1,
-    Three = 3,
-}
-
-// This test confirms that the function works in a `const` context
-const fn number_from_repr(d: u8) -> Option<Number> {
-    Number::from_repr(d)
-}
-assert_eq!(None, number_from_repr(0));
-assert_eq!(Some(Number::One), number_from_repr(1));
-assert_eq!(None, number_from_repr(2));
-assert_eq!(Some(Number::Three), number_from_repr(3));
-assert_eq!(None, number_from_repr(4));
-```
-")]
+/// 
+/// On versions of rust >= 1.46, the `from_repr` function is marked `const`.
+/// 
+/// ```rust
+/// use strum_macros::FromRepr;
+/// 
+/// #[derive(FromRepr, Debug, PartialEq)]
+/// #[repr(u8)]
+/// enum Number {
+///     One = 1,
+///     Three = 3,
+/// }
+/// 
+/// # #[rustversion::since(1.46)]
+/// const fn number_from_repr(d: u8) -> Option<Number> {
+///     Number::from_repr(d)
+/// }
+///
+/// # #[rustversion::before(1.46)]
+/// # fn number_from_repr(d: u8) -> Option<Number> {
+/// #     Number::from_repr(d)
+/// # }
+/// assert_eq!(None, number_from_repr(0));
+/// assert_eq!(Some(Number::One), number_from_repr(1));
+/// assert_eq!(None, number_from_repr(2));
+/// assert_eq!(Some(Number::Three), number_from_repr(3));
+/// assert_eq!(None, number_from_repr(4));
+/// ```
 
 #[proc_macro_derive(FromRepr, attributes(strum))]
 pub fn from_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

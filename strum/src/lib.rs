@@ -16,11 +16,11 @@
 //!
 //! ```toml
 //! [dependencies]
-//! strum = "0.22"
-//! strum_macros = "0.22"
+//! strum = "0.23"
+//! strum_macros = "0.23"
 //!
 //! # You can also access strum_macros exports directly through strum using the "derive" feature
-//! strum = { version = "0.22", features = ["derive"] }
+//! strum = { version = "0.23", features = ["derive"] }
 //! ```
 //!
 
