@@ -204,8 +204,8 @@ fn from_ref_test_complex() {
     assert_eq!(EnumIntoComplexVars::A, (&EnumIntoComplex::A(&rara)).into());
 }
 
-#[cfg(try_from)]
 #[allow(dead_code)]
+#[rustversion::since(1.34)]
 #[derive(Debug, Eq, PartialEq, EnumDiscriminants, EnumVariantType)]
 #[strum_discriminants(
     name(VariantFilterAttrDiscs),
@@ -219,8 +219,8 @@ enum VariantFilterAttr {
     BrightWhite(i32),
 }
 
-#[cfg(try_from)]
-#[test]
+#[rustversion::attr(since(1.34), test)]
+#[rustversion::since(1.34)]
 fn filter_variant_attributes_pass_through() {
     use std::str::FromStr;
 
@@ -238,8 +238,8 @@ fn filter_variant_attributes_pass_through() {
     );
 }
 
-#[cfg(bare_pub)]
 #[test]
+#[rustversion::since(1.34)]
 fn override_visibility() {
     mod private {
         use super::*;
@@ -259,8 +259,8 @@ fn override_visibility() {
     );
 }
 
-#[cfg(not(bare_pub))]
 #[test]
+#[rustversion::before(1.34)]
 fn override_visibility() {
     mod private {
         use super::*;

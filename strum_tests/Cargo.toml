@@ -1,6 +1,6 @@
 [package]
 name = "strum_tests"
-version = "0.22.0"
+version = "0.23.0"
 edition = "2018"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 
@@ -11,9 +11,6 @@ clap = "2.33.0"
 enum_variant_type = "=0.2.0"
 structopt = "0.2.18"
 bitflags = "=1.2"
-
-[build-dependencies]
-version_check = "0.9.2"
 
 [dev-dependencies]
 rustversion = "1.0"
