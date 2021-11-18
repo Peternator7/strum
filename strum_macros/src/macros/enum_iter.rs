@@ -96,7 +96,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         impl #impl_generics Iterator for #iter_name #ty_generics #where_clause {
             type Item = #name #ty_generics;
 
-            fn next(&mut self) -> Option<Self::Item> {
+            fn next(&mut self) -> Option<<Self as Iterator>::Item> {
                 self.nth(0)
             }
 
@@ -105,7 +105,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 (t, Some(t))
             }
 
-            fn nth(&mut self, n: usize) -> Option<Self::Item> {
+            fn nth(&mut self, n: usize) -> Option<<Self as Iterator>::Item> {
                 let idx = self.idx + n + 1;
                 if idx + self.back_idx > #variant_count {
                     // We went past the end of the iterator. Freeze idx at #variant_count
@@ -127,7 +127,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         impl #impl_generics DoubleEndedIterator for #iter_name #ty_generics #where_clause {
-            fn next_back(&mut self) -> Option<Self::Item> {
+            fn next_back(&mut self) -> Option<<Self as Iterator>::Item> {
                 let back_idx = self.back_idx + 1;
 
                 if self.idx + back_idx > #variant_count {
