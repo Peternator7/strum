@@ -134,10 +134,10 @@ fn try_from_str(
 ) -> TokenStream {
     quote! {
         #[allow(clippy::use_self)]
-        impl #impl_generics ::std::convert::TryFrom<&str> for #name #ty_generics #where_clause {
+        impl #impl_generics ::core::convert::TryFrom<&str> for #name #ty_generics #where_clause {
             type Error = #strum_module_path::ParseError;
-            fn try_from(s: &str) -> ::std::result::Result< #name #ty_generics , Self::Error> {
-                ::std::str::FromStr::from_str(s)
+            fn try_from(s: &str) -> ::core::result::Result< #name #ty_generics , Self::Error> {
+                ::core::str::FromStr::from_str(s)
             }
         }
     }
