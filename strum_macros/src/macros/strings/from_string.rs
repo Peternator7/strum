@@ -91,7 +91,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         #[allow(clippy::use_self)]
         impl #impl_generics ::core::str::FromStr for #name #ty_generics #where_clause {
             type Err = #strum_module_path::ParseError;
-            fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , Self::Err> {
+            fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
                 match s {
                     #(#arms),*
                 }
@@ -136,7 +136,7 @@ fn try_from_str(
         #[allow(clippy::use_self)]
         impl #impl_generics ::core::convert::TryFrom<&str> for #name #ty_generics #where_clause {
             type Error = #strum_module_path::ParseError;
-            fn try_from(s: &str) -> ::core::result::Result< #name #ty_generics , Self::Error> {
+            fn try_from(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<&str>>::Error> {
                 ::core::str::FromStr::from_str(s)
             }
         }
