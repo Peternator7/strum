@@ -192,7 +192,10 @@ pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 }
 
 #[proc_macro_derive(AsStaticStr, attributes(strum))]
-#[deprecated(since="0.22.0", note="please use `#[derive(IntoStaticStr)]` instead")]
+#[deprecated(
+    since = "0.22.0",
+    note = "please use `#[derive(IntoStaticStr)]` instead"
+)]
 pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -272,7 +275,10 @@ pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// let yellow = Color::Yellow;
 /// assert_eq!(String::from("Yellow"), yellow.to_string());
 /// ```
-#[deprecated(since="0.22.0", note="please use `#[derive(Display)]` instead. See issue https://github.com/Peternator7/strum/issues/132")]
+#[deprecated(
+    since = "0.22.0",
+    note = "please use `#[derive(Display)]` instead. See issue https://github.com/Peternator7/strum/issues/132"
+)]
 #[proc_macro_derive(ToString, attributes(strum))]
 pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
@@ -421,19 +427,19 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// assert_eq!(None, Vehicle::from_repr(0));
 /// ```
-/// 
+///
 /// On versions of rust >= 1.46, the `from_repr` function is marked `const`.
-/// 
+///
 /// ```rust
 /// use strum_macros::FromRepr;
-/// 
+///
 /// #[derive(FromRepr, Debug, PartialEq)]
 /// #[repr(u8)]
 /// enum Number {
 ///     One = 1,
 ///     Three = 3,
 /// }
-/// 
+///
 /// # #[rustversion::since(1.46)]
 /// const fn number_from_repr(d: u8) -> Option<Number> {
 ///     Number::from_repr(d)
@@ -454,8 +460,8 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 pub fn from_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::from_repr::from_repr_inner(&ast)
-        .unwrap_or_else(|err| err.to_compile_error());
+    let toks =
+        macros::from_repr::from_repr_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
