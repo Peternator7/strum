@@ -131,7 +131,7 @@ fn lifetime_test() {
 #[derive(Debug, Eq, PartialEq, EnumString)]
 enum Generic<T: Default> {
     Gen(T),
-    None,
+    Error,
 }
 
 #[test]
