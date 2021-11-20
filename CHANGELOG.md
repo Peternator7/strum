@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.23.1
+
+* [#193](https://github.com/Peternator7/strum/pull/193) Fixes an ambiguity introduced by #186 when your enum has a variant called Error.
+
+* [#192](https://github.com/Peternator7/strum/pull/192) The work done in #189 was lost in other PR's. This re-added the functionality to support no-std.
+
 ## 0.23.0
 
 * [#185](https://github.com/Peternator7/strum/pull/185) Adds the `FromRepr` derive that adds a `from_repr(x: usize) -> Option<Self>`
