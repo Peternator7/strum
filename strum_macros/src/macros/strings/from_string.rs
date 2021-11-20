@@ -18,8 +18,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let strum_module_path = type_properties.crate_module_path();
 
     let mut default_kw = None;
-    let mut default =
-        quote! { _ => ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) };
+    let mut default = quote! { _ => ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) };
     let mut arms = Vec::new();
     for variant in variants {
         let ident = &variant.ident;

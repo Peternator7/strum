@@ -1,12 +1,12 @@
 //! # Documentation for Additional Attributes
-//! 
+//!
 //! ## Attributes on Enums
 //!
 //! Strum supports several custom attributes to modify the generated code. At the enum level, the following attributes are supported:
-//! 
-//! - `#[strum(serialize_all = "case_style")]` attribute can be used to change the case used when serializing to and deserializing 
+//!
+//! - `#[strum(serialize_all = "case_style")]` attribute can be used to change the case used when serializing to and deserializing
 //!   from strings. This feature is enabled by [withoutboats/heck](https://github.com/withoutboats/heck) and supported case styles are:
-//! 
+//!
 //!   - `camelCase`
 //!   - `PascalCase`
 //!   - `kebab-case`
@@ -17,7 +17,7 @@
 //!   - `UPPERCASE`
 //!   - `title_case`
 //!   - `mixed_case`
-//! 
+//!
 //!   ```rust
 //!   use std::string::ToString;
 //!   use strum;
@@ -50,7 +50,7 @@
 //!
 //! - You can also apply the `#[strum(ascii_case_insensitive)]` attribute to the enum,
 //!   and this has the same effect of applying it to every variant.
-//! 
+//!
 //! ## Attributes on Variants
 //!
 //! Custom attributes are applied to a variant by adding `#[strum(parameter="value")]` to the variant.
