@@ -19,7 +19,7 @@ proc-macro = true
 name = "strum_macros"
 
 [dependencies]
-heck = "0.3"
+heck = "0.4"
 proc-macro2 = "1.0"
 quote = "1.0"
 rustversion = "1.0"
