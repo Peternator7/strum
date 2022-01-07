@@ -128,6 +128,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     Ok(quote! {
         impl #impl_generics #name #ty_generics #where_clause {
+            #[doc = "Try to create [Self] from the raw representation"]
             #vis #const_if_possible fn from_repr(discriminant: #discriminant_type) -> Option<#name #ty_generics> {
                 #(#constant_defs)*
                 match discriminant {
