@@ -17,12 +17,14 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let mut arms = Vec::new();
     let mut detailed_arms = Vec::new();
+    let mut documentation_arms = Vec::new();
     let mut serializations = Vec::new();
 
     for variant in variants {
         let variant_properties = variant.get_variant_properties()?;
         let messages = variant_properties.message.as_ref();
         let detailed_messages = variant_properties.detailed_message.as_ref();
+        let documentation = &variant_properties.documentation;
         let ident = &variant.ident;
 
         use syn::Fields::*;
@@ -65,9 +67,16 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         if let Some(msg) = detailed_messages {
             let params = params.clone();
-            // Push the simple message.
+            // Push the detailed message.
             detailed_arms
                 .push(quote! { &#name::#ident #params => ::core::option::Option::Some(#msg) });
+        }
+
+        if !documentation.is_empty() {
+            let params = params.clone();
+            // Push the documentation.
+            documentation_arms
+                .push(quote! { &#name::#ident #params => ::core::option::Option::Some(concat!(#( #documentation ),*).trim()) });
         }
     }
 
@@ -77,6 +86,10 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     if detailed_arms.len() < variants.len() {
         detailed_arms.push(quote! { _ => ::core::option::Option::None });
+    }
+
+    if documentation_arms.len() < variants.len() {
+        documentation_arms.push(quote! { _ => ::core::option::Option::None });
     }
 
     Ok(quote! {
@@ -90,6 +103,12 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             fn get_detailed_message(&self) -> ::core::option::Option<&'static str> {
                 match self {
                     #(#detailed_arms),*
+                }
+            }
+
+            fn get_documentation(&self) -> ::core::option::Option<&'static str> {
+                match self {
+                    #(#documentation_arms),*
                 }
             }
 

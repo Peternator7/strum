@@ -113,6 +113,7 @@ pub trait IntoEnumIterator: Sized {
 ///     #[strum(message="I have a dog")]
 ///     #[strum(detailed_message="My dog's name is Spots")]
 ///     Dog,
+///     /// I am documented.
 ///     #[strum(message="I don't have a cat")]
 ///     Cat,
 /// }
@@ -123,6 +124,7 @@ pub trait IntoEnumIterator: Sized {
 pub trait EnumMessage {
     fn get_message(&self) -> Option<&'static str>;
     fn get_detailed_message(&self) -> Option<&'static str>;
+    fn get_documentation(&self) -> Option<&'static str>;
     fn get_serializations(&self) -> &'static [&'static str];
 }
 

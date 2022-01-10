@@ -16,6 +16,7 @@ pub struct StrumVariantProperties {
     pub ascii_case_insensitive: Option<bool>,
     pub message: Option<LitStr>,
     pub detailed_message: Option<LitStr>,
+    pub documentation: Vec<LitStr>,
     pub string_props: Vec<(LitStr, LitStr)>,
     serialize: Vec<LitStr>,
     to_string: Option<LitStr>,
@@ -84,6 +85,9 @@ impl HasStrumVariantProperties for Variant {
 
                     detailed_message_kw = Some(kw);
                     output.detailed_message = Some(value);
+                }
+                VariantMeta::Documentation { value } => {
+                    output.documentation.push(value);
                 }
                 VariantMeta::Serialize { value, .. } => {
                     output.serialize.push(value);

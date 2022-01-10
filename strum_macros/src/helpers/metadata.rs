@@ -5,7 +5,7 @@ use syn::{
     parse2, parse_str,
     punctuated::Punctuated,
     spanned::Spanned,
-    Attribute, DeriveInput, Ident, LitBool, LitStr, Path, Token, Variant, Visibility,
+    Attribute, DeriveInput, Ident, Lit, LitBool, LitStr, Meta, MetaNameValue, Path, Token, Variant, Visibility,
 };
 
 use super::case_style::CaseStyle;
@@ -164,6 +164,9 @@ pub enum VariantMeta {
         kw: kw::serialize,
         value: LitStr,
     },
+    Documentation {
+        value: LitStr,
+    },
     ToString {
         kw: kw::to_string,
         value: LitStr,
@@ -253,6 +256,7 @@ impl Spanned for VariantMeta {
         match self {
             VariantMeta::Message { kw, .. } => kw.span,
             VariantMeta::DetailedMessage { kw, .. } => kw.span,
+            VariantMeta::Documentation { value } => value.span(),
             VariantMeta::Serialize { kw, .. } => kw.span,
             VariantMeta::ToString { kw, .. } => kw.span,
             VariantMeta::Disabled(kw) => kw.span,
@@ -270,7 +274,13 @@ pub trait VariantExt {
 
 impl VariantExt for Variant {
     fn get_metadata(&self) -> syn::Result<Vec<VariantMeta>> {
-        get_metadata_inner("strum", &self.attrs)
+        let result = get_metadata_inner("strum", &self.attrs)?;
+        self.attrs.iter().filter(|attr| attr.path.is_ident("doc")).try_fold(result, |mut vec, attr| {
+            if let Meta::NameValue(MetaNameValue { lit: Lit::Str(value), .. }) = attr.parse_meta()? {
+                vec.push(VariantMeta::Documentation { value })
+            }
+            Ok(vec)
+        })
     }
 }
 
