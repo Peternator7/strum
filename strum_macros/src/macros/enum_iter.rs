@@ -67,7 +67,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let iter_name = syn::parse_str::<Ident>(&format!("{}Iter", name)).unwrap();
 
     Ok(quote! {
-        #[allow(missing_docs)]
+        #[doc = "An iterator over the variants of [Self]"]
         #vis struct #iter_name #ty_generics {
             idx: usize,
             back_idx: usize,
