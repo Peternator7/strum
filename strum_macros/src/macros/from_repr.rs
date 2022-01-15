@@ -91,7 +91,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
 
-        use heck::ShoutySnakeCase;
+        use heck::ToShoutySnakeCase;
         let const_var_str = format!("{}_DISCRIMINANT", variant.ident).to_shouty_snake_case();
         let const_var_ident = format_ident!("{}", const_var_str);
 
