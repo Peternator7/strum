@@ -15,6 +15,7 @@ repository = "https://github.com/Peternator7/strum"
 readme = "../README.md"
 
 [dependencies]
+num-traits = "0.2.14"
 strum_macros = { path = "../strum_macros", optional = true, version = "0.23" }
 
 [dev-dependencies]

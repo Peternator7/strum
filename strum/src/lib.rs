@@ -190,6 +190,155 @@ pub trait VariantNames {
     const VARIANTS: &'static [&'static str];
 }
 
+#[derive(Copy, Clone)]
+pub struct OpaqueRepr<T: EnumRepr>(T::Repr, core::marker::PhantomData<T>);
+
+pub trait EnumRepr {
+    /// The repr type.
+    type Repr: Copy
+        + core::ops::BitOr
+        + core::ops::BitOrAssign
+        + num_traits::ops::wrapping::WrappingShl
+        + num_traits::ops::wrapping::WrappingShl
+        + num_traits::int::PrimInt;
+    /// The opaque representation type.
+    type OpaqueRepr;
+    /// The enum type.
+    type EnumT: EnumRepr;
+
+    /// convert to the enums #[repr(..)]
+    /// equivalent to `self as ..`
+    fn to_repr(self) -> Self::Repr;
+    /// Converts to a OpaqueRepr<Self>
+    fn opaque(self) -> Self::OpaqueRepr;
+    /// Non-const trait version of FromRepr
+    fn cvt_from_repr(repr: Self::Repr) -> Option<Self::EnumT>;
+}
+
+impl<T: EnumRepr> core::ops::BitOr<T> for OpaqueRepr<T>
+where
+    Self: EnumRepr<Repr = <T as EnumRepr>::Repr>,
+    <T as EnumRepr>::Repr: core::ops::BitOr<Output = <T as EnumRepr>::Repr>,
+{
+    type Output = Self;
+    fn bitor(self, other: T) -> OpaqueRepr<T> {
+        Self::from_repr(self.to_repr() | other.to_repr())
+    }
+}
+
+impl<T: EnumRepr> core::ops::BitOr<Self> for OpaqueRepr<T>
+where
+    Self: EnumRepr<Repr = <T as EnumRepr>::Repr>,
+    <T as EnumRepr>::Repr: core::ops::BitOr<Output = <T as EnumRepr>::Repr>,
+{
+    type Output = Self;
+    fn bitor(self, other: OpaqueRepr<T>) -> OpaqueRepr<T> {
+        Self::from_repr(self.to_repr() | other.to_repr())
+    }
+}
+
+impl<T: EnumRepr<EnumT = T>> EnumRepr for OpaqueRepr<T> {
+    type Repr = <T as EnumRepr>::Repr;
+    type OpaqueRepr = Self;
+    type EnumT = T;
+
+    fn to_repr(self) -> Self::Repr {
+        self.0
+    }
+
+    fn opaque(self) -> Self {
+        self
+    }
+
+    fn cvt_from_repr(repr: Self::Repr) -> Option<Self::EnumT> {
+        Self::EnumT::cvt_from_repr(repr)
+    }
+}
+
+impl<T: EnumRepr> OpaqueRepr<T> {
+    pub fn new(e: T) -> OpaqueRepr<T> {
+        OpaqueRepr::<T>(e.to_repr(), core::marker::PhantomData)
+    }
+
+    fn from_repr(repr: T::Repr) -> OpaqueRepr<T> {
+        OpaqueRepr::<T>(repr, core::marker::PhantomData)
+    }
+}
+
+impl<
+        R: num_traits::PrimInt
+            + core::ops::BitOrAssign
+            + num_traits::WrappingShr
+            + num_traits::WrappingShl,
+        E: EnumRepr<EnumT = E, Repr = R>,
+        O: Clone + EnumRepr<EnumT = E, Repr = R>,
+    > EnumMaskIter for O
+{
+    type I = EnumMaskIterator<R, E, O>;
+
+    fn mask_iter(&mut self) -> EnumMaskIterator<R, E, O> {
+        EnumMaskIterator {
+            mask: self.clone().to_repr(),
+            shift: 0,
+            phantom: core::marker::PhantomData,
+        }
+    }
+}
+
+pub trait EnumMaskIter: Sized
+where
+    Self: EnumRepr,
+    Self::Repr: core::ops::BitOr + core::ops::BitOrAssign,
+    <Self as EnumRepr>::EnumT: EnumRepr,
+{
+    type I: Iterator<Item = Self::EnumT>;
+
+    fn mask_iter(&mut self) -> Self::I;
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct EnumMaskIterator<
+    R: num_traits::int::PrimInt,
+    T: EnumRepr<Repr = R, EnumT = T>,
+    O: EnumRepr<Repr = R, EnumT = T>,
+> {
+    mask: R,
+    shift: u32,
+    phantom: core::marker::PhantomData<(O, R)>,
+}
+
+impl<
+        R: num_traits::WrappingShr + num_traits::WrappingShl + num_traits::int::PrimInt,
+        T: EnumRepr<Repr = R, EnumT = T>,
+        O: EnumRepr<Repr = R, EnumT = T>,
+    > Iterator for EnumMaskIterator<R, T, O>
+{
+    type Item = <T as EnumRepr>::EnumT;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // This can doubtlessly be improved
+        let tz: u32 = self.mask.trailing_zeros();
+        let discr = ((self.mask.wrapping_shr(tz)) & num_traits::identities::one())
+            .wrapping_shl(self.shift + tz);
+        let one_u32: u32 = num_traits::identities::one();
+        self.mask = self.mask.wrapping_shr(tz + one_u32);
+        let shift_lhs: u32 = core::ops::Add::<u32>::add(tz, one_u32);
+        self.shift += shift_lhs;
+        T::EnumT::cvt_from_repr(discr)
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        // FIXME This assumes mask bits only contain enum repr items...
+        // And there is only one bit to each enum discriminant.
+        (
+            self.mask.count_ones() as usize,
+            Some(self.mask.count_ones() as usize),
+        )
+    }
+}
+
+// FIXME derive ExactSizeIterator...
+
 #[cfg(feature = "derive")]
 pub use strum_macros::*;
 
@@ -214,6 +363,7 @@ DocumentMacroRexports! {
     EnumCount,
     EnumDiscriminants,
     EnumIter,
+    EnumMask,
     EnumMessage,
     EnumProperty,
     EnumString,
