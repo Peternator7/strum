@@ -298,7 +298,7 @@ where
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EnumMaskIterator<
-    R: num_traits::int::PrimInt,
+    R: num_traits::int::PrimInt + std::ops::BitOrAssign + num_traits::ops::wrapping::WrappingShl + num_traits::ops::wrapping::WrappingShr,
     T: EnumRepr<Repr = R, EnumT = T>,
     O: EnumRepr<Repr = R, EnumT = T>,
 > {
@@ -308,7 +308,7 @@ pub struct EnumMaskIterator<
 }
 
 impl<
-        R: num_traits::WrappingShr + num_traits::WrappingShl + num_traits::int::PrimInt,
+        R: num_traits::WrappingShr + num_traits::WrappingShl + num_traits::int::PrimInt + std::ops::BitOrAssign,
         T: EnumRepr<Repr = R, EnumT = T>,
         O: EnumRepr<Repr = R, EnumT = T>,
     > Iterator for EnumMaskIterator<R, T, O>
