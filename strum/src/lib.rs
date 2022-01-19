@@ -283,7 +283,7 @@ impl<
 {
     type I = EnumMaskIterator<R, E, O>;
 
-    fn mask_iter(&mut self) -> EnumMaskIterator<R, E, O> {
+    fn mask_iter(&self) -> EnumMaskIterator<R, E, O> {
         EnumMaskIterator {
             mask: self.to_repr(),
             shift: 0,
@@ -300,7 +300,7 @@ where
 {
     type I: Iterator<Item = Self::EnumT>;
 
-    fn mask_iter(&mut self) -> Self::I;
+    fn mask_iter(&self) -> Self::I;
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -330,9 +330,19 @@ impl<
 
     fn next(&mut self) -> Option<Self::Item> {
         // This can doubtlessly be improved
+        if self.shift >= std::mem::size_of::<R>() as u32 * 8 {
+            return None;
+        }
+
         let tz: u32 = self.mask.trailing_zeros();
+        let tz = if tz < std::mem::size_of::<R>() as u32 * 8 {
+            tz
+        } else {
+            std::mem::size_of::<R>() as u32 * 8 - 1
+        };
         let discr = ((self.mask.wrapping_shr(tz)) & num_traits::identities::one())
             .wrapping_shl(self.shift + tz);
+
         let one_u32: u32 = num_traits::identities::one();
         self.mask = self.mask.wrapping_shr(tz + one_u32);
         let shift_lhs: u32 = core::ops::Add::<u32>::add(tz, one_u32);
