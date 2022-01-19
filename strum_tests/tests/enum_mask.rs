@@ -3,7 +3,7 @@ use strum::EnumMaskIter;
 use strum::{EnumRepr, OpaqueRepr};
 use strum_macros::EnumMask;
 
-#[derive(Clone, Debug, Eq, PartialEq, EnumMask)]
+#[derive(Debug, Eq, PartialEq, EnumMask)]
 #[repr(u8)]
 enum ABC {
     A = 1 << 0,

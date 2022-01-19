@@ -190,8 +190,15 @@ pub trait VariantNames {
     const VARIANTS: &'static [&'static str];
 }
 
-#[derive(Copy, Clone)]
 pub struct OpaqueRepr<T: EnumRepr>(T::Repr, core::marker::PhantomData<T>);
+
+impl<T: EnumRepr> Clone for OpaqueRepr<T> {
+    fn clone(&self) -> Self {
+        OpaqueRepr(self.0, core::marker::PhantomData)
+    }
+}
+
+impl<T: EnumRepr> Copy for OpaqueRepr<T> {}
 
 pub trait EnumRepr {
     /// The repr type.
@@ -271,14 +278,14 @@ impl<
             + num_traits::WrappingShr
             + num_traits::WrappingShl,
         E: EnumRepr<EnumT = E, Repr = R>,
-        O: Clone + EnumRepr<EnumT = E, Repr = R>,
+        O: Copy + EnumRepr<EnumT = E, Repr = R>,
     > EnumMaskIter for O
 {
     type I = EnumMaskIterator<R, E, O>;
 
     fn mask_iter(&mut self) -> EnumMaskIterator<R, E, O> {
         EnumMaskIterator {
-            mask: self.clone().to_repr(),
+            mask: self.to_repr(),
             shift: 0,
             phantom: core::marker::PhantomData,
         }
@@ -298,7 +305,10 @@ where
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EnumMaskIterator<
-    R: num_traits::int::PrimInt + std::ops::BitOrAssign + num_traits::ops::wrapping::WrappingShl + num_traits::ops::wrapping::WrappingShr,
+    R: num_traits::int::PrimInt
+        + std::ops::BitOrAssign
+        + num_traits::ops::wrapping::WrappingShl
+        + num_traits::ops::wrapping::WrappingShr,
     T: EnumRepr<Repr = R, EnumT = T>,
     O: EnumRepr<Repr = R, EnumT = T>,
 > {
@@ -308,7 +318,10 @@ pub struct EnumMaskIterator<
 }
 
 impl<
-        R: num_traits::WrappingShr + num_traits::WrappingShl + num_traits::int::PrimInt + std::ops::BitOrAssign,
+        R: num_traits::WrappingShr
+            + num_traits::WrappingShl
+            + num_traits::int::PrimInt
+            + std::ops::BitOrAssign,
         T: EnumRepr<Repr = R, EnumT = T>,
         O: EnumRepr<Repr = R, EnumT = T>,
     > Iterator for EnumMaskIterator<R, T, O>
