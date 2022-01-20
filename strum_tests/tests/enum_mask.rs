@@ -1,5 +1,4 @@
-use strum::EnumMaskIter;
-use strum::{EnumRepr, OpaqueRepr};
+use strum::{EnumMaskIter, EnumRepr};
 use strum_macros::EnumMask;
 
 #[derive(Debug, Eq, PartialEq, EnumMask)]

@@ -2,7 +2,7 @@ use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
 use syn::{Data, DeriveInput, PathArguments, Type, TypeParen};
 
-use crate::helpers::{non_enum_error, HasStrumVariantProperties};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
 pub fn enum_mask_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -109,12 +109,14 @@ pub fn enum_mask_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     // FIXME this should check that discriminants are comprised of unique bits.
 
+    let type_properties = ast.get_type_properties()?;
+    let strum_module_path = type_properties.crate_module_path();
     Ok(quote! {
         impl #impl_generics EnumRepr for #name #ty_generics #where_clause {
             #[doc = "The Repr type"]
             type Repr = #discriminant_type;
             #[doc = "The Opaque Repr type"]
-            type OpaqueRepr = OpaqueRepr<Self>;
+            type OpaqueRepr = #strum_module_path::OpaqueRepr<Self>;
             #[doc = "The Enum type (Self for the enum, the enum for OpaqueRepr)"]
             type EnumT = Self;
 
@@ -122,8 +124,8 @@ pub fn enum_mask_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                self as #discriminant_type
             }
 
-            fn opaque(self) -> OpaqueRepr<Self> {
-                OpaqueRepr::new(self)
+            fn opaque(self) -> #strum_module_path::OpaqueRepr<Self> {
+                #strum_module_path::OpaqueRepr::new(self)
             }
 
             fn cvt_from_repr(discriminant: #discriminant_type) -> Option<Self> {
