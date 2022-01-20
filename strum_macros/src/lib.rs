@@ -476,6 +476,7 @@ pub fn enum_mask(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     debug_print_generated(&ast, &toks);
     toks.into()
 }
+
 /// Add a verbose message to an enum variant.
 ///
 /// Encode strings into the enum itself. The `strum_macros::EmumMessage` macro implements the `strum::EnumMessage` trait.

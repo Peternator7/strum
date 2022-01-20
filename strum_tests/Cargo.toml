@@ -14,3 +14,4 @@ bitflags = "=1.2"
 
 [dev-dependencies]
 rustversion = "1.0"
+num-traits = "0.2.14"
