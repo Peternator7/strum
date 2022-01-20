@@ -190,17 +190,17 @@ pub trait VariantNames {
     const VARIANTS: &'static [&'static str];
 }
 
-pub struct OpaqueRepr<T: EnumRepr>(T::Repr, core::marker::PhantomData<T>);
+pub struct OpaqueRepr<E: EnumMetadata>(E::Repr, core::marker::PhantomData<E>);
 
-impl<T: EnumRepr> Clone for OpaqueRepr<T> {
+impl<E: EnumMetadata> Clone for OpaqueRepr<E> {
     fn clone(&self) -> Self {
         OpaqueRepr(self.0, core::marker::PhantomData)
     }
 }
 
-impl<T: EnumRepr> Copy for OpaqueRepr<T> {}
+impl<E: EnumMetadata> Copy for OpaqueRepr<E> {}
 
-pub trait EnumRepr {
+pub trait EnumMetadata {
     /// The repr type.
     type Repr: Copy
         + core::ops::BitOr
@@ -211,69 +211,73 @@ pub trait EnumRepr {
     /// The opaque representation type.
     type OpaqueRepr;
     /// The enum type.
-    type EnumT: EnumRepr;
+    type EnumT: EnumMetadata;
+
+    /// Variant names
+    const VARIANTS: &'static [&'static str];
+    /// Number of variants
+    const COUNT: usize;
 
     /// convert to the enums #[repr(..)]
     /// equivalent to `self as ..`
     fn to_repr(self) -> Self::Repr;
     /// Converts to a OpaqueRepr<Self>
-    fn opaque(self) -> Self::OpaqueRepr;
+    fn opaque_repr(self) -> Self::OpaqueRepr;
     /// Non-const trait version of FromRepr
-    fn cvt_from_repr(repr: Self::Repr) -> Option<Self::EnumT>;
+    fn from_repr(repr: Self::Repr) -> Option<Self::EnumT>;
 }
 
-impl<T: EnumRepr> core::ops::BitOr<T> for OpaqueRepr<T>
+impl<E: EnumMetadata> core::ops::BitOr<E> for OpaqueRepr<E>
 where
-    Self: EnumRepr<Repr = <T as EnumRepr>::Repr>,
-    <T as EnumRepr>::Repr: core::ops::BitOr<Output = <T as EnumRepr>::Repr>,
+    Self: EnumMetadata<Repr = <E as EnumMetadata>::Repr>,
+    <E as EnumMetadata>::Repr: core::ops::BitOr<Output = <E as EnumMetadata>::Repr>,
 {
     type Output = Self;
-    fn bitor(self, other: T) -> OpaqueRepr<T> {
-        Self::from_repr(self.to_repr() | other.to_repr())
+    fn bitor(self, other: E) -> OpaqueRepr<E> {
+        Self::from_repr_unchecked(self.to_repr() | other.to_repr())
     }
 }
 
-impl<T: EnumRepr> core::ops::BitOr<Self> for OpaqueRepr<T>
+impl<E: EnumMetadata> core::ops::BitOr<Self> for OpaqueRepr<E>
 where
-    Self: EnumRepr<Repr = <T as EnumRepr>::Repr>,
-    <T as EnumRepr>::Repr: core::ops::BitOr<Output = <T as EnumRepr>::Repr>,
+    Self: EnumMetadata<Repr = <E as EnumMetadata>::Repr>,
+    <E as EnumMetadata>::Repr: core::ops::BitOr<Output = <E as EnumMetadata>::Repr>,
 {
     type Output = Self;
-    fn bitor(self, other: OpaqueRepr<T>) -> OpaqueRepr<T> {
-        Self::from_repr(self.to_repr() | other.to_repr())
+    fn bitor(self, other: OpaqueRepr<E>) -> OpaqueRepr<E> {
+        Self::from_repr_unchecked(self.to_repr() | other.to_repr())
     }
 }
 
-impl<T: EnumRepr<EnumT = T>> EnumRepr for OpaqueRepr<T> {
-    type Repr = <T as EnumRepr>::Repr;
+impl<E: EnumMetadata<EnumT = E>> EnumMetadata for OpaqueRepr<E> {
+    type Repr = <E as EnumMetadata>::Repr;
     type OpaqueRepr = Self;
-    type EnumT = T;
+    type EnumT = E;
+    const VARIANTS: &'static [&'static str] = Self::EnumT::VARIANTS;
+    const COUNT: usize = Self::EnumT::COUNT;
 
     fn to_repr(self) -> Self::Repr {
         self.0
     }
 
-    fn opaque(self) -> Self {
+    fn opaque_repr(self) -> Self {
         self
     }
 
-    fn cvt_from_repr(repr: Self::Repr) -> Option<Self::EnumT> {
-        Self::EnumT::cvt_from_repr(repr)
+    fn from_repr(repr: Self::Repr) -> Option<Self::EnumT> {
+        Self::EnumT::from_repr(repr)
     }
 }
 
-impl<T: EnumRepr> OpaqueRepr<T> {
-    pub fn new(e: T) -> OpaqueRepr<T> {
-        OpaqueRepr::<T>(e.to_repr(), core::marker::PhantomData)
+impl<E: EnumMetadata> OpaqueRepr<E> {
+    pub fn new(e: E) -> OpaqueRepr<E> {
+        OpaqueRepr::<E>(e.to_repr(), core::marker::PhantomData)
     }
 
-    fn from_repr(repr: T::Repr) -> OpaqueRepr<T> {
-        OpaqueRepr::<T>(repr, core::marker::PhantomData)
+    fn from_repr_unchecked(repr: E::Repr) -> OpaqueRepr<E> {
+        OpaqueRepr::<E>(repr, core::marker::PhantomData)
     }
 }
-
-
-// FIXME derive ExactSizeIterator...
 
 #[cfg(feature = "derive")]
 pub use strum_macros::*;
@@ -299,7 +303,7 @@ DocumentMacroRexports! {
     EnumCount,
     EnumDiscriminants,
     EnumIter,
-    EnumMask,
+    EnumMetadata,
     EnumMessage,
     EnumProperty,
     EnumString,

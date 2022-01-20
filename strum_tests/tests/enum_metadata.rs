@@ -1,13 +1,40 @@
-use strum::EnumRepr;
-use strum_macros::EnumMask;
+use strum::EnumMetadata;
+// To check that from_repr impls on both the enum type,
+// and EnumMetadata don't clash in any way.
+use strum::FromRepr;
 
+#[derive(Debug, Eq, PartialEq, EnumMetadata, FromRepr)]
+#[repr(u8)]
+enum ABC {
+    A = 1 << 0,
+    B = 1 << 1,
+    C = 1 << 2,
+}
+
+#[test]
+fn abc_variant_names() {
+    assert_eq!(ABC::VARIANTS, ["A", "B", "C"]);
+}
+
+#[test]
+fn abc_variant_count() {
+    assert_eq!(ABC::COUNT, 3);
+}
+
+#[test]
+fn abc_from_repr_same() {
+    assert_eq!(ABC::from_repr(ABC::A as u8), <ABC as EnumMetadata>::from_repr(ABC::A.to_repr()))
+}
+
+// Scaffolding for further tests, and an example
+// Iterator type which uses the EnumMetadata trait.
 impl<
         R: num_traits::PrimInt
             + core::ops::BitOrAssign
             + num_traits::WrappingShr
             + num_traits::WrappingShl,
-        E: EnumRepr<EnumT = E, Repr = R>,
-        O: Copy + EnumRepr<EnumT = E, Repr = R>,
+        E: EnumMetadata<EnumT = E, Repr = R>,
+        O: Copy + EnumMetadata<EnumT = E, Repr = R>,
     > EnumMaskIter for O
 {
     type I = EnumMaskIterator<R, E, O>;
@@ -23,9 +50,9 @@ impl<
 
 pub trait EnumMaskIter: Sized
 where
-    Self: EnumRepr,
+    Self: EnumMetadata,
     Self::Repr: core::ops::BitOr + core::ops::BitOrAssign,
-    <Self as EnumRepr>::EnumT: EnumRepr,
+    <Self as EnumMetadata>::EnumT: EnumMetadata,
 {
     type I: Iterator<Item = Self::EnumT>;
 
@@ -38,8 +65,8 @@ pub struct EnumMaskIterator<
         + std::ops::BitOrAssign
         + num_traits::ops::wrapping::WrappingShl
         + num_traits::ops::wrapping::WrappingShr,
-    E: EnumRepr<Repr = R, EnumT = E>,
-    O: EnumRepr<Repr = R, EnumT = E>,
+    E: EnumMetadata<Repr = R, EnumT = E>,
+    O: EnumMetadata<Repr = R, EnumT = E>,
 > {
     mask: R,
     shift: u32,
@@ -51,11 +78,11 @@ impl<
             + num_traits::WrappingShl
             + num_traits::int::PrimInt
             + std::ops::BitOrAssign,
-        E: EnumRepr<Repr = R, EnumT = E>,
-        O: EnumRepr<Repr = R, EnumT = E>,
+        E: EnumMetadata<Repr = R, EnumT = E>,
+        O: EnumMetadata<Repr = R, EnumT = E>,
     > Iterator for EnumMaskIterator<R, E, O>
 {
-    type Item = <T as EnumRepr>::EnumT;
+    type Item = <E as EnumMetadata>::EnumT;
 
     fn next(&mut self) -> Option<Self::Item> {
         // This can doubtlessly be improved
@@ -76,7 +103,7 @@ impl<
         self.mask = self.mask.wrapping_shr(tz + one_u32);
         let shift_lhs: u32 = core::ops::Add::<u32>::add(tz, one_u32);
         self.shift += shift_lhs;
-        T::EnumT::cvt_from_repr(discr)
+        E::EnumT::from_repr(discr)
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -89,25 +116,19 @@ impl<
     }
 }
 
-#[derive(Debug, Eq, PartialEq, EnumMask)]
-#[repr(u8)]
-enum ABC {
-    A = 1 << 0,
-    B = 1 << 1,
-    C = 1 << 2,
-}
+// FIXME derive ExactSizeIterator...
 
 #[test]
 fn mask_iter() {
-    let mask = ABC::A.opaque();
+    let mask = ABC::A.opaque_repr();
     assert_eq!(mask.mask_iter().collect::<Vec<ABC>>(), [ABC::A]);
-    let mask = ABC::A.opaque() | ABC::B;
+    let mask = ABC::A.opaque_repr() | ABC::B;
     assert_eq!(mask.mask_iter().collect::<Vec<ABC>>(), [ABC::A, ABC::B]);
-    let mask = ABC::C.opaque() | ABC::B.opaque();
+    let mask = ABC::C.opaque_repr() | ABC::B.opaque_repr();
     assert_eq!(mask.mask_iter().collect::<Vec<ABC>>(), [ABC::B, ABC::C]);
 }
 
-#[derive(Debug, Eq, PartialEq, EnumMask)]
+#[derive(Debug, Eq, PartialEq, EnumMetadata)]
 #[repr(u8)]
 enum ReprBoundary {
     End = 1 << 7,
@@ -115,14 +136,14 @@ enum ReprBoundary {
 
 #[test]
 fn test_repr_boundary() {
-    let mask = ReprBoundary::End.opaque();
+    let mask = ReprBoundary::End.opaque_repr();
     assert_eq!(
         mask.mask_iter().collect::<Vec<ReprBoundary>>(),
         [ReprBoundary::End]
     );
 }
 
-#[derive(Debug, Eq, PartialEq, EnumMask)]
+#[derive(Debug, Eq, PartialEq, EnumMetadata)]
 #[repr(u8)]
 enum ReprSaturated {
     A = 1 << 0,
@@ -138,14 +159,14 @@ enum ReprSaturated {
 #[test]
 fn test_repr_saturated() {
     use ReprSaturated::*;
-    let mask = A.opaque();
+    let mask = A.opaque_repr();
     assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [A]);
-    let mask = A.opaque() | H;
+    let mask = A.opaque_repr() | H;
     assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [A, H]);
-    let mask = B.opaque() | H;
+    let mask = B.opaque_repr() | H;
     assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [B, H]);
-    let mask = B.opaque() | G;
+    let mask = B.opaque_repr() | G;
     assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [B, G]);
-    let mask = G.opaque() | B;
+    let mask = G.opaque_repr() | B;
     assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [B, G]);
 }

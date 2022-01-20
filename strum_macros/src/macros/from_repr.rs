@@ -125,7 +125,10 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
         filter_by_rust_version(quote! { const })
     };
-
+    // Note: synchronize changes with `EnumMetadata::from_repr`,
+    // it duplicates this logic in an inherent impl.
+    // Making it possible to have both impls on the same type;
+    // so their behavior must be kept the same.
     Ok(quote! {
         impl #impl_generics #name #ty_generics #where_clause {
             #[doc = "Try to create [Self] from the raw representation"]
