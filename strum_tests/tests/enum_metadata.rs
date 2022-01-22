@@ -199,6 +199,13 @@ fn mask_iter() {
     assert_eq!(mask.mask_iter().collect::<Vec<ABC>>(), [ABC::B, ABC::C]);
 }
 
+#[test]
+fn check_opaque_zero_repr() {
+    use strum::OpaqueRepr;
+    let mask: OpaqueRepr<ABC> = OpaqueRepr::zero();
+    assert_eq!(mask.mask_iter().collect::<Vec<ABC>>(), []);
+}
+
 #[derive(Debug, Eq, PartialEq, EnumMetadata)]
 #[repr(u8)]
 enum ReprBoundary {

@@ -155,6 +155,7 @@ impl<E: EnumMetadata<EnumT = E>> EnumMetadata for OpaqueRepr<E> {
     type Repr = <E as EnumMetadata>::Repr;
     type OpaqueRepr = Self;
     type EnumT = E;
+
     const VARIANTS: &'static [&'static str] = Self::EnumT::VARIANTS;
     const COUNT: usize = Self::EnumT::COUNT;
     const REPR_SIZE: usize = Self::EnumT::REPR_SIZE;
@@ -175,6 +176,10 @@ impl<E: EnumMetadata<EnumT = E>> EnumMetadata for OpaqueRepr<E> {
 impl<E: EnumMetadata> OpaqueRepr<E> {
     pub fn new(e: E) -> OpaqueRepr<E> {
         OpaqueRepr::<E>(e.to_repr(), PhantomData)
+    }
+
+    pub fn zero() -> OpaqueRepr<E> {
+        OpaqueRepr::<E>(num_traits::identities::zero(), PhantomData)
     }
 
     fn from_repr_unchecked(repr: E::Repr) -> OpaqueRepr<E> {
