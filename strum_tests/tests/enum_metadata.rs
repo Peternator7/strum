@@ -159,25 +159,21 @@ impl<
             }
         };
 
-        if let Some(step) = self.step {
-            let mut ret = None;
-            while let None = ret {
-                let proposed_repr = step & self.mask;
-
+        let mut ret = None;
+        while let None = ret {
+            if let Some(step) = &mut self.step {
+                let proposed_repr = *step & self.mask;
                 // Assumption: the single 1 bit in Some(step) is also 1 in self.mask.
-                assert_eq!(proposed_repr, step);
+                assert_eq!(proposed_repr, *step);
                 ret = E::EnumT::from_repr(proposed_repr);
                 // Strip that bit out of mask.
-                self.mask ^= step;
+                self.mask ^= *step;
                 self.step = nextpos(self.mask);
-                if let None = self.step {
-                    break;
-                }
+            } else {
+                break;
             }
-            ret
-        } else {
-            None
         }
+        ret
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -247,4 +243,28 @@ fn test_repr_saturated() {
     assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [B, G]);
     let mask = G.opaque_repr() | B;
     assert_eq!(mask.mask_iter().collect::<Vec<ReprSaturated>>(), [B, G]);
+}
+
+// Neither of these variants fulfill the constraints on variants
+// required for EnumMaskIter to work
+//
+// In particular all reprs should have a single unique 1 bit.
+// Ox0 has zero unique 1 bits, and Ox11 has 2.
+//
+// Just check that it handles being given these gracefully.
+#[derive(Debug, Eq, PartialEq, EnumMetadata)]
+enum UnsupportedByMaskIter {
+    Ox0 = 0,
+    Ox11 = 0x3,
+}
+
+#[test]
+fn test_mask_iter_enum_constraints() {
+    use UnsupportedByMaskIter::*;
+
+    let mask = Ox0.opaque_repr();
+    assert_eq!(mask.mask_iter().collect::<Vec<UnsupportedByMaskIter>>(), []);
+
+    let mask = Ox11.opaque_repr();
+    assert_eq!(mask.mask_iter().collect::<Vec<UnsupportedByMaskIter>>(), []);
 }
