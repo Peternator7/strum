@@ -133,6 +133,7 @@ pub fn enum_metadata_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             const VARIANTS: &'static [&'static str] = &[ #(#variant_names),* ];
             const COUNT: usize = #enum_count;
+            const REPR_SIZE: usize = std::mem::size_of::<Self::Repr>();
 
             fn to_repr(self) -> #discriminant_type {
                self as #discriminant_type

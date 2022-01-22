@@ -1,6 +1,11 @@
 use strum::EnumMetadata;
 // To check that from_repr impls on both the enum type,
 // and EnumMetadata don't clash in any way.
+use core::ops;
+use num_traits::ops::checked;
+use num_traits::ops::wrapping;
+use num_traits::Num;
+use num_traits::PrimInt;
 use strum::FromRepr;
 
 #[derive(Debug, Eq, PartialEq, EnumMetadata, FromRepr)]
@@ -23,16 +28,34 @@ fn abc_variant_count() {
 
 #[test]
 fn abc_from_repr_same() {
-    assert_eq!(ABC::from_repr(ABC::A as u8), <ABC as EnumMetadata>::from_repr(ABC::A.to_repr()))
+    assert_eq!(
+        ABC::from_repr(ABC::A as u8),
+        <ABC as EnumMetadata>::from_repr(ABC::A.to_repr())
+    )
 }
 
 // Scaffolding for further tests, and an example
 // Iterator type which uses the EnumMetadata trait.
 impl<
-        R: num_traits::PrimInt
-            + core::ops::BitOrAssign
-            + num_traits::WrappingShr
-            + num_traits::WrappingShl,
+        R: Copy
+            + ops::BitOr
+            + ops::BitAnd
+            + ops::BitXor
+            + ops::Shr
+            + ops::Shl
+            + ops::Not
+            + ops::BitOrAssign
+            + ops::BitAndAssign
+            + ops::BitXorAssign
+            + ops::ShrAssign
+            + ops::ShlAssign
+            + checked::CheckedShl
+            + checked::CheckedShr
+            + wrapping::WrappingShl
+            + wrapping::WrappingShl
+            + Num
+            + PrimInt
+            + core::fmt::Debug,
         E: EnumMetadata<EnumT = E, Repr = R>,
         O: Copy + EnumMetadata<EnumT = E, Repr = R>,
     > EnumMaskIter for O
@@ -40,9 +63,20 @@ impl<
     type I = EnumMaskIterator<R, E, O>;
 
     fn mask_iter(&self) -> EnumMaskIterator<R, E, O> {
+        let nextpos = |x: R| {
+            let pos: usize = x.trailing_zeros() as usize;
+            if pos >= E::EnumT::REPR_SIZE * 8_usize {
+                None
+            } else {
+                let one_r: R = num_traits::identities::one();
+                Some(one_r << pos)
+            }
+        };
+        let mask = self.to_repr();
+
         EnumMaskIterator {
-            mask: self.to_repr(),
-            shift: 0,
+            mask,
+            step: nextpos(mask),
             phantom: core::marker::PhantomData,
         }
     }
@@ -61,23 +95,53 @@ where
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EnumMaskIterator<
-    R: num_traits::int::PrimInt
-        + std::ops::BitOrAssign
-        + num_traits::ops::wrapping::WrappingShl
-        + num_traits::ops::wrapping::WrappingShr,
+    R: Copy
+        + ops::BitOr
+        + ops::BitAnd
+        + ops::BitXor
+        + ops::Shr
+        + ops::Shl
+        + ops::Not
+        + ops::BitOrAssign
+        + ops::BitAndAssign
+        + ops::BitXorAssign
+        + ops::ShrAssign
+        + ops::ShlAssign
+        + checked::CheckedShl
+        + checked::CheckedShr
+        + wrapping::WrappingShl
+        + wrapping::WrappingShl
+        + Num
+        + PrimInt
+        + core::fmt::Debug,
     E: EnumMetadata<Repr = R, EnumT = E>,
     O: EnumMetadata<Repr = R, EnumT = E>,
 > {
     mask: R,
-    shift: u32,
+    step: Option<R>,
     phantom: core::marker::PhantomData<(O, R)>,
 }
 
 impl<
-        R: num_traits::WrappingShr
-            + num_traits::WrappingShl
-            + num_traits::int::PrimInt
-            + std::ops::BitOrAssign,
+        R: Copy
+            + ops::BitOr
+            + ops::BitAnd
+            + ops::BitXor
+            + ops::Shr
+            + ops::Shl
+            + ops::Not
+            + ops::BitOrAssign
+            + ops::BitAndAssign
+            + ops::BitXorAssign
+            + ops::ShrAssign
+            + ops::ShlAssign
+            + checked::CheckedShl
+            + checked::CheckedShr
+            + wrapping::WrappingShl
+            + wrapping::WrappingShl
+            + Num
+            + PrimInt
+            + core::fmt::Debug,
         E: EnumMetadata<Repr = R, EnumT = E>,
         O: EnumMetadata<Repr = R, EnumT = E>,
     > Iterator for EnumMaskIterator<R, E, O>
@@ -85,38 +149,45 @@ impl<
     type Item = <E as EnumMetadata>::EnumT;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // This can doubtlessly be improved
-        if self.shift >= std::mem::size_of::<R>() as u32 * 8 {
-            return None;
-        }
-
-        let tz: u32 = self.mask.trailing_zeros();
-        let tz = if tz < std::mem::size_of::<R>() as u32 * 8 {
-            tz
-        } else {
-            std::mem::size_of::<R>() as u32 * 8 - 1
+        let nextpos = |x: R| {
+            let pos: usize = x.trailing_zeros() as usize;
+            if pos >= (E::EnumT::REPR_SIZE * 8_usize) as usize {
+                None
+            } else {
+                let one_r: R = num_traits::identities::one();
+                Some(one_r << pos)
+            }
         };
-        let discr = ((self.mask.wrapping_shr(tz)) & num_traits::identities::one())
-            .wrapping_shl(self.shift + tz);
 
-        let one_u32: u32 = num_traits::identities::one();
-        self.mask = self.mask.wrapping_shr(tz + one_u32);
-        let shift_lhs: u32 = core::ops::Add::<u32>::add(tz, one_u32);
-        self.shift += shift_lhs;
-        E::EnumT::from_repr(discr)
+        if let Some(step) = self.step {
+            let mut ret = None;
+            while let None = ret {
+                let proposed_repr = step & self.mask;
+
+                // Assumption: the single 1 bit in Some(step) is also 1 in self.mask.
+                assert_eq!(proposed_repr, step);
+                ret = E::EnumT::from_repr(proposed_repr);
+                // Strip that bit out of mask.
+                self.mask ^= step;
+                self.step = nextpos(self.mask);
+                if let None = self.step {
+                    break;
+                }
+            }
+            ret
+        } else {
+            None
+        }
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        // FIXME This assumes mask bits only contain enum repr items...
-        // And there is only one bit to each enum discriminant.
-        (
-            self.mask.count_ones() as usize,
-            Some(self.mask.count_ones() as usize),
-        )
+        // TODO if we know which bits will never be in a valid repr,
+        // and that the other single bits all represent valid representations
+        // We could return an exact lower == upper bounds with `count_ones()`,
+        // then derive ExactSizeIterator.
+        (0, Some(self.mask.count_ones() as usize))
     }
 }
-
-// FIXME derive ExactSizeIterator...
 
 #[test]
 fn mask_iter() {
