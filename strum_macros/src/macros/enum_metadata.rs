@@ -2,13 +2,12 @@ use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
 use syn::{Data, DeriveInput, PathArguments, Type, TypeParen};
 
-use crate::helpers::{non_enum_error, HasStrumVariantProperties};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
-pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
+pub fn enum_metadata_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
-    let vis = &ast.vis;
     let attrs = &ast.attrs;
 
     let mut discriminant_type: Type = syn::parse("usize".parse().unwrap()).unwrap();
@@ -63,7 +62,6 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let mut arms = Vec::new();
     let mut constant_defs = Vec::new();
-    let mut has_additional_data = false;
     let mut prev_const_var_ident = None;
     for variant in variants {
         use syn::Fields::*;
@@ -76,13 +74,11 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let params = match &variant.fields {
             Unit => quote! {},
             Unnamed(fields) => {
-                has_additional_data = true;
                 let defaults = ::std::iter::repeat(quote!(::core::default::Default::default()))
                     .take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
             Named(fields) => {
-                has_additional_data = true;
                 let fields = fields
                     .named
                     .iter()
@@ -111,29 +107,38 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     arms.push(quote! { _ => ::core::option::Option::None });
 
-    let const_if_possible = if has_additional_data {
-        quote! {}
-    } else {
-        #[rustversion::before(1.46)]
-        fn filter_by_rust_version(s: TokenStream) -> TokenStream {
-            quote! {}
-        }
+    let type_properties = ast.get_type_properties()?;
 
-        #[rustversion::since(1.46)]
-        fn filter_by_rust_version(s: TokenStream) -> TokenStream {
-            s
-        }
-        filter_by_rust_version(quote! { const })
-    };
+    let variant_names = variants
+        .iter()
+        .map(|v| {
+            let props = v.get_variant_properties()?;
+            Ok(props.get_preferred_name(type_properties.case_style))
+        })
+        .collect::<syn::Result<Vec<_>>>()?;
 
-    // Note: synchronize changes with `EnumMetadata::from_repr`,
-    // it duplicates this logic in an inherent impl.
-    // Making it possible to have both impls on the same type;
-    // so their behavior must be kept the same.
+    let enum_count = variants.len();
+
     Ok(quote! {
-        impl #impl_generics #name #ty_generics #where_clause {
-            #[doc = "Try to create [Self] from the raw representation"]
-            #vis #const_if_possible fn from_repr(discriminant: #discriminant_type) -> Option<#name #ty_generics> {
+        impl #impl_generics EnumMetadata for #name #ty_generics #where_clause {
+            #[doc = "The Repr type."]
+            type Repr = #discriminant_type;
+            #[doc = "The Enum type, typically Self unless implementing EnumMetadata for another enum type."]
+            type EnumT = Self;
+
+            const VARIANTS: &'static [&'static str] = &[ #(#variant_names),* ];
+            const COUNT: usize = #enum_count;
+            const REPR_SIZE: usize = std::mem::size_of::<Self::Repr>();
+
+            fn to_repr(self) -> #discriminant_type {
+               self as #discriminant_type
+            }
+
+            // Note: synchronize changes with `FromRepr::from_repr`,
+            // it duplicates this logic in an inherent impl.
+            // Making it possible to have both impls on the same type;
+            // so their behavior must be kept the same.
+            fn from_repr(discriminant: #discriminant_type) -> Option<Self> {
                 #(#constant_defs)*
                 match discriminant {
                     #(#arms),*

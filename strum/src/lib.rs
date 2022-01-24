@@ -30,6 +30,8 @@
 // only for documentation purposes
 pub mod additional_attributes;
 
+use core::ops;
+
 /// The ParseError enum is a collection of all the possible reasons
 /// an enum can fail to parse from a string.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -190,6 +192,39 @@ pub trait VariantNames {
     const VARIANTS: &'static [&'static str];
 }
 
+pub trait EnumMetadata {
+    /// The repr type as a trait associated type.
+    type Repr: Copy
+        + ops::BitOr
+        + ops::BitAnd
+        + ops::BitXor
+        + ops::Shr
+        + ops::Shl
+        + ops::Not
+        + ops::BitOrAssign
+        + ops::BitAndAssign
+        + ops::BitXorAssign
+        + ops::ShrAssign
+        + ops::ShlAssign
+        + core::fmt::Debug;
+
+    /// The enum type, generally Self unless deriving EnumMetadata for a type which returns
+    /// metadata for another enum.
+    type EnumT: EnumMetadata;
+
+    /// Variant names
+    const VARIANTS: &'static [&'static str];
+    /// Number of variants
+    const COUNT: usize;
+    /// std::mem::size_of<Self::Repr>().
+    const REPR_SIZE: usize;
+
+    /// convert to the enums #[repr(..)] equivalent to `self as ..`
+    fn to_repr(self) -> Self::Repr;
+    /// Trait equivalent of EnumT::from_repr(...)
+    fn from_repr(repr: Self::Repr) -> Option<Self::EnumT>;
+}
+
 #[cfg(feature = "derive")]
 pub use strum_macros::*;
 
@@ -214,6 +249,7 @@ DocumentMacroRexports! {
     EnumCount,
     EnumDiscriminants,
     EnumIter,
+    EnumMetadata,
     EnumMessage,
     EnumProperty,
     EnumString,
