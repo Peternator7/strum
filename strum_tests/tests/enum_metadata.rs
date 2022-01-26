@@ -1,7 +1,6 @@
 use strum::EnumMetadata;
 // To check that from_repr impls on both the enum type,
 // and EnumMetadata don't clash in any way.
-use core::ops;
 use strum::FromRepr;
 
 #[derive(Debug, Eq, PartialEq, EnumMetadata, FromRepr)]
