@@ -206,6 +206,11 @@ pub trait EnumMetadata {
         + ops::BitXorAssign
         + ops::ShrAssign
         + ops::ShlAssign
+        + core::cmp::Eq
+        + core::cmp::Ord
+        + core::cmp::PartialEq
+        + core::cmp::PartialOrd
+        + core::fmt::Display
         + core::fmt::Debug;
 
     /// The enum type, generally Self unless deriving EnumMetadata for a type which returns
