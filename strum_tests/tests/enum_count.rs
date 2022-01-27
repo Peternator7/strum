@@ -40,3 +40,15 @@ fn crate_module_path_test() {
     assert_eq!(7, Week::COUNT);
     assert_eq!(Week::iter().count(), Week::COUNT);
 }
+
+// EnumIter doesn't support lifetimes so we can't check consistency with that.
+#[derive(Debug, EnumCount)]
+enum HasLifetime<'a> {
+    Hello(&'a str),
+}
+
+#[test]
+fn lifetime_test() {
+    let _ = HasLifetime::Hello("world");
+    assert_eq!(1, HasLifetime::COUNT);
+}

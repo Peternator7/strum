@@ -1,14 +1,12 @@
+use crate::helpers::metadata_impl::MetadataImpl;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput};
+use syn::DeriveInput;
 
-use crate::helpers::{non_enum_error, HasTypeProperties};
+use crate::helpers::HasTypeProperties;
 
 pub(crate) fn enum_count_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
-    let n = match &ast.data {
-        Data::Enum(v) => v.variants.len(),
-        _ => return Err(non_enum_error()),
-    };
+    let n = MetadataImpl::new(ast)?.enum_count;
     let type_properties = ast.get_type_properties()?;
     let strum_module_path = type_properties.crate_module_path();
 

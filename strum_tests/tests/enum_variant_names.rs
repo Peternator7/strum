@@ -126,3 +126,15 @@ fn crate_module_path_test() {
 
     assert_eq!(Color::VARIANTS, &["Red", "b", "y"]);
 }
+
+#[derive(Debug, EnumVariantNames)]
+enum HasLifetime<'a> {
+    #[strum(serialize = "hello")]
+    Hello(&'a str),
+}
+
+#[test]
+fn has_lifetime_variant_name() {
+    let _ = HasLifetime::Hello("world");
+    assert_eq!(HasLifetime::VARIANTS, &["hello"]);
+}
