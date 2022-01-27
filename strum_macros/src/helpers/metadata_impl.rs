@@ -26,14 +26,6 @@ impl<'a> MetadataImpl<'a> {
         let gen = &ast.generics;
         let generics_split = gen.split_for_impl();
 
-        if gen.lifetimes().count() > 0 {
-            return Err(syn::Error::new(
-                Span::call_site(),
-                "This macro doesn't support enums with lifetimes. \
-                 The resulting enums would be unbounded.",
-            ));
-        }
-
         match &ast.data {
             Data::Enum(_) => (),
             _ => return Err(non_enum_error()),
@@ -61,12 +53,21 @@ impl<'a> MetadataImpl<'a> {
         self
     }
 
-    pub fn use_from_repr(mut self) -> Self {
+    pub fn use_from_repr(mut self) -> syn::Result<Self> {
+        let gen = &self.ast.generics;
+        if gen.lifetimes().count() > 0 {
+            return Err(syn::Error::new(
+                Span::call_site(),
+                "This macro doesn't support enums with lifetimes. \
+                 The resulting enums would be unbounded.",
+            ));
+        }
+
         self.gen_from_repr = Some(FromReprTokens {
             constant_defs: Vec::new(),
             match_arms: Vec::new(),
         });
-        self
+        Ok(self)
     }
 
     pub fn discriminant_type(&self) -> Type {

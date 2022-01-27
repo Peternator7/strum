@@ -5,7 +5,7 @@ use syn::DeriveInput;
 
 pub fn enum_metadata_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
-    let mut metadata = MetadataImpl::new(ast)?.use_name_info().use_from_repr();
+    let mut metadata = MetadataImpl::new(ast)?.use_name_info().use_from_repr()?;
     let discriminant_type = metadata.discriminant_type();
     metadata.generate()?;
     let enum_count = metadata.enum_count();

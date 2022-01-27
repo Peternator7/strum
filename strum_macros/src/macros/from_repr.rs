@@ -8,7 +8,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let vis = &ast.vis;
 
-    let mut metadata = MetadataImpl::new(ast)?.use_from_repr();
+    let mut metadata = MetadataImpl::new(ast)?.use_from_repr()?;
 
     let discriminant_type = metadata.discriminant_type();
     metadata.generate()?;
