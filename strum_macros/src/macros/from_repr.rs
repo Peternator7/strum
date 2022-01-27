@@ -1,4 +1,4 @@
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::quote;
 use syn::DeriveInput;
 
@@ -6,25 +6,17 @@ use crate::helpers::metadata_impl::{FromReprTokens, MetadataImpl};
 
 pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
-    let gen = &ast.generics;
-    let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
     let vis = &ast.vis;
 
-    if gen.lifetimes().count() > 0 {
-        return Err(syn::Error::new(
-            Span::call_site(),
-            "This macro doesn't support enums with lifetimes. \
-             The resulting enums would be unbounded.",
-        ));
-    }
+    let mut metadata = MetadataImpl::new(ast)?.use_from_repr();
 
-    let mut metadata = MetadataImpl::new(ast).use_from_repr();
     let discriminant_type = metadata.discriminant_type();
     metadata.generate()?;
     let FromReprTokens {
         constant_defs,
         match_arms,
     } = &metadata.from_repr().as_ref().unwrap();
+    let (impl_generics, ty_generics, where_clause) = metadata.generics_split();
 
     let const_if_possible = if metadata.has_additional_data {
         quote! {}

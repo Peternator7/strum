@@ -1,32 +1,16 @@
 use crate::helpers::metadata_impl::{FromReprTokens, MetadataImpl};
-use crate::helpers::non_enum_error;
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput};
+use syn::DeriveInput;
 
 pub fn enum_metadata_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
-    let gen = &ast.generics;
-    let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
-
-    if gen.lifetimes().count() > 0 {
-        return Err(syn::Error::new(
-            Span::call_site(),
-            "This macro doesn't support enums with lifetimes. \
-             The resulting enums would be unbounded.",
-        ));
-    }
-
-    match &ast.data {
-        Data::Enum(_) => (),
-        _ => return Err(non_enum_error()),
-    };
-
-    let mut metadata = MetadataImpl::new(ast).use_name_info().use_from_repr();
+    let mut metadata = MetadataImpl::new(ast)?.use_name_info().use_from_repr();
     let discriminant_type = metadata.discriminant_type();
     metadata.generate()?;
     let enum_count = metadata.enum_count();
     let variant_names = metadata.variant_names().as_ref().unwrap();
+    let (impl_generics, ty_generics, where_clause) = &metadata.generics_split();
 
     let FromReprTokens {
         constant_defs,

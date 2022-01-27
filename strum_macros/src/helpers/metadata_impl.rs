@@ -1,13 +1,17 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
-use syn::{Data, DeriveInput, PathArguments, Type, TypeParen};
+use syn::{
+    Data, DeriveInput, ImplGenerics, PathArguments, Type, TypeGenerics, TypeParen, WhereClause,
+};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
 pub struct MetadataImpl<'a> {
     ast: &'a syn::DeriveInput,
+    variants: &'a syn::punctuated::Punctuated<syn::Variant, syn::token::Comma>,
     gen_names: Option<Vec<syn::LitStr>>,
     gen_from_repr: Option<FromReprTokens>,
+    generics_split: (ImplGenerics<'a>, TypeGenerics<'a>, Option<&'a WhereClause>),
     pub enum_count: usize,
     pub has_additional_data: bool,
 }
@@ -18,14 +22,38 @@ pub struct FromReprTokens {
 }
 
 impl<'a> MetadataImpl<'a> {
-    pub fn new(ast: &'a DeriveInput) -> Self {
-        MetadataImpl {
+    pub fn new(ast: &'a DeriveInput) -> syn::Result<Self> {
+        let gen = &ast.generics;
+        let generics_split = gen.split_for_impl();
+
+        if gen.lifetimes().count() > 0 {
+            return Err(syn::Error::new(
+                Span::call_site(),
+                "This macro doesn't support enums with lifetimes. \
+                 The resulting enums would be unbounded.",
+            ));
+        }
+
+        match &ast.data {
+            Data::Enum(_) => (),
+            _ => return Err(non_enum_error()),
+        };
+
+        let variants = match &ast.data {
+            Data::Enum(v) => &v.variants,
+            _ => return Err(non_enum_error()),
+        };
+        let enum_count = variants.len();
+
+        Ok(MetadataImpl {
             ast,
-            enum_count: 0,
+            enum_count,
             gen_names: None,
             gen_from_repr: None,
+            generics_split,
+            variants,
             has_additional_data: false,
-        }
+        })
     }
 
     pub fn use_name_info(mut self) -> Self {
@@ -117,12 +145,8 @@ impl<'a> MetadataImpl<'a> {
 
         let case_style = self.case_style();
         let mut prev_const_var_ident = None;
-        let variants = match &self.ast.data {
-            Data::Enum(v) => &v.variants,
-            _ => return Err(non_enum_error()),
-        };
-        self.enum_count = variants.len();
-        for variant in variants {
+
+        for variant in self.variants {
             let props = variant.get_variant_properties()?;
 
             if let Some(variant_names) = &mut self.gen_names {
@@ -181,5 +205,9 @@ impl<'a> MetadataImpl<'a> {
 
     pub fn enum_count(&self) -> usize {
         self.enum_count
+    }
+
+    pub fn generics_split(&self) -> &(ImplGenerics<'a>, TypeGenerics<'a>, Option<&'a WhereClause>) {
+        &self.generics_split
     }
 }
