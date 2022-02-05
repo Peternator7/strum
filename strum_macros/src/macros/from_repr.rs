@@ -77,7 +77,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             Unit => quote! {},
             Unnamed(fields) => {
                 has_additional_data = true;
-                let defaults = ::std::iter::repeat(quote!(::core::default::Default::default()))
+                let defaults = ::core::iter::repeat(quote!(::core::default::Default::default()))
                     .take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }

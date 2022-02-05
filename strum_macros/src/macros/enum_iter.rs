@@ -45,7 +45,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let params = match &variant.fields {
             Unit => quote! {},
             Unnamed(fields) => {
-                let defaults = ::std::iter::repeat(quote!(::core::default::Default::default()))
+                let defaults = ::core::iter::repeat(quote!(::core::default::Default::default()))
                     .take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
