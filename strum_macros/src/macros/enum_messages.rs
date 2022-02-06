@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput};
+use syn::{Data, DeriveInput, LitStr};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
@@ -74,9 +74,25 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         if !documentation.is_empty() {
             let params = params.clone();
-            // Push the documentation.
-            documentation_arms
-                .push(quote! { &#name::#ident #params => ::core::option::Option::Some(concat!(#( #documentation ),*).trim()) });
+            // Strip a single leading space from each documentation line.
+            let documentation: Vec<LitStr> = documentation.iter().map(|lit_str| {
+                if let Some(suffix) = lit_str.value().strip_prefix(' ') {
+                    LitStr::new(suffix, lit_str.span())
+                } else {
+                    lit_str.clone()
+                }
+            }).collect();
+            if documentation.len() == 1 {
+                let text = &documentation[0];
+                documentation_arms
+                    .push(quote! { &#name::#ident #params => ::core::option::Option::Some(#text) });
+            } else {
+                // Push the documentation.
+                documentation_arms
+                    .push(quote! {
+                        &#name::#ident #params => ::core::option::Option::Some(concat!(#(concat!(#documentation, "\n")),*))
+                    });
+            }
         }
     }
 

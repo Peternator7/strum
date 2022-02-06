@@ -2,7 +2,7 @@ use strum::EnumMessage;
 
 #[derive(Debug, Eq, PartialEq, EnumMessage)]
 enum Pets {
-    // I'm a silent dog.
+    // This comment is not collected since it starts with "//" instead of "///".
     #[strum(message = "I'm a dog")]
     Dog,
     /// I eat birds.
@@ -16,7 +16,7 @@ enum Pets {
     Fish,
     /// I'm a bird.
     Bird,
-    /// I'm disabled.
+    /// This comment is not collected because it is explicitly disabled.
     #[strum(disabled)]
     Hamster,
 }
@@ -47,7 +47,7 @@ fn only_detailed_message() {
 
 #[test]
 fn documentation() {
-    assert_eq!("I eat birds. And fish.", (Pets::Cat).get_documentation().unwrap());
+    assert_eq!("I eat birds.\n\nAnd fish.\n", (Pets::Cat).get_documentation().unwrap());
     assert_eq!("I'm a fish.", (Pets::Fish).get_documentation().unwrap());
     assert_eq!("I'm a bird.", (Pets::Bird).get_documentation().unwrap());
 }

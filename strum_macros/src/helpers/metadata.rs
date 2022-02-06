@@ -275,7 +275,9 @@ pub trait VariantExt {
 impl VariantExt for Variant {
     fn get_metadata(&self) -> syn::Result<Vec<VariantMeta>> {
         let result = get_metadata_inner("strum", &self.attrs)?;
-        self.attrs.iter().filter(|attr| attr.path.is_ident("doc")).try_fold(result, |mut vec, attr| {
+        self.attrs.iter()
+            .filter(|attr| attr.path.is_ident("doc"))
+            .try_fold(result, |mut vec, attr| {
             if let Meta::NameValue(MetaNameValue { lit: Lit::Str(value), .. }) = attr.parse_meta()? {
                 vec.push(VariantMeta::Documentation { value })
             }
