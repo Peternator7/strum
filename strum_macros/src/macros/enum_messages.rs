@@ -76,8 +76,9 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             let params = params.clone();
             // Strip a single leading space from each documentation line.
             let documentation: Vec<LitStr> = documentation.iter().map(|lit_str| {
-                if let Some(suffix) = lit_str.value().strip_prefix(' ') {
-                    LitStr::new(suffix, lit_str.span())
+                let line = lit_str.value();
+                if line.starts_with(' ') {
+                    LitStr::new(&line.as_str()[1..], lit_str.span())
                 } else {
                     lit_str.clone()
                 }
