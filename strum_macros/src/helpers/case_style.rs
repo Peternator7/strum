@@ -7,6 +7,7 @@ use syn::{
     Ident, LitStr,
 };
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum CaseStyle {
     CamelCase,
@@ -54,7 +55,7 @@ impl Parse for CaseStyle {
 impl FromStr for CaseStyle {
     type Err = ();
 
-    fn from_str(text: &str) -> Result<CaseStyle, ()> {
+    fn from_str(text: &str) -> Result<Self, ()> {
         Ok(match text {
             "camel_case" | "PascalCase" => CaseStyle::PascalCase,
             "camelCase" => CaseStyle::CamelCase,

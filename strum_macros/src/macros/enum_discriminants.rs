@@ -1,7 +1,7 @@
 use proc_macro2::{Span, TokenStream, TokenTree};
 use quote::{quote, ToTokens};
 use syn::parse_quote;
-use syn::{Data, DeriveInput};
+use syn::{Data, DeriveInput, Fields};
 
 use crate::helpers::{non_enum_error, strum_discriminants_passthrough_error, HasTypeProperties};
 
@@ -30,10 +30,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     };
 
     // Work out the name
-    let default_name = syn::Ident::new(
-        &format!("{}Discriminants", name.to_string()),
-        Span::call_site(),
-    );
+    let default_name = syn::Ident::new(&format!("{}Discriminants", name), Span::call_site());
 
     let discriminants_name = type_properties.discriminant_name.unwrap_or(default_name);
     let discriminants_vis = type_properties
@@ -69,11 +66,11 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     let passthrough_attribute = match passthrough_group {
                         TokenTree::Group(ref group) => group.stream(),
                         _ => {
-                            return Err(strum_discriminants_passthrough_error(passthrough_group));
+                            return Err(strum_discriminants_passthrough_error(&passthrough_group));
                         }
                     };
                     if passthrough_attribute.is_empty() {
-                        return Err(strum_discriminants_passthrough_error(passthrough_group));
+                        return Err(strum_discriminants_passthrough_error(&passthrough_group));
                     }
                     Ok(quote! { #[#passthrough_attribute] })
                 } else {
@@ -108,14 +105,12 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         .iter()
         .map(|variant| {
             let ident = &variant.ident;
-
-            use syn::Fields::*;
             let params = match &variant.fields {
-                Unit => quote! {},
-                Unnamed(_fields) => {
+                Fields::Unit => quote! {},
+                Fields::Unnamed(_fields) => {
                     quote! { (..) }
                 }
-                Named(_fields) => {
+                Fields::Named(_fields) => {
                     quote! { { .. } }
                 }
             };

@@ -1,6 +1,7 @@
+use heck::ToShoutySnakeCase;
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
-use syn::{Data, DeriveInput, PathArguments, Type, TypeParen};
+use syn::{Data, DeriveInput, Fields, PathArguments, Type, TypeParen};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties};
 
@@ -66,22 +67,20 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let mut has_additional_data = false;
     let mut prev_const_var_ident = None;
     for variant in variants {
-        use syn::Fields::*;
-
         if variant.get_variant_properties()?.disabled.is_some() {
             continue;
         }
 
         let ident = &variant.ident;
         let params = match &variant.fields {
-            Unit => quote! {},
-            Unnamed(fields) => {
+            Fields::Unit => quote! {},
+            Fields::Unnamed(fields) => {
                 has_additional_data = true;
                 let defaults = ::core::iter::repeat(quote!(::core::default::Default::default()))
                     .take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
-            Named(fields) => {
+            Fields::Named(fields) => {
                 has_additional_data = true;
                 let fields = fields
                     .named
@@ -91,7 +90,6 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
 
-        use heck::ToShoutySnakeCase;
         let const_var_str = format!("{}_DISCRIMINANT", variant.ident).to_shouty_snake_case();
         let const_var_ident = format_ident!("{}", const_var_str);
 
@@ -115,7 +113,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         quote! {}
     } else {
         #[rustversion::before(1.46)]
-        fn filter_by_rust_version(s: TokenStream) -> TokenStream {
+        fn filter_by_rust_version(_: TokenStream) -> TokenStream {
             quote! {}
         }
 

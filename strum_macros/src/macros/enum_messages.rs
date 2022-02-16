@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput};
+use syn::{Data, DeriveInput, Fields};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
@@ -25,11 +25,10 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let detailed_messages = variant_properties.detailed_message.as_ref();
         let ident = &variant.ident;
 
-        use syn::Fields::*;
         let params = match variant.fields {
-            Unit => quote! {},
-            Unnamed(..) => quote! { (..) },
-            Named(..) => quote! { {..} },
+            Fields::Unit => quote! {},
+            Fields::Unnamed(..) => quote! { (..) },
+            Fields::Named(..) => quote! { {..} },
         };
 
         // You can't disable getting the serializations.

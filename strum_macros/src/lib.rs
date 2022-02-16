@@ -30,7 +30,7 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 
 /// Converts strings to enum variants based on their name.
 ///
-/// auto-derives `std::str::FromStr` on the enum (for Rust 1.34 and above, std::convert::TryFrom<&str>
+/// auto-derives `std::str::FromStr` on the enum (for Rust 1.34 and above, `std::convert::TryFrom<&str>`
 /// will be derived as well). Each variant of the enum will match on it's own name.
 /// This can be overridden using `serialize="DifferentName"` or `to_string="DifferentName"`
 /// on the attribute as shown below.
@@ -47,7 +47,7 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// See the [Additional Attributes](https://docs.rs/strum/0.22/strum/additional_attributes/index.html)
 /// Section for more information on using this feature.
 ///
-/// # Example howto use EnumString
+/// # Example howto use `EnumString`
 /// ```
 /// use std::str::FromStr;
 /// use strum_macros::EnumString;
@@ -160,7 +160,7 @@ pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-/// Implements Strum::VariantNames which adds an associated constant `VARIANTS` which is an array of discriminant names.
+/// Implements `Strum::VariantNames` which adds an associated constant `VARIANTS` which is an array of discriminant names.
 ///
 /// Adds an `impl` block for the `enum` that adds a static `VARIANTS` array of `&'static str` that are the discriminant names.
 /// This will respect the `serialize_all` attribute on the `enum` (like `#[strum(serialize_all = "snake_case")]`.
@@ -201,7 +201,7 @@ pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 
     let toks = macros::as_ref_str::as_static_str_inner(
         &ast,
-        macros::as_ref_str::GenerateTraitVariant::AsStaticStr,
+        &macros::as_ref_str::GenerateTraitVariant::AsStaticStr,
     )
     .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
@@ -243,7 +243,7 @@ pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 
     let toks = macros::as_ref_str::as_static_str_inner(
         &ast,
-        macros::as_ref_str::GenerateTraitVariant::From,
+        &macros::as_ref_str::GenerateTraitVariant::From,
     )
     .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
