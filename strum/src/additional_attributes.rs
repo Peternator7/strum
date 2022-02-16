@@ -66,7 +66,7 @@
 //!    The generated code will now return the variant with the input string captured as shown below
 //!    instead of failing.
 //!
-//!     ```rust,ignore
+//!     ```text
 //!     // Replaces this:
 //!     _ => Err(strum::ParseError::VariantNotFound)
 //!     // With this in generated code:
