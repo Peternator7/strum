@@ -1,4 +1,4 @@
-/// test serialize_all cooperation with other macroses
+/// test `serialize_all` cooperation with other macroses
 use std::str::FromStr;
 use std::string::ToString;
 use strum::{Display, EnumString, IntoStaticStr};
