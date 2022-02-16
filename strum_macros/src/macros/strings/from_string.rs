@@ -69,7 +69,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             Fields::Unit => quote! {},
             Fields::Unnamed(fields) => {
                 let defaults =
-                    ::std::iter::repeat(quote!(Default::default())).take(fields.unnamed.len());
+                    ::core::iter::repeat(quote!(Default::default())).take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
             Fields::Named(fields) => {

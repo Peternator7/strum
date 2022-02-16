@@ -78,14 +78,14 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// impl std::str::FromStr for Color {
 ///     type Err = ::strum::ParseError;
 ///
-///     fn from_str(s: &str) -> ::std::result::Result<Color, Self::Err> {
+///     fn from_str(s: &str) -> ::core::result::Result<Color, Self::Err> {
 ///         match s {
-///             "Red" => ::std::result::Result::Ok(Color::Red),
-///             "Green" => ::std::result::Result::Ok(Color::Green { range:Default::default() }),
-///             "blue" => ::std::result::Result::Ok(Color::Blue(Default::default())),
-///             "b" => ::std::result::Result::Ok(Color::Blue(Default::default())),
-///             s if s.eq_ignore_ascii_case("Black") => ::std::result::Result::Ok(Color::Black),
-///             _ => ::std::result::Result::Err(::strum::ParseError::VariantNotFound),
+///             "Red" => ::core::result::Result::Ok(Color::Red),
+///             "Green" => ::core::result::Result::Ok(Color::Green { range:Default::default() }),
+///             "blue" => ::core::result::Result::Ok(Color::Blue(Default::default())),
+///             "b" => ::core::result::Result::Ok(Color::Blue(Default::default())),
+///             s if s.eq_ignore_ascii_case("Black") => ::core::result::Result::Ok(Color::Black),
+///             _ => ::core::result::Result::Err(::strum::ParseError::VariantNotFound),
 ///         }
 ///     }
 /// }
@@ -490,18 +490,18 @@ pub fn from_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// // Generated code looks like more or less like this:
 /// /*
 /// impl ::strum::EnumMessage for Color {
-///     fn get_message(&self) -> ::std::option::Option<&'static str> {
+///     fn get_message(&self) -> ::core::option::Option<&'static str> {
 ///         match self {
-///             &Color::Red => ::std::option::Option::Some("Red"),
-///             &Color::Green {..} => ::std::option::Option::Some("Simply Green"),
+///             &Color::Red => ::core::option::Option::Some("Red"),
+///             &Color::Green {..} => ::core::option::Option::Some("Simply Green"),
 ///             _ => None
 ///         }
 ///     }
 ///
-///     fn get_detailed_message(&self) -> ::std::option::Option<&'static str> {
+///     fn get_detailed_message(&self) -> ::core::option::Option<&'static str> {
 ///         match self {
-///             &Color::Red => ::std::option::Option::Some("This is very red"),
-///             &Color::Green {..}=> ::std::option::Option::Some("Simply Green"),
+///             &Color::Red => ::core::option::Option::Some("This is very red"),
+///             &Color::Green {..}=> ::core::option::Option::Some("Simply Green"),
 ///             _ => None
 ///         }
 ///     }
