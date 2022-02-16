@@ -30,10 +30,10 @@ impl StrumVariantProperties {
 
     pub fn get_preferred_name(&self, case_style: Option<CaseStyle>) -> LitStr {
         self.to_string.as_ref().cloned().unwrap_or_else(|| {
-            let mut serialized = self.serialize.clone();
-            serialized.sort_by_key(|s| s.value().len());
-            serialized
-                .pop()
+            self.serialize
+                .iter()
+                .max_by_key(|s| s.value().len())
+                .cloned()
                 .unwrap_or_else(|| self.ident_as_str(case_style))
         })
     }
