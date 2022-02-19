@@ -11,8 +11,8 @@
 //!
 //! # Including Strum in Your Project
 //!
-//! Import strum and strum_macros into your project by adding the following lines to your
-//! Cargo.toml. Strum_macros contains the macros needed to derive all the traits in Strum.
+//! Import strum and `strum_macros` into your project by adding the following lines to your
+//! Cargo.toml. `strum_macros` contains the macros needed to derive all the traits in Strum.
 //!
 //! ```toml
 //! [dependencies]
@@ -30,7 +30,7 @@
 // only for documentation purposes
 pub mod additional_attributes;
 
-/// The ParseError enum is a collection of all the possible reasons
+/// The `ParseError` enum is a collection of all the possible reasons
 /// an enum can fail to parse from a string.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum ParseError {
@@ -99,7 +99,7 @@ pub trait IntoEnumIterator: Sized {
 
 /// Associates additional pieces of information with an Enum. This can be
 /// autoimplemented by deriving `EnumMessage` and annotating your variants with
-/// `#[strum(message="...")].
+/// `#[strum(message="...")]`.
 ///
 /// # Example
 ///
@@ -126,7 +126,7 @@ pub trait EnumMessage {
     fn get_serializations(&self) -> &'static [&'static str];
 }
 
-/// EnumProperty is a trait that makes it possible to store additional information
+/// `EnumProperty` is a trait that makes it possible to store additional information
 /// with enum variants. This trait is designed to be used with the macro of the same
 /// name in the `strum_macros` crate. Currently, the only string literals are supported
 /// in attributes, the other methods will be implemented as additional attribute types

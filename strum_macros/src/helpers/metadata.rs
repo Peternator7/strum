@@ -137,7 +137,7 @@ pub trait DeriveInputExt {
     /// Get all the strum metadata associated with an enum.
     fn get_metadata(&self) -> syn::Result<Vec<EnumMeta>>;
 
-    /// Get all the strum_discriminants metadata associated with an enum.
+    /// Get all the `strum_discriminants` metadata associated with an enum.
     fn get_discriminants_metadata(&self) -> syn::Result<Vec<EnumDiscriminantsMeta>>;
 }
 
@@ -240,7 +240,7 @@ impl Parse for Prop {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         use syn::ext::IdentExt;
 
-        let k = Ident::parse_any(&input)?;
+        let k = Ident::parse_any(input)?;
         let _: Token![=] = input.parse()?;
         let v = input.parse()?;
 

@@ -71,6 +71,18 @@ fn non_plain_camel() {
 
 #[test]
 fn clap_and_structopt() {
+    #[derive(Debug, StructOpt)]
+    #[allow(unused)]
+    struct StructOptExample {
+        /// The main color
+        #[structopt(
+            long = "color",
+            default_value = "Color::Blue",
+            raw(possible_values = "Color::VARIANTS")
+        )]
+        color: Color,
+    }
+
     #[derive(Debug, EnumString, EnumVariantNames)]
     #[strum(serialize_all = "kebab_case")]
     enum Color {
@@ -91,18 +103,6 @@ fn clap_and_structopt() {
             .possible_values(Color::VARIANTS)
             .case_insensitive(true),
     );
-
-    #[derive(Debug, StructOpt)]
-    #[allow(unused)]
-    struct StructOptExample {
-        /// The main color
-        #[structopt(
-            long = "color",
-            default_value = "Color::Blue",
-            raw(possible_values = "Color::VARIANTS")
-        )]
-        color: Color,
-    }
 }
 
 #[test]

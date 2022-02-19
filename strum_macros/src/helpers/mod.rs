@@ -15,7 +15,7 @@ pub fn non_enum_error() -> syn::Error {
     syn::Error::new(Span::call_site(), "This macro only supports enums.")
 }
 
-pub fn strum_discriminants_passthrough_error(span: impl Spanned) -> syn::Error {
+pub fn strum_discriminants_passthrough_error(span: &impl Spanned) -> syn::Error {
     syn::Error::new(
         span.span(),
         "expected a pass-through attribute, e.g. #[strum_discriminants(serde(rename = \"var0\"))]",

@@ -1,6 +1,6 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use syn::{Data, DeriveInput, Ident};
+use syn::{Data, DeriveInput, Fields, Ident};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
@@ -35,21 +35,19 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let mut arms = Vec::new();
     let mut idx = 0usize;
     for variant in variants {
-        use syn::Fields::*;
-
         if variant.get_variant_properties()?.disabled.is_some() {
             continue;
         }
 
         let ident = &variant.ident;
         let params = match &variant.fields {
-            Unit => quote! {},
-            Unnamed(fields) => {
+            Fields::Unit => quote! {},
+            Fields::Unnamed(fields) => {
                 let defaults = ::core::iter::repeat(quote!(::core::default::Default::default()))
                     .take(fields.unnamed.len());
                 quote! { (#(#defaults),*) }
             }
-            Named(fields) => {
+            Fields::Named(fields) => {
                 let fields = fields
                     .named
                     .iter()

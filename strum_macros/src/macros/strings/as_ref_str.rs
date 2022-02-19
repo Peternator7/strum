@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{parse_quote, Data, DeriveInput};
+use syn::{parse_quote, Data, DeriveInput, Fields};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
@@ -15,7 +15,6 @@ fn get_arms(ast: &DeriveInput) -> syn::Result<Vec<TokenStream>> {
     let type_properties = ast.get_type_properties()?;
 
     for variant in variants {
-        use syn::Fields::*;
         let ident = &variant.ident;
         let variant_properties = variant.get_variant_properties()?;
 
@@ -28,9 +27,9 @@ fn get_arms(ast: &DeriveInput) -> syn::Result<Vec<TokenStream>> {
         // (i.e. always `enum.as_ref().to_string() == enum.to_string()`).
         let output = variant_properties.get_preferred_name(type_properties.case_style);
         let params = match variant.fields {
-            Unit => quote! {},
-            Unnamed(..) => quote! { (..) },
-            Named(..) => quote! { {..} },
+            Fields::Unit => quote! {},
+            Fields::Unnamed(..) => quote! { (..) },
+            Fields::Named(..) => quote! { {..} },
         };
 
         arms.push(quote! { #name::#ident #params => #output });
@@ -70,7 +69,7 @@ pub enum GenerateTraitVariant {
 
 pub fn as_static_str_inner(
     ast: &DeriveInput,
-    trait_variant: GenerateTraitVariant,
+    trait_variant: &GenerateTraitVariant,
 ) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();

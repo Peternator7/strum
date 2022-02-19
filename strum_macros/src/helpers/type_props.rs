@@ -99,10 +99,8 @@ impl HasTypeProperties for DeriveInput {
 
 impl StrumTypeProperties {
     pub fn crate_module_path(&self) -> Path {
-        if let Some(path) = &self.crate_module_path {
-            parse_quote!(#path)
-        } else {
-            parse_quote!(::strum)
-        }
+        self.crate_module_path
+            .as_ref()
+            .map_or_else(|| parse_quote!(::strum), |path| parse_quote!(#path))
     }
 }
