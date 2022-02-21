@@ -16,11 +16,11 @@
 //!
 //! ```toml
 //! [dependencies]
-//! strum = "0.23"
-//! strum_macros = "0.23"
+//! strum = "0.24"
+//! strum_macros = "0.24"
 //!
 //! # You can also access strum_macros exports directly through strum using the "derive" feature
-//! strum = { version = "0.23", features = ["derive"] }
+//! strum = { version = "0.24", features = ["derive"] }
 //! ```
 //!
 
@@ -124,6 +124,8 @@ pub trait IntoEnumIterator: Sized {
 pub trait EnumMessage {
     fn get_message(&self) -> Option<&'static str>;
     fn get_detailed_message(&self) -> Option<&'static str>;
+
+    /// Get the doc comment associated with a variant if it exists.
     fn get_documentation(&self) -> Option<&'static str>;
     fn get_serializations(&self) -> &'static [&'static str];
 }

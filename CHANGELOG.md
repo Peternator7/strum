@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.24.0
+
+* [#212](https://github.com/Peternator7/strum/pull/212). Fix some clippy lints
+
+* [#209](https://github.com/Peternator7/strum/pull/209). Use `core` instead of `std` in a few places.
+
+* [#206](https://github.com/Peternator7/strum/pull/206). Add `get_documentation()` to `EnumMessage`. This provides
+  the ability to get the doc comment for a variant. Currently, very little formatting is done. That is subject to change.
+  Please do not abuse this feature. Rust docs are meant for developer documentation, not long messages for users. However,
+  this may be useful in some situations so we've added support for it.
+
+* [#202](https://github.com/Peternator7/strum/pull/202). Add a missing doc comment
+
+* [#201](https://github.com/Peternator7/strum/pull/201). Upgrade Heck version
+
 ## 0.23.1
 
 * [#193](https://github.com/Peternator7/strum/pull/193) Fixes an ambiguity introduced by #186 when your enum has a variant called Error.
