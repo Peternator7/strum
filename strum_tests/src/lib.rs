@@ -1,8 +1,6 @@
-#![allow(unused_imports)]
-use strum::*;
+use strum::{Display, EnumCount, EnumDiscriminants, EnumString};
 
-#[allow(dead_code)]
-#[derive(Debug, Eq, PartialEq, EnumString, ToString, EnumCount, EnumDiscriminants)]
+#[derive(Debug, Eq, PartialEq, EnumString, Display, EnumCount, EnumDiscriminants)]
 pub enum Color {
     /// Docs on red
     #[strum(to_string = "RedRed")]

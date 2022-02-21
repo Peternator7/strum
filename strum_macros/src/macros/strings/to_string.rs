@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput};
+use syn::{Data, DeriveInput, Fields};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
@@ -15,7 +15,6 @@ pub fn to_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let type_properties = ast.get_type_properties()?;
     let mut arms = Vec::new();
     for variant in variants {
-        use syn::Fields::*;
         let ident = &variant.ident;
         let variant_properties = variant.get_variant_properties()?;
 
@@ -27,9 +26,9 @@ pub fn to_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let output = variant_properties.get_preferred_name(type_properties.case_style);
 
         let params = match variant.fields {
-            Unit => quote! {},
-            Unnamed(..) => quote! { (..) },
-            Named(..) => quote! { {..} },
+            Fields::Unit => quote! {},
+            Fields::Unnamed(..) => quote! { (..) },
+            Fields::Named(..) => quote! { {..} },
         };
 
         arms.push(quote! { #name::#ident #params => ::std::string::String::from(#output) });

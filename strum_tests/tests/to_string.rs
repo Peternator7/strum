@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use std::str::FromStr;
 use std::string::ToString;
 use strum::{EnumString, ToString};

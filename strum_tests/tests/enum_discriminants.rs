@@ -179,8 +179,8 @@ fn from_test() {
 
 #[test]
 fn from_ref_test() {
-    assert_eq!(EnumIntoDiscriminants::A, (&EnumInto::A(true)).into());
-    assert_eq!(EnumIntoDiscriminants::B, (&EnumInto::B(1)).into());
+    assert_eq!(EnumIntoDiscriminants::A, (EnumInto::A(true)).into());
+    assert_eq!(EnumIntoDiscriminants::B, (EnumInto::B(1)).into());
 }
 
 #[derive(Debug)]
@@ -201,7 +201,7 @@ fn from_test_complex() {
 #[test]
 fn from_ref_test_complex() {
     let rara = Rara;
-    assert_eq!(EnumIntoComplexVars::A, (&EnumIntoComplex::A(&rara)).into());
+    assert_eq!(EnumIntoComplexVars::A, (EnumIntoComplex::A(&rara)).into());
 }
 
 #[allow(dead_code)]

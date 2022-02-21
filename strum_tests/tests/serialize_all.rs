@@ -1,9 +1,9 @@
-/// test serialize_all cooperation with other macroses
+/// test `serialize_all` cooperation with other macroses
 use std::str::FromStr;
 use std::string::ToString;
-use strum::{EnumString, IntoStaticStr, ToString};
+use strum::{Display, EnumString, IntoStaticStr};
 
-#[derive(Debug, Eq, PartialEq, EnumString, ToString, IntoStaticStr)]
+#[derive(Debug, Eq, PartialEq, EnumString, Display, IntoStaticStr)]
 #[strum(serialize_all = "title_case")]
 enum Foo1 {
     DarkBlack,
@@ -18,7 +18,7 @@ fn test_serialize_all_title_case() {
     assert_eq!("Dark Black", <&'static str>::from(Foo1::DarkBlack));
 }
 
-#[derive(Debug, Eq, PartialEq, EnumString, ToString, IntoStaticStr)]
+#[derive(Debug, Eq, PartialEq, EnumString, Display, IntoStaticStr)]
 #[strum(serialize_all = "UPPERCASE")]
 enum Foo2 {
     DarkBlack,

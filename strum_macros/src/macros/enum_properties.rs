@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput};
+use syn::{Data, DeriveInput, Fields};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
@@ -26,15 +26,14 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             continue;
         }
 
-        use syn::Fields::*;
         let params = match variant.fields {
-            Unit => quote! {},
-            Unnamed(..) => quote! { (..) },
-            Named(..) => quote! { {..} },
+            Fields::Unit => quote! {},
+            Fields::Unnamed(..) => quote! { (..) },
+            Fields::Named(..) => quote! { {..} },
         };
 
         for (key, value) in variant_properties.string_props {
-            string_arms.push(quote! { #key => ::core::option::Option::Some( #value )})
+            string_arms.push(quote! { #key => ::core::option::Option::Some( #value )});
         }
 
         string_arms.push(quote! { _ => ::core::option::Option::None });
