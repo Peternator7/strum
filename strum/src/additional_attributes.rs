@@ -88,4 +88,6 @@
 //! - `detailed_message=".."`: Adds a more detailed message to a variant. If this value is omitted, then
 //!    `message` will be used in it's place.
 //!
+//! - Structured documentation, as in `/// ...`: If using `EnumMessage`, is accessible via get_documentation().
+//!
 //! - `props(key="value")`: Enables associating additional information with a given variant.

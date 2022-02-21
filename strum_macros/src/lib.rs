@@ -479,6 +479,7 @@ pub fn from_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// #[derive(strum_macros::EnumMessage, Debug)]
 /// #[allow(dead_code)]
 /// enum Color {
+///     /// Danger color.
 ///     #[strum(message = "Red", detailed_message = "This is very red")]
 ///     Red,
 ///     #[strum(message = "Simply Green")]
@@ -506,6 +507,13 @@ pub fn from_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///         }
 ///     }
 ///
+///     fn get_documentation(&self) -> ::std::option::Option<&'static str> {
+///         match self {
+///             &Color::Red => ::std::option::Option::Some("Danger color."),
+///             _ => None
+///         }
+///     }
+///
 ///     fn get_serializations(&self) -> &'static [&'static str] {
 ///         match self {
 ///             &Color::Red => {
@@ -528,6 +536,7 @@ pub fn from_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// let c = Color::Red;
 /// assert_eq!("Red", c.get_message().unwrap());
 /// assert_eq!("This is very red", c.get_detailed_message().unwrap());
+/// assert_eq!("Danger color.", c.get_documentation().unwrap());
 /// assert_eq!(["Red"], c.get_serializations());
 /// ```
 #[proc_macro_derive(EnumMessage, attributes(strum))]
@@ -613,7 +622,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// // Bring trait into scope
 /// use std::str::FromStr;
 /// use strum::{IntoEnumIterator, EnumMessage};
-/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString, EnumMessage};
+/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString};
 ///
 /// #[derive(Debug)]
 /// struct NonDefault;
