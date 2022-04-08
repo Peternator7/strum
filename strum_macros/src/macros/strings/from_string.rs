@@ -18,7 +18,8 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let strum_module_path = type_properties.crate_module_path();
 
     let mut default_kw = None;
-    let mut default = quote! { _ => ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) };
+    let mut default =
+        quote! { ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) };
     let mut arms = Vec::new();
     for variant in variants {
         let ident = &variant.ident;
@@ -45,7 +46,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             default_kw = Some(kw);
             default = quote! {
-                default => ::core::result::Result::Ok(#name::#ident(default.into()))
+                ::core::result::Result::Ok(#name::#ident(s.into()))
             };
             continue;
         }
@@ -81,19 +82,31 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
 
-        arms.push(quote! { #(#attrs => ::core::result::Result::Ok(#name::#ident #params)),* });
+        arms.push(quote! { #(#attrs => #name::#ident #params,)* });
     }
 
-    arms.push(default);
+    let body = if type_properties.use_phf {
+        quote! {
+            static PHF: phf::Map<&'static str, #name> = phf::phf_map! {
+                #(#arms)*
+            };
+            PHF.get(s).copied().map_or_else(|| #default, ::core::result::Result::Ok)
+        }
+    } else {
+        quote! {
+            ::core::result::Result::Ok(match s {
+                #(#arms)*
+                _ => return #default,
+            })
+        }
+    };
 
     let from_str = quote! {
         #[allow(clippy::use_self)]
         impl #impl_generics ::core::str::FromStr for #name #ty_generics #where_clause {
             type Err = #strum_module_path::ParseError;
             fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
-                match s {
-                    #(#arms),*
-                }
+                #body
             }
         }
     };

@@ -20,6 +20,7 @@ pub struct StrumTypeProperties {
     pub discriminant_name: Option<Ident>,
     pub discriminant_others: Vec<TokenStream>,
     pub discriminant_vis: Option<Visibility>,
+    pub use_phf: bool,
 }
 
 impl HasTypeProperties for DeriveInput {
@@ -31,6 +32,7 @@ impl HasTypeProperties for DeriveInput {
 
         let mut serialize_all_kw = None;
         let mut ascii_case_insensitive_kw = None;
+        let mut use_phf_kw = None;
         let mut crate_module_path_kw = None;
         for meta in strum_meta {
             match meta {
@@ -49,6 +51,14 @@ impl HasTypeProperties for DeriveInput {
 
                     ascii_case_insensitive_kw = Some(kw);
                     output.ascii_case_insensitive = true;
+                }
+                EnumMeta::UsePhf(kw) => {
+                    if let Some(fst_kw) = use_phf_kw {
+                        return Err(occurrence_error(fst_kw, kw, "use_phf"));
+                    }
+
+                    use_phf_kw = Some(kw);
+                    output.use_phf = true;
                 }
                 EnumMeta::Crate {
                     crate_module_path,
