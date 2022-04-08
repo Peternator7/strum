@@ -47,6 +47,10 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// See the [Additional Attributes](https://docs.rs/strum/0.22/strum/additional_attributes/index.html)
 /// Section for more information on using this feature.
 ///
+/// If you have a large enum, you may want to consider using the `use_phf` attribute here. It leverages
+/// perfect hash functions to parse much quicker than a standard `match`. It is expected that you have the
+/// `phf` crate in scope when doing this.
+///
 /// # Example howto use `EnumString`
 /// ```
 /// use std::str::FromStr;
@@ -471,11 +475,11 @@ pub fn from_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// Encode strings into the enum itself. The `strum_macros::EmumMessage` macro implements the `strum::EnumMessage` trait.
 /// `EnumMessage` looks for `#[strum(message="...")]` attributes on your variants.
 /// You can also provided a `detailed_message="..."` attribute to create a seperate more detailed message than the first.
-/// 
+///
 /// `EnumMessage` also exposes the variants doc comments through `get_documentation()`. This is useful in some scenarios,
 /// but `get_message` should generally be preferred. Rust doc comments are intended for developer facing documentation,
 /// not end user messaging.
-/// 
+///
 /// ```
 /// // You need to bring the trait into scope to use it
 /// use strum::EnumMessage;
