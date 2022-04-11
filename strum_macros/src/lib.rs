@@ -48,8 +48,7 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// Section for more information on using this feature.
 ///
 /// If you have a large enum, you may want to consider using the `use_phf` attribute here. It leverages
-/// perfect hash functions to parse much quicker than a standard `match`. It is expected that you have the
-/// `phf` crate in scope when doing this.
+/// perfect hash functions to parse much quicker than a standard `match`. (MSRV 1.46)
 ///
 /// # Example howto use `EnumString`
 /// ```
