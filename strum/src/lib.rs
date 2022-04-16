@@ -30,6 +30,10 @@
 // only for documentation purposes
 pub mod additional_attributes;
 
+#[cfg(feature = "phf")]
+#[doc(hidden)]
+pub use phf as _private_phf_reexport_for_macro_if_phf_feature;
+
 /// The `ParseError` enum is a collection of all the possible reasons
 /// an enum can fail to parse from a string.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
