@@ -1,6 +1,4 @@
-use core::convert::TryFrom;
-use core::convert::TryInto;
-
+use if_rust_version::if_rust_version;
 use strum::FromRepr;
 
 #[derive(Debug, FromRepr, PartialEq)]
@@ -18,13 +16,17 @@ enum Week {
 macro_rules! assert_eq_repr {
     ( $type:ident::from_repr($number:literal), Some($enum:expr) ) => {
         assert_eq!($type::from_repr($number), Some($enum));
-        assert_eq!(TryInto::<$type>::try_into($number), Ok($enum));
-        assert_eq!(<$type as TryFrom<_>>::try_from($number), Ok($enum));
+        if_rust_version! { >= 1.34 {
+            assert_eq!(core::convert::TryInto::<$type>::try_into($number), Ok($enum));
+            assert_eq!(<$type as core::convert::TryFrom<_>>::try_from($number), Ok($enum));
+        }}
     };
     ( $type:ident::from_repr($number:literal), None ) => {
         assert_eq!($type::from_repr($number), None);
-        assert_eq!(TryInto::<$type>::try_into($number), Err(::strum::ParseError::VariantNotFound));
-        assert_eq!(<$type as TryFrom<_>>::try_from($number), Err(::strum::ParseError::VariantNotFound));
+        if_rust_version! { >= 1.34 {
+            assert_eq!(core::convert::TryInto::<$type>::try_into($number), Err(::strum::ParseError::VariantNotFound));
+            assert_eq!(<$type as core::convert::TryFrom<_>>::try_from($number), Err(::strum::ParseError::VariantNotFound));
+        }}
     };
 }
 
