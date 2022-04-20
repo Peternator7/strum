@@ -630,7 +630,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// // Bring trait into scope
 /// use std::str::FromStr;
 /// use strum::{IntoEnumIterator, EnumMessage};
-/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString};
+/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString, EnumMessage};
 ///
 /// #[derive(Debug)]
 /// struct NonDefault;
