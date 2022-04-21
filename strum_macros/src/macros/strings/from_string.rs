@@ -104,9 +104,9 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
     }
 
-    // Probably under that string allocation is more expensive than matching 3 times
+    // Probably under that string allocation is more expensive than matching few times
     // Proper threshold is not benchmarked - feel free to do so :)
-    if phf_lowercase_arms.len() < 3 {
+    if phf_lowercase_arms.len() <= 3 {
         standard_match_arms.extend(case_insensitive_arms_alternative);
         phf_lowercase_arms.clear();
     }
@@ -137,7 +137,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             static PHF_LOWERCASE: phf::Map<&'static str, #name> = phf::phf_map! {
                 #(#phf_lowercase_arms)*
             };
-            if let Some(value) = PHF.get(s.to_ascii_lowercase()).cloned() {
+            if let Some(value) = PHF_LOWERCASE.get(&s.to_ascii_lowercase()).cloned() {
                 return ::core::result::Result::Ok(value);
             }
         }
