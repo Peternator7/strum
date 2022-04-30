@@ -4,6 +4,10 @@ version = "0.24.0"
 edition = "2018"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 
+[features]
+default = ["test_phf"]
+test_phf = ["strum/phf"]
+
 [dependencies]
 strum = { path = "../strum", features = ["derive"] }
 strum_macros = { path = "../strum_macros", features = [] }
