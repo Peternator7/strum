@@ -113,7 +113,6 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
     };
-
     let standard_match_body = if standard_match_arms.is_empty() {
         default
     } else {

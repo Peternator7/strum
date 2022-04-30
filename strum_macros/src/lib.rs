@@ -384,7 +384,8 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-/// Add a function to enum that allows accessing variants by its discriminant
+/// Add a function to enum that allows accessing variants by its discriminant.
+/// On Rust 1.34 and above, std::convert::TryFrom<TDiscriminant> will be derived as well.
 ///
 /// This macro adds a standalone function to obtain an enum variant by its discriminant. The macro adds
 /// `from_repr(discriminant: usize) -> Option<YourEnum>` as a standalone function on the enum. For

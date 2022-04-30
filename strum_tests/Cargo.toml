@@ -15,6 +15,7 @@ clap = "=2.33.0"
 enum_variant_type = "=0.2.0"
 structopt = "0.2.18"
 bitflags = "=1.2"
+if_rust_version = "1.0"
 
 [dev-dependencies]
 rustversion = "1.0"
