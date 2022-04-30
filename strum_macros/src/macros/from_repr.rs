@@ -3,7 +3,7 @@ use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
 use syn::{Data, DeriveInput, Fields, PathArguments, Type, TypeParen};
 
-use crate::helpers::{non_enum_error, HasStrumVariantProperties};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
 pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -11,6 +11,9 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
     let vis = &ast.vis;
     let attrs = &ast.attrs;
+
+    let type_properties = ast.get_type_properties()?;
+    let strum_module_path = type_properties.crate_module_path();
 
     let mut discriminant_type: Type = syn::parse("usize".parse().unwrap()).unwrap();
     for attr in attrs {
@@ -124,7 +127,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         filter_by_rust_version(quote! { const })
     };
 
-    Ok(quote! {
+    let from_repr = quote! {
         #[allow(clippy::use_self)]
         impl #impl_generics #name #ty_generics #where_clause {
             #[doc = "Try to create [Self] from the raw representation"]
@@ -135,5 +138,51 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 }
             }
         }
+    };
+
+    let try_from_repr = try_from_repr(
+        name,
+        &discriminant_type,
+        &impl_generics,
+        &ty_generics,
+        where_clause,
+        &strum_module_path,
+    );
+
+    Ok(quote! {
+        #from_repr
+        #try_from_repr
     })
+}
+
+#[rustversion::before(1.34)]
+fn try_from_repr(
+    _name: &proc_macro2::Ident,
+    _discriminant_type: &Type,
+    _impl_generics: &syn::ImplGenerics,
+    _ty_generics: &syn::TypeGenerics,
+    _where_clause: Option<&syn::WhereClause>,
+    _strum_module_path: &syn::Path,
+) -> TokenStream {
+    Default::default()
+}
+
+#[rustversion::since(1.34)]
+fn try_from_repr(
+    name: &proc_macro2::Ident,
+    discriminant_type: &Type,
+    impl_generics: &syn::ImplGenerics,
+    ty_generics: &syn::TypeGenerics,
+    where_clause: Option<&syn::WhereClause>,
+    strum_module_path: &syn::Path,
+) -> TokenStream {
+    quote! {
+        #[allow(clippy::use_self)]
+        impl #impl_generics ::core::convert::TryFrom<#discriminant_type> for #name #ty_generics #where_clause {
+            type Error = #strum_module_path::ParseError;
+            fn try_from(s: #discriminant_type) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<#discriminant_type>>::Error> {
+                Self::from_repr(s).ok_or(#strum_module_path::ParseError::VariantNotFound)
+            }
+        }
+    }
 }

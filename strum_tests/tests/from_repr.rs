@@ -1,3 +1,4 @@
+use if_rust_version::if_rust_version;
 use strum::FromRepr;
 
 #[derive(Debug, FromRepr, PartialEq)]
@@ -12,14 +13,31 @@ enum Week {
     Saturday = 8,
 }
 
+macro_rules! assert_eq_repr {
+    ( $type:ident::from_repr($number:literal), Some($enum:expr) ) => {
+        assert_eq!($type::from_repr($number), Some($enum));
+        if_rust_version! { >= 1.34 {
+            assert_eq!(core::convert::TryInto::<$type>::try_into($number), Ok($enum));
+            assert_eq!(<$type as core::convert::TryFrom<_>>::try_from($number), Ok($enum));
+        }}
+    };
+    ( $type:ident::from_repr($number:literal), None ) => {
+        assert_eq!($type::from_repr($number), None);
+        if_rust_version! { >= 1.34 {
+            assert_eq!(core::convert::TryInto::<$type>::try_into($number), Err(::strum::ParseError::VariantNotFound));
+            assert_eq!(<$type as core::convert::TryFrom<_>>::try_from($number), Err(::strum::ParseError::VariantNotFound));
+        }}
+    };
+}
+
 #[test]
 fn simple_test() {
-    assert_eq!(Week::from_repr(0), Some(Week::Sunday));
-    assert_eq!(Week::from_repr(1), Some(Week::Monday));
-    assert_eq!(Week::from_repr(6), None);
-    assert_eq!(Week::from_repr(7), Some(Week::Friday));
-    assert_eq!(Week::from_repr(8), Some(Week::Saturday));
-    assert_eq!(Week::from_repr(9), None);
+    assert_eq_repr!(Week::from_repr(0), Some(Week::Sunday));
+    assert_eq_repr!(Week::from_repr(1), Some(Week::Monday));
+    assert_eq_repr!(Week::from_repr(6), None);
+    assert_eq_repr!(Week::from_repr(7), Some(Week::Friday));
+    assert_eq_repr!(Week::from_repr(8), Some(Week::Saturday));
+    assert_eq_repr!(Week::from_repr(9), None);
 }
 
 #[rustversion::since(1.46)]
@@ -57,7 +75,7 @@ fn crate_module_path_test() {
         Saturday,
     }
 
-    assert_eq!(Week::from_repr(0), Some(Week::Sunday));
-    assert_eq!(Week::from_repr(6), Some(Week::Saturday));
-    assert_eq!(Week::from_repr(7), None);
+    assert_eq_repr!(Week::from_repr(0), Some(Week::Sunday));
+    assert_eq_repr!(Week::from_repr(6), Some(Week::Saturday));
+    assert_eq_repr!(Week::from_repr(7), None);
 }
