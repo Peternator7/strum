@@ -5,7 +5,7 @@ edition = "2018"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 
 [features]
-default = ["test_phf"]
+default = []
 test_phf = ["strum/phf"]
 
 [dependencies]
