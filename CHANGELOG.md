@@ -1,9 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.24.1
 
 * [#220](https://github.com/Peternator7/strum/pull/220). Add support for PHF in `EnumString` (opt-in runtime
   performance improvements for large enums as `#[strum(use_phf)]`, requires `phf` feature and increases MSRV to `1.46`)
+  * [#224](https://github.com/Peternator7/strum/pull/224) tweaked the algorithm.
+* [#217](https://github.com/Peternator7/strum/pull/217): Automatically implement `TryFrom` in `FromRepr`. This is 
+  technically a breaking change, but the fix is to just remove the manual implementation of TryFrom so it shouldn't 
+  be more than a minor inconvenience.
 
 ## 0.24.0
 
