@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.24.1
+## ~~0.24.1~~ (Yanked becase #217 was more "breaking" than I wanted)
 
 * [#220](https://github.com/Peternator7/strum/pull/220). Add support for PHF in `EnumString` (opt-in runtime
   performance improvements for large enums as `#[strum(use_phf)]`, requires `phf` feature and increases MSRV to `1.46`)
