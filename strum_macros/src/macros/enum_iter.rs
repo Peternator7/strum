@@ -66,6 +66,10 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     Ok(quote! {
         #[doc = "An iterator over the variants of [Self]"]
+        #[allow(
+            missing_copy_implementations,
+            missing_debug_implementations,
+        )]
         #vis struct #iter_name #ty_generics {
             idx: usize,
             back_idx: usize,
