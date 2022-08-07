@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.24.2
+## 0.24.3 (strum_macros)
+
+* [#231](https://github.com/Peternator7/strum/pull/231) Add ignore lints for EnumIter not implementing Copy or Debug
+  on the generated iter struct. Copy should generally not be implemented on Iterators. Its an oversight that Debug isn't
+  implemented, but it will be a breaking change to add that so it'll be added in a future version.
+
+## 0.24.2 (strum_macros)
 
 * [#220](https://github.com/Peternator7/strum/pull/220). Add support for PHF in `EnumString` (opt-in runtime
   performance improvements for large enums as `#[strum(use_phf)]`, requires `phf` feature and increases MSRV to `1.46`)
