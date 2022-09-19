@@ -390,7 +390,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// `from_repr(discriminant: usize) -> Option<YourEnum>` as a standalone function on the enum. For
 /// variants with additional data, the returned variant will use the `Default` trait to fill the
 /// data. The discriminant follows the same rules as `rustc`. The first discriminant is zero and each
-/// successive variant has a discriminant of one greater than the previous variant, expect where an
+/// successive variant has a discriminant of one greater than the previous variant, except where an
 /// explicit discriminant is specified. The type of the discriminant will match the `repr` type if
 /// it is specifed.
 ///
