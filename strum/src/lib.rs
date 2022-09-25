@@ -7,7 +7,7 @@
 //! Strum is a set of macros and traits for working with
 //! enums and strings easier in Rust.
 //!
-//! The full version of the README can be found on [Github](https://github.com/Peternator7/strum).
+//! The full version of the README can be found on [GitHub](https://github.com/Peternator7/strum).
 //!
 //! # Including Strum in Your Project
 //!
