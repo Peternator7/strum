@@ -253,7 +253,7 @@ pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     toks.into()
 }
 
-/// implements `std::string::ToString` on en enum
+/// implements `std::string::ToString` on an enum
 ///
 /// ```
 /// // You need to bring the ToString trait into scope to use it
