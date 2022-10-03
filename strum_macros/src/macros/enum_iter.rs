@@ -11,6 +11,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let vis = &ast.vis;
     let type_properties = ast.get_type_properties()?;
     let strum_module_path = type_properties.crate_module_path();
+    let doc_comment = format!("An iterator over the variants of [{}]", name);
 
     if gen.lifetimes().count() > 0 {
         return Err(syn::Error::new(
@@ -65,7 +66,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let iter_name = syn::parse_str::<Ident>(&format!("{}Iter", name)).unwrap();
 
     Ok(quote! {
-        #[doc = "An iterator over the variants of [Self]"]
+        #[doc = #doc_comment]
         #[allow(
             missing_copy_implementations,
             missing_debug_implementations,
