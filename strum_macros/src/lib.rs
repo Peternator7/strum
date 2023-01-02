@@ -175,7 +175,7 @@ pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// use strum::VariantNames;
 ///
 /// #[derive(Debug, EnumString, EnumVariantNames)]
-/// #[strum(serialize_all = "kebab_case")]
+/// #[strum(serialize_all = "kebab-case")]
 /// enum Color {
 ///     Red,
 ///     Blue,
