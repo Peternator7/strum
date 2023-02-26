@@ -8,7 +8,6 @@ pub trait HasInnerVariantProperties {
 #[derive(Clone, Eq, PartialEq, Debug, Default)]
 pub struct StrumInnerVariantProperties {
     pub default_with: Option<LitStr>,
-    //  ident: Option<Ident>,
 }
 
 impl HasInnerVariantProperties for Field {
