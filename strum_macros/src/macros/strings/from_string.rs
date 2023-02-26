@@ -3,7 +3,8 @@ use quote::quote;
 use syn::{Data, DeriveInput, Fields};
 
 use crate::helpers::{
-    non_enum_error, occurrence_error, HasStrumVariantProperties, HasTypeProperties,
+    non_enum_error, occurrence_error, HasInnerVariantProperties, HasStrumVariantProperties,
+    HasTypeProperties,
 };
 
 pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
@@ -45,7 +46,6 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     ))
                 }
             }
-
             default_kw = Some(kw);
             default = quote! {
                 ::core::result::Result::Ok(#name::#ident(s.into()))
@@ -56,16 +56,34 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let params = match &variant.fields {
             Fields::Unit => quote! {},
             Fields::Unnamed(fields) => {
-                let defaults =
-                    ::core::iter::repeat(quote!(Default::default())).take(fields.unnamed.len());
-                quote! { (#(#defaults),*) }
+                if let Some(ref value) = variant_properties.default_with {
+                    let func = proc_macro2::Ident::new(&value.value(), value.span());
+                    let defaults = vec![quote! { #func() }];
+                    quote! { (#(#defaults),*) }
+                } else {
+                    let defaults =
+                        ::core::iter::repeat(quote!(Default::default())).take(fields.unnamed.len());
+                    quote! { (#(#defaults),*) }
+                }
             }
             Fields::Named(fields) => {
-                let fields = fields
-                    .named
-                    .iter()
-                    .map(|field| field.ident.as_ref().unwrap());
-                quote! { {#(#fields: Default::default()),*} }
+                let mut defaults = vec![];
+                for field in &fields.named {
+                    let meta = field.get_variant_inner_properties()?;
+                    let field = field.ident.as_ref().unwrap();
+
+                    if let Some(default_with) = meta.default_with {
+                        let func =
+                            proc_macro2::Ident::new(&default_with.value(), default_with.span());
+                        defaults.push(quote! {
+                            #field: #func()
+                        });
+                    } else {
+                        defaults.push(quote! { #field: Default::default() });
+                    }
+                }
+
+                quote! { {#(#defaults),*} }
             }
         };
 
@@ -79,7 +97,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 phf_exact_match_arms.push(quote! { #serialization => #name::#ident #params, });
 
                 if is_ascii_case_insensitive {
-                    // Store the lowercase and UPPERCASE variants in the phf map to capture 
+                    // Store the lowercase and UPPERCASE variants in the phf map to capture
                     let ser_string = serialization.value();
 
                     let lower =
@@ -113,6 +131,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
     };
+
     let standard_match_body = if standard_match_arms.is_empty() {
         default
     } else {
@@ -134,7 +153,6 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
     };
-
     let try_from_str = try_from_str(
         name,
         &impl_generics,

@@ -1,8 +1,10 @@
 pub use self::case_style::CaseStyleHelpers;
+pub use self::inner_variant_props::HasInnerVariantProperties;
 pub use self::type_props::HasTypeProperties;
 pub use self::variant_props::HasStrumVariantProperties;
 
 pub mod case_style;
+pub mod inner_variant_props;
 mod metadata;
 pub mod type_props;
 pub mod variant_props;

@@ -15,6 +15,15 @@ enum Color {
     Purple,
     #[strum(serialize = "blk", serialize = "Black", ascii_case_insensitive)]
     Black,
+    Pink {
+        #[strum(default_with = "test_default")]
+        test_no_default: NoDefault,
+
+        #[strum(default_with = "string_test")]
+        string_test: String,
+    },
+    #[strum(default_with = "to_white")]
+    White(String),
 }
 
 #[rustversion::since(1.34)]
@@ -174,4 +183,47 @@ fn case_insensitive_enum_no_case_insensitive_try_from() {
 fn case_insensitive_enum_case_insensitive() {
     assert_from_str(CaseInsensitiveEnum::CaseInsensitive, "CaseInsensitive");
     assert_from_str(CaseInsensitiveEnum::CaseInsensitive, "caseinsensitive");
+}
+
+#[derive(Eq, PartialEq, Debug)]
+struct NoDefault(String);
+
+fn test_default() -> NoDefault {
+    NoDefault(String::from("test"))
+}
+
+fn to_white() -> String {
+    String::from("white-test")
+}
+
+fn string_test() -> String {
+    String::from("This is a string test")
+}
+
+#[test]
+fn color_default_with() {
+    match Color::from_str("Pink").unwrap() {
+        Color::Pink {
+            test_no_default,
+            string_test,
+        } => {
+            assert_eq!(test_no_default, test_default());
+            assert_eq!(string_test, String::from("This is a string test"));
+        }
+        other => {
+            panic!("Failed to get correct enum value {:?}", other);
+        }
+    }
+}
+
+#[test]
+fn color_default_with_white() {
+    match Color::from_str("White").unwrap() {
+        Color::White(inner) => {
+            assert_eq!(inner, String::from("white-test"));
+        }
+        other => {
+            panic!("Failed t o get  correct enum value {:?}", other);
+        }
+    }
 }
