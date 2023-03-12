@@ -17,6 +17,7 @@
 //!   - `UPPERCASE`
 //!   - `title_case`
 //!   - `mixed_case`
+//!   - `Train-Case`
 //!
 //!   ```rust
 //!   use std::string::ToString;
