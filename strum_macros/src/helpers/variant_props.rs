@@ -4,6 +4,7 @@ use syn::{Ident, LitStr, Variant};
 use super::case_style::{CaseStyle, CaseStyleHelpers};
 use super::metadata::{kw, VariantExt, VariantMeta};
 use super::occurrence_error;
+use super::PropertyValue;
 
 pub trait HasStrumVariantProperties {
     fn get_variant_properties(&self) -> syn::Result<StrumVariantProperties>;
@@ -18,7 +19,7 @@ pub struct StrumVariantProperties {
     pub message: Option<LitStr>,
     pub detailed_message: Option<LitStr>,
     pub documentation: Vec<LitStr>,
-    pub string_props: Vec<(LitStr, LitStr)>,
+    pub string_props: Vec<(LitStr, PropertyValue)>,
     serialize: Vec<LitStr>,
     pub to_string: Option<LitStr>,
     ident: Option<Ident>,
