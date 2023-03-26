@@ -53,14 +53,16 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             .filter(|attr| {
                 ATTRIBUTES_TO_COPY
                     .iter()
-                    .any(|attr_whitelisted| attr.path.is_ident(attr_whitelisted))
+                    .any(|attr_whitelisted| attr.path().is_ident(attr_whitelisted))
             })
             .map(|attr| {
-                if attr.path.is_ident("strum_discriminants") {
-                    let passthrough_group = attr
-                        .tokens
-                        .clone()
-                        .into_iter()
+                if attr.path().is_ident("strum_discriminants") {
+                    let mut ts = attr.meta.require_list()?.to_token_stream().into_iter();
+
+                    // Discard strum_discriminants(...)
+                    let _ = ts.next();
+
+                    let passthrough_group = ts
                         .next()
                         .ok_or_else(|| strum_discriminants_passthrough_error(attr))?;
                     let passthrough_attribute = match passthrough_group {
