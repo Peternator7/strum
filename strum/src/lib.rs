@@ -161,12 +161,11 @@ pub trait EnumMessage {
 /// let history = Class::History;
 /// assert_eq!("Ms.Frizzle", history.get_str("Teacher").unwrap());
 /// let maths = Class::Mathematics;
-/// assert_eq!(103, maths.get_int("Room").unwrap());
+/// assert_eq!(103, maths.get_usize("Room").unwrap());
 /// ```
 pub trait EnumProperty {
     fn get_str(&self, prop: &str) -> Option<&'static str>;
-    fn get_int(&self, prop: &str) -> Option<usize>;
-
+    fn get_usize(&self, prop: &str) -> Option<usize>;
     fn get_bool(&self, prop: &str) -> Option<bool>;
 }
 

@@ -98,7 +98,7 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     #(#bool_props),*
                 }
             }
-            fn get_int(&self, prop: &str) -> ::core::option::Option<usize> {
+            fn get_usize(&self, prop: &str) -> ::core::option::Option<usize> {
                 match self {
                     #(#num_props),*
                 }
