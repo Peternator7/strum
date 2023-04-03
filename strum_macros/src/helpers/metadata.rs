@@ -248,14 +248,7 @@ impl Parse for Prop {
 
         let k = Ident::parse_any(input)?;
         let _: Token![=] = input.parse()?;
-        let v;
-        if input.peek(syn::LitBool) {
-            v = PropertyValue::Bool(input.parse()?);
-        } else if input.peek(syn::LitInt) {
-            v = PropertyValue::Num(input.parse()?);
-        } else {
-            v = PropertyValue::Str(input.parse()?);
-        };
+        let v = input.parse()?;
 
         Ok(Prop(k, v))
     }

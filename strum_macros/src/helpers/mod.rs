@@ -48,6 +48,19 @@ pub enum PropertyValue {
     Bool(syn::LitBool),
 }
 
+impl syn::parse::Parse for PropertyValue {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let value = if input.peek(syn::LitBool) {
+            PropertyValue::Bool(input.parse()?)
+        } else if input.peek(syn::LitInt) {
+            PropertyValue::Num(input.parse()?)
+        } else {
+            PropertyValue::Str(input.parse()?)
+        };
+        Ok(value)
+    }
+}
+
 impl quote::ToTokens for PropertyValue {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
