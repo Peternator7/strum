@@ -11,10 +11,27 @@ enum Week {
     Saturday,
 }
 
+#[allow(dead_code)]
+#[derive(Debug, EnumCount, EnumIter)]
+enum Pets {
+    Dog,
+    Cat,
+    Fish,
+    Bird,
+    #[strum(disabled)]
+    Hamster,
+}
+
 #[test]
 fn simple_test() {
     assert_eq!(7, Week::COUNT);
     assert_eq!(Week::iter().count(), Week::COUNT);
+}
+
+#[test]
+fn disabled_test() {
+    assert_eq!(4, Pets::COUNT);
+    assert_eq!(Pets::iter().count(), Pets::COUNT);
 }
 
 #[test]
