@@ -1,5 +1,5 @@
 use heck::{
-    ToKebabCase, ToLowerCamelCase, ToShoutySnakeCase, ToSnakeCase, ToTitleCase, ToUpperCamelCase,
+    ToKebabCase, ToLowerCamelCase, ToShoutySnakeCase, ToSnakeCase, ToTitleCase, ToUpperCamelCase, ToTrainCase,
 };
 use std::str::FromStr;
 use syn::{
@@ -20,6 +20,7 @@ pub enum CaseStyle {
     LowerCase,
     ScreamingKebabCase,
     PascalCase,
+    TrainCase,
 }
 
 const VALID_CASE_STYLES: &[&str] = &[
@@ -33,6 +34,7 @@ const VALID_CASE_STYLES: &[&str] = &[
     "UPPERCASE",
     "title_case",
     "mixed_case",
+    "Train-Case",
 ];
 
 impl Parse for CaseStyle {
@@ -71,6 +73,7 @@ impl FromStr for CaseStyle {
             "mixed_case" => CaseStyle::MixedCase,
             "lowercase" => CaseStyle::LowerCase,
             "UPPERCASE" => CaseStyle::UpperCase,
+            "Train-Case" => CaseStyle::TrainCase,
             _ => return Err(()),
         })
     }
@@ -94,6 +97,7 @@ impl CaseStyleHelpers for Ident {
                 CaseStyle::UpperCase => ident_string.to_uppercase(),
                 CaseStyle::LowerCase => ident_string.to_lowercase(),
                 CaseStyle::ScreamingKebabCase => ident_string.to_kebab_case().to_uppercase(),
+                CaseStyle::TrainCase => ident_string.to_train_case(),
                 CaseStyle::CamelCase => {
                     let camel_case = ident_string.to_upper_camel_case();
                     let mut pascal = String::with_capacity(camel_case.len());
@@ -120,6 +124,7 @@ mod tests {
         let id = Ident::new("test_me", proc_macro2::Span::call_site());
         assert_eq!("testMe", id.convert_case(Some(CaseStyle::CamelCase)));
         assert_eq!("TestMe", id.convert_case(Some(CaseStyle::PascalCase)));
+        assert_eq!("Test-Me", id.convert_case(Some(CaseStyle::TrainCase)));
     }
 
     #[test]
