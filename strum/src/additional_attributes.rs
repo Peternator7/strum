@@ -20,11 +20,9 @@
 //!   - `Train-Case`
 //!
 //!   ```rust
-//!   use std::string::ToString;
-//!   use strum;
 //!   use strum_macros;
 //!   
-//!   #[derive(Debug, Eq, PartialEq, strum_macros::ToString)]
+//!   #[derive(Debug, Eq, PartialEq, strum_macros::Display)]
 //!   #[strum(serialize_all = "snake_case")]
 //!   enum Brightness {
 //!       DarkBlack,
