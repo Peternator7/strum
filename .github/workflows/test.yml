@@ -32,11 +32,17 @@ jobs:
         if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
       # https://twitter.com/jonhoo/status/1571290371124260865
+      - name: cargo test --locked --all-features
+        # test_phf feature is incompatible with 1.32
+        if: matrix.toolchain != '1.32.0'
+        run: cargo test --locked --all-features --all-targets --verbose
       - name: cargo test --locked
-        run: cargo test --locked --all-features --all-targets
+        if: matrix.toolchain == '1.32.0'
+        run: cargo test --locked --all-targets --verbose
       # Cargo test --all-targets doesn't run doc tests
       # https://github.com/rust-lang/cargo/issues/6669
       - name: cargo test --doc
+        if: matrix.toolchain != '1.32.0'
         run: cargo test --locked --all-features --doc
   minimal:
     runs-on: ubuntu-latest
@@ -74,8 +80,13 @@ jobs:
       - name: cargo generate-lockfile
         if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
-      - name: cargo test
-        run: cargo test --locked --all-features --all-targets
+      - name: cargo test --locked --all-features
+        # test_phf feature is incompatible with 1.32
+        if: matrix.toolchain != '1.32.0'
+        run: cargo test --locked --all-features --all-targets --verbose
+      - name: cargo test --locked
+        if: matrix.toolchain == '1.32.0'
+        run: cargo test --locked --all-targets --verbose
   coverage:
     runs-on: ubuntu-latest
     name: ubuntu / stable / coverage
