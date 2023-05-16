@@ -11,11 +11,15 @@ concurrency:
 name: test
 jobs:
   required:
+    # test on ubuntu, fail fast if this fails, as it's unlikely that the other
+    # OSes will succed. This is the only target that builds the docs, as it's
+    # not necessary to build this on every OS.
     runs-on: ubuntu-latest
     name: ubuntu / ${{ matrix.toolchain }}
     strategy:
+      fail-fast: true
       matrix:
-        toolchain: [stable, beta]
+        toolchain: [1.32.0, stable, beta, nightly]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -30,6 +34,7 @@ jobs:
       # https://twitter.com/jonhoo/status/1571290371124260865
       - name: cargo test --locked
         run: cargo test --locked --all-features --all-targets
+      # Cargo test --all-targets doesn't run doc tests
       # https://github.com/rust-lang/cargo/issues/6669
       - name: cargo test --doc
         run: cargo test --locked --all-features --doc
@@ -52,17 +57,20 @@ jobs:
         run: cargo test --locked --all-features --all-targets
   os-check:
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }} / stable
+    name: ${{ matrix.os }} / ${{ matrix.toolchain}}
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
+        toolchain: [1.32.0, stable, beta, nightly]
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
-      - name: Install stable
-        uses: dtolnay/rust-toolchain@stable
+      - name: Install ${{ matrix.toolchain}}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain}}
       - name: cargo generate-lockfile
         if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
