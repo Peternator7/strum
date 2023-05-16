@@ -47,7 +47,10 @@ fn only_detailed_message() {
 
 #[test]
 fn documentation() {
-    assert_eq!("I eat birds.\n\nAnd fish.\n", (Pets::Cat).get_documentation().unwrap());
+    assert_eq!(
+        "I eat birds.\n\nAnd fish.\n",
+        (Pets::Cat).get_documentation().unwrap()
+    );
     assert_eq!("I'm a fish.", (Pets::Fish).get_documentation().unwrap());
     assert_eq!("I'm a bird.", (Pets::Bird).get_documentation().unwrap());
 }
