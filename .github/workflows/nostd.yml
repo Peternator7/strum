@@ -25,4 +25,5 @@ jobs:
       - name: rustup target add ${{ matrix.target }}
         run: rustup target add ${{ matrix.target }}
       - name: cargo check
-        run: cargo check --target ${{ matrix.target }} --no-default-features
+        # exclude strum_tests as textwrap (used by structopt) is not compatible with no-std
+        run: cargo check --target ${{ matrix.target }} --no-default-features -p strum -p strum_nostd_tests
