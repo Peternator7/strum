@@ -22,6 +22,22 @@ pub fn to_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             continue;
         }
 
+        // display variants like Green("lime") as "lime"
+        if variant_properties.to_string.is_none() && variant_properties.default.is_some() {
+            match &variant.fields {
+                Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
+                    arms.push(quote! { #name::#ident(ref s) => ::std::string::String::from(s) });
+                    continue;
+                }
+                _ => {
+                    return Err(syn::Error::new_spanned(
+                        variant,
+                        "Default only works on newtype structs with a single String field",
+                    ))
+                }
+            }
+        }
+
         // Look at all the serialize attributes.
         let output = variant_properties.get_preferred_name(type_properties.case_style);
 
