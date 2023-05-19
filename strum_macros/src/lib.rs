@@ -384,6 +384,52 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
+/// Creates a new type that maps all the variants of an enum to another generic value.
+///
+/// Iterate over the variants of an Enum. This macro does not support any additional data on your variants.
+/// The macro creates a new type called `YourEnumMap` that is the map object.
+/// You cannot derive `EnumIter` on any type with a lifetime bound (`<'a>`) because the map could
+/// create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
+///
+/// ```
+/// use strum_macros::{EnumIter, EnumMap};
+///
+/// #[derive(Clone, Copy, EnumIter, EnumMap, Debug, PartialEq, Eq)]
+/// enum Color {
+///     Red,
+///     Green,
+///     Blue,
+///     Yellow,
+/// }
+///
+/// let mut color_map: ColorMap<u8> = ColorMap::new();
+/// color_map[Color::Red] = 15;
+/// color_map[Color::Blue] = 12;
+///
+/// assert_eq!(15, color_map[Color::Red]);
+/// assert_eq!(12, color_map[Color::Blue]);
+/// assert_eq!(0, color_map[Color::Green]);
+/// 
+/// color_map[Color::Green] = 75;
+/// 
+/// let mut color_map_iter = color_map.into_iter();
+/// assert_eq!(Some((Color::Red, 15)), color_map_iter.next());
+/// assert_eq!(Some((Color::Green, 75)), color_map_iter.next());
+/// assert_eq!(Some((Color::Blue, 12)), color_map_iter.next());
+/// assert_eq!(Some((Color::Yellow, 0)), color_map_iter.next());
+/// assert_eq!(None, color_map_iter.next());
+/// 
+/// ```
+#[proc_macro_derive(EnumMap, attributes(strum))]
+pub fn enum_map(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks =
+        macros::enum_map::enum_map_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
 /// Add a function to enum that allows accessing variants by its discriminant
 ///
 /// This macro adds a standalone function to obtain an enum variant by its discriminant. The macro adds
