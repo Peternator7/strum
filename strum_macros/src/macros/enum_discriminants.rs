@@ -1,6 +1,6 @@
-use proc_macro2::{Span, TokenStream, TokenTree};
+use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::parse_quote;
+use syn::{parse_quote, Meta};
 use syn::{Data, DeriveInput, Fields};
 
 use crate::helpers::{non_enum_error, strum_discriminants_passthrough_error, HasTypeProperties};
@@ -53,26 +53,19 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             .filter(|attr| {
                 ATTRIBUTES_TO_COPY
                     .iter()
-                    .any(|attr_whitelisted| attr.path.is_ident(attr_whitelisted))
+                    .any(|attr_whitelisted| attr.path().is_ident(attr_whitelisted))
             })
             .map(|attr| {
-                if attr.path.is_ident("strum_discriminants") {
-                    let passthrough_group = attr
-                        .tokens
-                        .clone()
-                        .into_iter()
-                        .next()
-                        .ok_or_else(|| strum_discriminants_passthrough_error(attr))?;
-                    let passthrough_attribute = match passthrough_group {
-                        TokenTree::Group(ref group) => group.stream(),
-                        _ => {
-                            return Err(strum_discriminants_passthrough_error(&passthrough_group));
+                if attr.path().is_ident("strum_discriminants") {
+                    if let Meta::List(list) = &attr.meta {
+                        let passthrough_attribute = &list.tokens;
+                        if passthrough_attribute.is_empty() {
+                            return Err(strum_discriminants_passthrough_error(&list));
                         }
-                    };
-                    if passthrough_attribute.is_empty() {
-                        return Err(strum_discriminants_passthrough_error(&passthrough_group));
+                        Ok(quote! { #[#passthrough_attribute] })
+                    } else {
+                        Err(strum_discriminants_passthrough_error(&attr))
                     }
-                    Ok(quote! { #[#passthrough_attribute] })
                 } else {
                     Ok(attr.to_token_stream())
                 }

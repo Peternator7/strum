@@ -1,7 +1,7 @@
 use heck::ToShoutySnakeCase;
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
-use syn::{Data, DeriveInput, Fields, PathArguments, Type, TypeParen};
+use syn::{Data, DeriveInput, Fields, PathArguments, Type};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties};
 
@@ -14,8 +14,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let mut discriminant_type: Type = syn::parse("usize".parse().unwrap()).unwrap();
     for attr in attrs {
-        let path = &attr.path;
-        let tokens = &attr.tokens;
+        let path = &attr.path();
         if path.leading_colon.is_some() {
             continue;
         }
@@ -29,11 +28,11 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         if segment.arguments != PathArguments::None {
             continue;
         }
-        let typ_paren = match syn::parse2::<Type>(tokens.clone()) {
-            Ok(Type::Paren(TypeParen { elem, .. })) => *elem,
+        let typ: Type = match attr.parse_args() {
+            Ok(t) => t,
             _ => continue,
         };
-        let inner_path = match &typ_paren {
+        let inner_path = match &typ {
             Type::Path(t) => t,
             _ => continue,
         };
@@ -42,7 +41,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 "u8", "u16", "u32", "u64", "usize", "i8", "i16", "i32", "i64", "isize",
             ] {
                 if seg.ident == t {
-                    discriminant_type = typ_paren;
+                    discriminant_type = typ;
                     break;
                 }
             }
