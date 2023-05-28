@@ -400,7 +400,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert!(Color::Red.is_red());
 /// assert!(Color::Green{range: 0}.is_green());
 /// ```
-#[proc_macro_derive(EnumIs)]
+#[proc_macro_derive(EnumIs, attributes(strum))]
 pub fn enum_is(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 

@@ -10,6 +10,9 @@ enum Foo {
     Unnamed1(Option<u128>),
     Unnamed2(bool, u8),
     MultiWordName,
+    #[strum(disabled)]
+    #[allow(dead_code)]
+    Disabled,
 }
 
 #[test]

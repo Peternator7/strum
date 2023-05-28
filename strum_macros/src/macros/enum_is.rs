@@ -1,4 +1,4 @@
-use crate::helpers::non_enum_error;
+use crate::helpers::{non_enum_error, HasStrumVariantProperties};
 use heck::ToSnakeCase;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -14,10 +14,15 @@ pub fn enum_is_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let variants: Vec<_> = variants
         .iter()
-        .map(|variant| {
+        .filter_map(|variant| {
+            if variant.get_variant_properties().ok()?.disabled.is_some() {
+                return None;
+            }
+
             let variant_name = &variant.ident;
             let fn_name = format_ident!("is_{}", snakify(&variant_name.to_string()));
-            quote! {
+
+            Some(quote! {
                 #[must_use]
                 #[inline]
                 pub const fn #fn_name(&self) -> bool {
@@ -26,7 +31,7 @@ pub fn enum_is_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                         _ => false
                     }
                 }
-            }
+            })
         })
         .collect();
 
