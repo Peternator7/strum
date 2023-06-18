@@ -44,6 +44,28 @@ fn to_red_string() {
     assert_eq!(String::from("RedRed"), format!("{}", Color::Red));
 }
 
+#[test]
+fn to_green_string() {
+    assert_eq!(
+        String::from("lime"),
+        format!("{}", Color::Green("lime".into()))
+    );
+}
+
+#[derive(Debug, Eq, PartialEq, EnumString, Display)]
+enum ColorWithDefaultAndToString {
+    #[strum(default, to_string = "GreenGreen")]
+    Green(String),
+}
+
+#[test]
+fn to_green_with_default_and_to_string() {
+    assert_eq!(
+        String::from("GreenGreen"),
+        format!("{}", ColorWithDefaultAndToString::Green("lime".into()))
+    );
+}
+
 #[derive(Display, Debug, Eq, PartialEq)]
 #[strum(serialize_all = "snake_case")]
 enum Brightness {

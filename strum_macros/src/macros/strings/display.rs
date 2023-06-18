@@ -32,7 +32,21 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             Fields::Named(..) => quote! { {..} },
         };
 
-        arms.push(quote! { #name::#ident #params => f.pad(#output) });
+        if variant_properties.to_string.is_none() && variant_properties.default.is_some() {
+            match &variant.fields {
+                Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
+                    arms.push(quote! { #name::#ident(ref s) => f.pad(s) });
+                }
+                _ => {
+                    return Err(syn::Error::new_spanned(
+                        variant,
+                        "Default only works on newtype structs with a single String field",
+                    ))
+                }
+            }
+        } else {
+            arms.push(quote! { #name::#ident #params => f.pad(#output) });
+        }
     }
 
     if arms.len() < variants.len() {
