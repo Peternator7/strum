@@ -80,7 +80,7 @@ pub fn as_static_str_inner(
     let mut generics = ast.generics.clone();
     generics
         .params
-        .push(syn::GenericParam::Lifetime(syn::LifetimeDef::new(
+        .push(syn::GenericParam::Lifetime(syn::LifetimeParam::new(
             parse_quote!('_derivative_strum),
         )));
     let (impl_generics2, _, _) = generics.split_for_impl();
