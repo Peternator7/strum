@@ -1,5 +1,56 @@
 # Changelog
 
+## 0.25.0
+
+### Breaking Changes
+
+* [#261](https://github.com/Peternator7/strum/pull/261) Upgrade syn dependency to version 2. This bumps the msrv to 
+  1.56. It's impractical to maintain a package where a core dependency of the ecosystem has a different msrv than this one.
+
+* [270](https://github.com/Peternator7/strum/pull/270) Change the `to_string` behavior when using `default`. Now, when
+  using `default`, the `display` method will return the display version of the value contained in the enum rather than
+  the name of the variant.
+
+  ```rust
+  #[derive(strum::Display)]
+  enum Color {
+    Red,
+    Blue,
+    Green,
+    #[strum(default)]
+    Other(String)
+  }
+
+  fn main() {
+    // This used to print "Other", now it prints "Purple"
+    assert_eq!(Color::Other("Purple".to_string()).to_string(), "Purple");
+  }
+  ```
+
+  If you want the old behavior, you can use the `to_string` attribute to override this behavior. See the PR for an example.
+
+* [268](https://github.com/Peternator7/strum/pull/268) Update the behavior of `EnumCount` to exclude variants that are
+  `disabled`. This is a breaking change, but the behavior makes it more consistent with other methods.
+
+### New Features
+
+* [#257](https://github.com/Peternator7/strum/pull/257) This PR adds the `EnumIs` macro that automatically implements
+  `is_{variant_name}` methods for each variant. 
+
+  ```rust
+  #[derive(EnumIs)]
+  enum Color {
+      Red,
+      Blue,
+      Green,
+  }
+
+  #[test]
+  fn simple_test() {
+      assert!(Color::Red.is_red());
+  }
+  ```
+
 ## 0.24.3 (strum_macros)
 
 * [#231](https://github.com/Peternator7/strum/pull/231) Add ignore lints for EnumIter not implementing Copy or Debug

@@ -1,6 +1,6 @@
 [package]
 name = "strum_tests"
-version = "0.24.0"
+version = "0.25.0"
 edition = "2018"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 

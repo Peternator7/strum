@@ -16,11 +16,11 @@
 //!
 //! ```toml
 //! [dependencies]
-//! strum = "0.24"
-//! strum_macros = "0.24"
+//! strum = "0.25"
+//! strum_macros = "0.25"
 //!
 //! # You can also access strum_macros exports directly through strum using the "derive" feature
-//! strum = { version = "0.24", features = ["derive"] }
+//! strum = { version = "0.25", features = ["derive"] }
 //! ```
 //!
 
@@ -99,6 +99,19 @@ pub trait IntoEnumIterator: Sized {
     type Iterator: Iterator<Item = Self>;
 
     fn iter() -> Self::Iterator;
+}
+
+pub trait VariantIterator: Sized {
+    type Iterator: Iterator<Item = Self>;
+
+    fn iter() -> Self::Iterator;
+}
+
+pub trait VariantMetadata {
+    const VARIANT_COUNT: usize;
+    const VARIANT_NAMES: &'static [&'static str];
+
+    fn variant_name(&self) -> &'static str;
 }
 
 /// Associates additional pieces of information with an Enum. This can be

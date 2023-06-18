@@ -135,7 +135,7 @@ test_script:
 for:
 - matrix:
     only:
-      - channel: 1.32.0
+      - channel: 1.56.1
 
   test_script:
   - cargo test --verbose %cargoflags%
