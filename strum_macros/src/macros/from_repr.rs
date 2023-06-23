@@ -16,7 +16,15 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     for attr in attrs {
         let path = attr.path();
 
-        let mut ts = attr.meta.require_list()?.to_token_stream().into_iter();
+        let mut ts = if let Ok(ts) = attr
+            .meta
+            .require_list()
+            .map(|metas| metas.to_token_stream().into_iter())
+        {
+            ts
+        } else {
+            continue;
+        };
         // Discard the path
         let _ = ts.next();
         let tokens: TokenStream = ts.collect();

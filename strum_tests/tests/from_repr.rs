@@ -1,6 +1,7 @@
 use strum::FromRepr;
 
 #[derive(Debug, FromRepr, PartialEq)]
+/// Day of the week
 #[repr(u8)]
 enum Week {
     Sunday,
