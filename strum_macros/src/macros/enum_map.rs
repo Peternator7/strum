@@ -33,6 +33,10 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let mut get_matches_mut = Vec::new();
     // match arms in the form `MyEnumMap::Variant => self.variant = new_value`
     let mut set_matches = Vec::new();
+    // struct fields of the form `variant: func(MyEnum::Variant),*
+    let mut closure_fields = Vec::new();
+    // struct fields of the form `variant: func(MyEnum::Variant, self.variant),`
+    let mut transform_fields = Vec::new();
 
     for variant in variants {
         // skip disabled variants
@@ -68,6 +72,8 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         get_matches.push(quote! {#name::#pascal_case => &self.#snake_case,});
         get_matches_mut.push(quote! {#name::#pascal_case => &mut self.#snake_case,});
         set_matches.push(quote! {#name::#pascal_case => self.#snake_case = new_value,});
+        closure_fields.push(quote!{#snake_case: func(#name::#pascal_case),});
+        transform_fields.push(quote!{#snake_case: func(#name::#pascal_case, self.#snake_case),});
         snake_idents.push(snake_case);
     }
 
@@ -90,6 +96,24 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 #map_name {
                     #(#snake_idents,)*
                 }
+            }
+            
+            #vis fn filled(value: T) -> #map_name<T> {
+              #map_name {
+                #(#snake_idents: value.clone(),)*
+              }
+            }
+            
+            #vis fn from_closure<F: Fn(#name) -> T> -> #map_name<T> {
+              #map_name {
+                #(#closure_fields)*
+              }
+            }
+            
+            #vis fn transform<U, F(#name, T) -> U> -> #map_name<U> {
+              #map_name {
+                #(#transform_fields)*
+              }
             }
 
             // // E.g. so that if you're using EnumIter as well, these functions work nicely
