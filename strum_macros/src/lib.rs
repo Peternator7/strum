@@ -394,7 +394,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// ```
 /// use strum_macros::{EnumIter, EnumMap};
 ///
-/// #[derive(Clone, Copy, EnumIter, EnumMap, Debug, PartialEq, Eq)]
+/// #[derive(Clone, Copy, EnumIter, EnumMap, PartialEq, Eq)]
 /// enum Color {
 ///     Red,
 ///     Green,
@@ -402,7 +402,7 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Yellow,
 /// }
 ///
-/// let mut color_map: ColorMap<u8> = ColorMap::new();
+/// let mut color_map: ColorMap<u8> = ColorMap::default();
 /// color_map[Color::Red] = 15;
 /// color_map[Color::Blue] = 12;
 ///
@@ -412,12 +412,14 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// 
 /// color_map[Color::Green] = 75;
 /// 
-/// let mut color_map_iter = color_map.into_iter();
-/// assert_eq!(Some((Color::Red, 15)), color_map_iter.next());
-/// assert_eq!(Some((Color::Green, 75)), color_map_iter.next());
-/// assert_eq!(Some((Color::Blue, 12)), color_map_iter.next());
-/// assert_eq!(Some((Color::Yellow, 0)), color_map_iter.next());
-/// assert_eq!(None, color_map_iter.next());
+/// assert_eq!(15, color_map[Color::Red]);
+/// assert_eq!(color_map[Color::Green], 75);
+/// assert_eq!(color_map[Color::Blue], 12);
+/// assert_eq!(color_map[Color::Yellow], 0);
+/// 
+/// let mut float_map: ColorMap<f32> = ColorMap::default();
+/// 
+/// float_map[Color::Red] = f32::NAN;
 /// 
 /// ```
 #[proc_macro_derive(EnumMap, attributes(strum))]

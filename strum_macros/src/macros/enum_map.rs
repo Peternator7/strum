@@ -1,5 +1,5 @@
 use proc_macro2::{Span, TokenStream};
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::{spanned::Spanned, Data, DeriveInput, Fields, Ident};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties};
@@ -17,100 +17,109 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         ));
     }
 
-    let variants = match &ast.data {
-        Data::Enum(v) => &v.variants,
-        _ => return Err(non_enum_error()),
+    let Data::Enum(data_enum) = &ast.data else {
+        return Err(non_enum_error())
     };
 
-    let mut arms = Vec::new();
-    let mut idx = 0usize;
+    let variants = &data_enum.variants;
+
+    // the identifiers of each variant, in PascalCase
+    let mut pascal_idents = Vec::new();
+    // the identifiers of each struct field, in snake_case
+    let mut snake_idents = Vec::new();
+    // match arms in the form `MyEnumMap::Variant => &self.variant,`
+    let mut get_matches = Vec::new();
+    // match arms in the form `MyEnumMap::Variant => &mut self.variant,`
+    let mut get_matches_mut = Vec::new();
+    // match arms in the form `MyEnumMap::Variant => self.variant = new_value`
+    let mut set_matches = Vec::new();
+
     for variant in variants {
+        // skip disabled variants
         if variant.get_variant_properties()?.disabled.is_some() {
             continue;
         }
-
-        let ident = &variant.ident;
-        match &variant.fields {
-            Fields::Unit => {}
-            _ => {
-                return Err(syn::Error::new(
-                    variant.fields.span(),
-                    "This macro doesn't support enums with non-unit variants",
-                ))
-            }
+        // Error on fields with data
+        let Fields::Unit = &variant.fields else {
+            return Err(syn::Error::new(
+                variant.fields.span(),
+                "This macro doesn't support enums with non-unit variants",
+            ))
         };
 
-        arms.push(quote! {#name::#ident => #idx});
-        idx += 1;
+        let pascal_case = &variant.ident;
+        pascal_idents.push(pascal_case);
+        // switch PascalCase to snake_case. This naively assumes they use PascalCase
+        let snake_case = format_ident!(
+            "{}",
+            pascal_case
+                .to_string()
+                .chars()
+                .enumerate()
+                .fold(String::new(), |mut s, (i, c)| {
+                    if c.is_uppercase() && i > 0 {
+                        s.push('-');
+                    }
+                    s.push(c.to_ascii_lowercase());
+                    s
+                })
+        );
+
+        get_matches.push(quote! {#name::#pascal_case => &self.#snake_case,});
+        get_matches_mut.push(quote! {#name::#pascal_case => &mut self.#snake_case,});
+        set_matches.push(quote! {#name::#pascal_case => self.#snake_case = new_value,});
+        snake_idents.push(snake_case);
     }
 
-    let variant_count = arms.len();
     let map_name = syn::parse_str::<Ident>(&format!("{}Map", name)).unwrap();
-
-    // Create a string literal "MyEnumMap" to use in the debug impl.
-    let map_name_debug_struct =
-        syn::parse_str::<syn::LitStr>(&format!("\"{}\"", map_name)).unwrap();
 
     Ok(quote! {
         #[doc = #doc_comment]
         #[allow(
             missing_copy_implementations,
         )]
+        #[derive(Debug, Clone, Default, PartialEq, Hash)]
         #vis struct #map_name<T> {
-            content: [T; #variant_count]
+            #(#snake_idents: T,)*
         }
 
-        impl<T: Default> #map_name<T> {
-            fn new() -> Self {
-                Self {
-                    content: Default::default()
+        impl<T> #map_name<T> {
+            #vis fn new(
+                #(#snake_idents: T,)*
+            ) -> #map_name<T> {
+                #map_name {
+                    #(#snake_idents,)*
                 }
             }
-        }
 
-        impl<T> core::fmt::Debug for #map_name<T> {
-            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                // We don't know if the variants implement debug themselves so the only thing we
-                // can really show is how many elements are left.
-                f.debug_struct(#map_name_debug_struct)
-                    .field("len", &#variant_count)
-                    .finish()
-            }
+            // // E.g. so that if you're using EnumIter as well, these functions work nicely
+            // fn get(&self, variant: #name) -> &T {
+            //     match variant {
+            //         #(#get_matches)*
+            //     }
+            // }
+
+            // fn set(&mut self, variant: #name, new_value: T) {
+            //     match variant {
+            //         #(#set_matches)*
+            //     }
+            // }
         }
 
         impl<T> core::ops::Index<#name> for #map_name<T> {
             type Output = T;
 
             fn index(&self, idx: #name) -> &T {
-                &self.content[{match idx {
-                    #(#arms),*
-                }}]
+                match idx {
+                    #(#get_matches)*
+                }
             }
         }
 
         impl<T> core::ops::IndexMut<#name> for #map_name<T> {
             fn index_mut(&mut self, idx: #name) -> &mut T {
-                self.content.index_mut({match idx {
-                    #(#arms),*
-                }})
-            }
-        }
-
-        impl<T: Clone> core::iter::IntoIterator for #map_name<T> {
-            type Item = (#name, T);
-            type IntoIter = <Vec<(#name, T)> as core::iter::IntoIterator>::IntoIter;
-
-            fn into_iter(self) -> Self::IntoIter {
-                use strum::IntoEnumIterator;
-                let pairs: Vec<(#name, T)> = #name::iter().map(|variant| (variant, self[variant].clone())).collect();
-                pairs.into_iter()
-            }
-        }
-
-        impl<T: Clone> Clone for #map_name<T> {
-            fn clone(&self) -> Self {
-                Self {
-                    content: self.content.clone()
+                match idx {
+                    #(#get_matches_mut)*
                 }
             }
         }
