@@ -384,6 +384,31 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
+/// Generated `is_*()` methods for each variant.
+/// E.g. `Color.is_red()`.
+///
+/// ```
+///
+/// use strum_macros::EnumIs;
+///
+/// #[derive(EnumIs, Debug)]
+/// enum Color {
+///     Red,
+///     Green { range: usize },
+/// }
+///
+/// assert!(Color::Red.is_red());
+/// assert!(Color::Green{range: 0}.is_green());
+/// ```
+#[proc_macro_derive(EnumIs, attributes(strum))]
+pub fn enum_is(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks = macros::enum_is::enum_is_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
 /// Creates a new type that maps all the variants of an enum to another generic value.
 ///
 /// Iterate over the variants of an Enum. This macro does not support any additional data on your variants.

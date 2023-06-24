@@ -1,5 +1,6 @@
 pub mod enum_count;
 pub mod enum_discriminants;
+pub mod enum_is;
 pub mod enum_iter;
 pub mod enum_map;
 pub mod enum_messages;

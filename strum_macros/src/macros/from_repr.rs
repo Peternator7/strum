@@ -1,6 +1,6 @@
 use heck::ToShoutySnakeCase;
 use proc_macro2::{Span, TokenStream};
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 use syn::{Data, DeriveInput, Fields, PathArguments, Type, TypeParen};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties};
@@ -14,8 +14,13 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let mut discriminant_type: Type = syn::parse("usize".parse().unwrap()).unwrap();
     for attr in attrs {
-        let path = &attr.path;
-        let tokens = &attr.tokens;
+        let path = attr.path();
+
+        let mut ts = attr.meta.require_list()?.to_token_stream().into_iter();
+        // Discard the path
+        let _ = ts.next();
+        let tokens: TokenStream = ts.collect();
+
         if path.leading_colon.is_some() {
             continue;
         }

@@ -19,7 +19,7 @@ pub struct StrumVariantProperties {
     pub documentation: Vec<LitStr>,
     pub string_props: Vec<(LitStr, LitStr)>,
     serialize: Vec<LitStr>,
-    to_string: Option<LitStr>,
+    pub to_string: Option<LitStr>,
     ident: Option<Ident>,
 }
 
