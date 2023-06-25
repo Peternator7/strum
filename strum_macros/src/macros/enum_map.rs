@@ -43,7 +43,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         if variant.get_variant_properties()?.disabled.is_some() {
             continue;
         }
-        
+
         // Error on fields with data
         let Fields::Unit = &variant.fields else {
             return Err(syn::Error::new(
@@ -80,6 +80,14 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let map_name = syn::parse_str::<Ident>(&format!("{}Map", name)).unwrap();
 
+    let doc_new = format!("Create a new {map_name} with a value for each variant of {name}");
+    let doc_closure =
+        format!("Create a new {map_name} by running a function on each variant of `{name}`");
+    let doc_transform = format!("Create a new `{map_name}` by running a function on each variant of `{name}` and the corresponding value in the current `{map_name}`");
+    let doc_filled = format!("Create a new `{map_name}` with the same value in each field.");
+    let doc_option_all = format!("Converts `{map_name}<Option<T>>` into `Option<{map_name}<T>>`. Returns `Some` if all fields are `Some`, otherwise returns `None`.");
+    let doc_result_all_ok = format!("Converts `{map_name}<Result<T, E>>` into `Option<{map_name}>`. Returns `Some` if all fields are `Ok`, otherwise returns `None`.");
+
     Ok(quote! {
         #[doc = #doc_comment]
         #[allow(
@@ -91,6 +99,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         impl<T: Clone> #map_name<T> {
+            #[doc = #doc_filled]
             #vis fn filled(value: T) -> #map_name<T> {
                 #map_name {
                     #(#snake_idents: value.clone(),)*
@@ -99,6 +108,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         impl<T> #map_name<T> {
+            #[doc = #doc_new]
             #vis fn new(
                 #(#snake_idents: T,)*
             ) -> #map_name<T> {
@@ -107,12 +117,14 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 }
             }
 
+            #[doc = #doc_closure]
             #vis fn from_closure<F: Fn(#name)->T>(func: F) -> #map_name<T> {
               #map_name {
                 #(#closure_fields)*
               }
             }
 
+            #[doc = #doc_transform]
             #vis fn transform<U, F: Fn(#name, &T)->U>(&self, func: F) -> #map_name<U> {
               #map_name {
                 #(#transform_fields)*
@@ -147,6 +159,36 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             fn index_mut(&mut self, idx: #name) -> &mut T {
                 match idx {
                     #(#get_matches_mut)*
+                }
+            }
+        }
+
+        impl<T> #map_name<Option<T>> {
+            #[doc = #doc_option_all]
+            #vis fn all(self) -> Option<#map_name<T>> {
+                if let #map_name {
+                    #(#snake_idents: Some(#snake_idents),)*
+                } = self {
+                    Some(#map_name {
+                        #(#snake_idents,)*
+                    })
+                } else {
+                    None
+                }
+            }
+        }
+
+        impl<T, E> #map_name<Result<T, E>> {
+            #[doc = #doc_result_all_ok]
+            #vis fn all_ok(self) -> Option<#map_name<T>> {
+                if let #map_name {
+                    #(#snake_idents: Ok(#snake_idents),)*
+                } = self {
+                    Some(#map_name {
+                        #(#snake_idents,)*
+                    })
+                } else {
+                    None
                 }
             }
         }

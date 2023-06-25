@@ -48,6 +48,29 @@ fn index_mut() {
 }
 
 #[test]
+fn option_all() {
+    let mut map: ColorMap<Option<u8>> = ColorMap::filled(None);
+    map[Color::Red] = Some(64);
+    map[Color::Green] = Some(32);
+    map[Color::Blue] = Some(16);
+
+    assert_eq!(map.clone().all(), None);
+
+    map[Color::Yellow] = Some(8);
+    assert_eq!(map.all(), Some(ColorMap::new(64, 8, 32, 16)));
+}
+
+#[test]
+fn result_all_ok() {
+    let mut map: ColorMap<Result<u8, u8>> = ColorMap::filled(Ok(4));
+    assert_eq!(map.clone().all_ok(), Some(ColorMap::filled(4)));
+
+    map[Color::Red] = Err(22);
+
+    assert_eq!(map.all_ok(), None);
+}
+
+#[test]
 fn transform() {
     let all_two = ColorMap::filled(2);
     assert_eq!(all_two.transform(|_, n| *n * 2), ColorMap::filled(4));
