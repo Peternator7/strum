@@ -52,7 +52,6 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         };
 
         let pascal_case = &variant.ident;
-        pascal_idents.push(pascal_case);
         // switch PascalCase to snake_case. This naively assumes they use PascalCase
         let snake_case = format_ident!(
             "{}",
@@ -72,8 +71,9 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         get_matches.push(quote! {#name::#pascal_case => &self.#snake_case,});
         get_matches_mut.push(quote! {#name::#pascal_case => &mut self.#snake_case,});
         set_matches.push(quote! {#name::#pascal_case => self.#snake_case = new_value,});
-        closure_fields.push(quote!{#snake_case: func(#name::#pascal_case),});
-        transform_fields.push(quote!{#snake_case: func(#name::#pascal_case, self.#snake_case),});
+        closure_fields.push(quote! {#snake_case: func(#name::#pascal_case),});
+        transform_fields.push(quote! {#snake_case: func(#name::#pascal_case, &self.#snake_case),});
+        pascal_idents.push(pascal_case);
         snake_idents.push(snake_case);
     }
 
@@ -84,9 +84,17 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         #[allow(
             missing_copy_implementations,
         )]
-        #[derive(Debug, Clone, Default, PartialEq, Hash)]
+        #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
         #vis struct #map_name<T> {
             #(#snake_idents: T,)*
+        }
+
+        impl<T: Clone> #map_name<T> {
+            #vis fn filled(value: T) -> #map_name<T> {
+                #map_name {
+                    #(#snake_idents: value.clone(),)*
+                }
+            }
         }
 
         impl<T> #map_name<T> {
@@ -97,20 +105,14 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     #(#snake_idents,)*
                 }
             }
-            
-            #vis fn filled(value: T) -> #map_name<T> {
-              #map_name {
-                #(#snake_idents: value.clone(),)*
-              }
-            }
-            
-            #vis fn from_closure<F: Fn(#name) -> T> -> #map_name<T> {
+
+            #vis fn from_closure<F: Fn(#name)->T>(func: F) -> #map_name<T> {
               #map_name {
                 #(#closure_fields)*
               }
             }
-            
-            #vis fn transform<U, F(#name, T) -> U> -> #map_name<U> {
+
+            #vis fn transform<U, F: Fn(#name, &T)->U>(&self, func: F) -> #map_name<U> {
               #map_name {
                 #(#transform_fields)*
               }
