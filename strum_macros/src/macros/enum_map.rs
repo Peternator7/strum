@@ -8,7 +8,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let vis = &ast.vis;
-    let doc_comment = format!("A map over the variants of [{}]", name);
+    let mut doc_comment = format!("A map over the variants of [{}]", name);
 
     if gen.lifetimes().count() > 0 {
         return Err(syn::Error::new(
@@ -20,6 +20,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let Data::Enum(data_enum) = &ast.data else {
         return Err(non_enum_error())
     };
+    let map_name = syn::parse_str::<Ident>(&format!("{}Map", name)).unwrap();
 
     let variants = &data_enum.variants;
 
@@ -38,9 +39,19 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     // struct fields of the form `variant: func(MyEnum::Variant, self.variant),`
     let mut transform_fields = Vec::new();
 
+    // identifiers for disabled variants
+    let mut disabled_variants = Vec::new();
+    // match arms for disabled variants
+    let mut disabled_matches = Vec::new();
+
     for variant in variants {
         // skip disabled variants
         if variant.get_variant_properties()?.disabled.is_some() {
+            let disabled_ident = &variant.ident;
+            let panic_message =
+                format!("Can't use `{disabled_ident}` with `{map_name}` - variant is disabled for Strum features");
+            disabled_variants.push(disabled_ident);
+            disabled_matches.push(quote!(#name::#disabled_ident => panic!(#panic_message),));
             continue;
         }
 
@@ -78,7 +89,15 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         snake_idents.push(snake_case);
     }
 
-    let map_name = syn::parse_str::<Ident>(&format!("{}Map", name)).unwrap();
+    // if the index operation can panic, add that to the documentation
+    if !disabled_variants.is_empty() {
+        doc_comment.push_str(&format!(
+            "\n# Panics\nIndexing `{map_name}` with any of the following variants will cause a panic:"
+        ));
+        for variant in disabled_variants {
+            doc_comment.push_str(&format!("\n\n- `{name}::{variant}`"));
+        }
+    }
 
     let doc_new = format!("Create a new {map_name} with a value for each variant of {name}");
     let doc_closure =
@@ -151,6 +170,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             fn index(&self, idx: #name) -> &T {
                 match idx {
                     #(#get_matches)*
+                    #(#disabled_matches)*
                 }
             }
         }
@@ -159,6 +179,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             fn index_mut(&mut self, idx: #name) -> &mut T {
                 match idx {
                     #(#get_matches_mut)*
+                    #(#disabled_matches)*
                 }
             }
         }

@@ -5,12 +5,22 @@ enum Color {
     Red,
     Yellow,
     Green,
+    #[strum(disabled)]
+    Teal,
     Blue,
+    #[strum(disabled)]
+    Indigo,
 }
 
 #[test]
 fn default() {
     assert_eq!(ColorMap::default(), ColorMap::new(0, 0, 0, 0));
+}
+
+#[test]
+#[should_panic]
+fn disabled() {
+    let _ = ColorMap::<u8>::default()[Color::Indigo];
 }
 
 #[test]
