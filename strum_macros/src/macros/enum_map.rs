@@ -43,6 +43,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         if variant.get_variant_properties()?.disabled.is_some() {
             continue;
         }
+        
         // Error on fields with data
         let Fields::Unit = &variant.fields else {
             return Err(syn::Error::new(
