@@ -411,48 +411,38 @@ pub fn enum_is(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Creates a new type that maps all the variants of an enum to another generic value.
 ///
-/// Iterate over the variants of an Enum. This macro does not support any additional data on your variants.
-/// The macro creates a new type called `YourEnumMap` that is the map object.
-/// You cannot derive `EnumIter` on any type with a lifetime bound (`<'a>`) because the map could
-/// create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
-///
+/// This macro does not support any additional data on your variants.
+/// The macro creates a new type called `YourEnumMap<T>`.
+/// The map has a field of type `T` for each variant of `YourEnum`. The map automatically implements `Index<T>` and `IndexMut<T>`.
 /// ```
-/// use strum_macros::{EnumIter, EnumMap};
+/// use strum_macros::EnumMap;
 ///
-/// #[derive(Clone, Copy, EnumIter, EnumMap, PartialEq, Eq)]
+/// #[derive(EnumMap)]
 /// enum Color {
 ///     Red,
+///     Yellow,
 ///     Green,
 ///     Blue,
-///     Yellow,
 /// }
 ///
-/// let mut color_map: ColorMap<u8> = ColorMap::default();
-/// color_map[Color::Red] = 15;
-/// color_map[Color::Blue] = 12;
+/// assert_eq!(ColorMap::default(), ColorMap::new(0, 0, 0, 0));
+/// assert_eq!(ColorMap::filled(2), ColorMap::new(2, 2, 2, 2));
+/// assert_eq!(ColorMap::from_closure(|_| 3), ColorMap::new(3, 3, 3, 3));
+/// assert_eq!(ColorMap::default().transform(|_, val| val + 2), ColorMap::new(2, 2, 2, 2));
 ///
-/// assert_eq!(15, color_map[Color::Red]);
-/// assert_eq!(12, color_map[Color::Blue]);
-/// assert_eq!(0, color_map[Color::Green]);
-/// 
-/// color_map[Color::Green] = 75;
-/// 
-/// assert_eq!(15, color_map[Color::Red]);
-/// assert_eq!(color_map[Color::Green], 75);
-/// assert_eq!(color_map[Color::Blue], 12);
-/// assert_eq!(color_map[Color::Yellow], 0);
-/// 
-/// let mut float_map: ColorMap<f32> = ColorMap::default();
-/// 
-/// float_map[Color::Red] = f32::NAN;
-/// 
+/// let mut complex_map = ColorMap::from_closure(|color| match color {
+///     Color::Red => 0,
+///     _ => 3
+/// });
+/// complex_map[Color::Green] = complex_map[Color::Red];
+/// assert_eq!(complex_map, ColorMap::new(0, 3, 0, 3));
+///
 /// ```
 #[proc_macro_derive(EnumMap, attributes(strum))]
 pub fn enum_map(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks =
-        macros::enum_map::enum_map_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
+    let toks = macros::enum_map::enum_map_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
