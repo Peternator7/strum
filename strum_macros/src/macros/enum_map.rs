@@ -1,8 +1,8 @@
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
-use syn::{spanned::Spanned, Data, DeriveInput, Fields, Ident};
+use syn::{spanned::Spanned, Data, DeriveInput, Fields};
 
-use crate::helpers::{non_enum_error, HasStrumVariantProperties};
+use crate::helpers::{non_enum_error, snakify, HasStrumVariantProperties};
 
 pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -20,7 +20,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let Data::Enum(data_enum) = &ast.data else {
         return Err(non_enum_error())
     };
-    let map_name = syn::parse_str::<Ident>(&format!("{}Map", name)).unwrap();
+    let map_name = format_ident!("{}Map", name);
 
     let variants = &data_enum.variants;
 
@@ -64,21 +64,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         };
 
         let pascal_case = &variant.ident;
-        // switch PascalCase to snake_case. This naively assumes they use PascalCase
-        let snake_case = format_ident!(
-            "{}",
-            pascal_case
-                .to_string()
-                .chars()
-                .enumerate()
-                .fold(String::new(), |mut s, (i, c)| {
-                    if c.is_uppercase() && i > 0 {
-                        s.push('-');
-                    }
-                    s.push(c.to_ascii_lowercase());
-                    s
-                })
-        );
+        let snake_case = snakify(&pascal_case.to_string());
 
         get_matches.push(quote! {#name::#pascal_case => &self.#snake_case,});
         get_matches_mut.push(quote! {#name::#pascal_case => &mut self.#snake_case,});
