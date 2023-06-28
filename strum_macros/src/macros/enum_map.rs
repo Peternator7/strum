@@ -150,18 +150,6 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
               }
             }
 
-            // // E.g. so that if you're using EnumIter as well, these functions work nicely
-            // fn get(&self, variant: #name) -> &T {
-            //     match variant {
-            //         #(#get_matches)*
-            //     }
-            // }
-
-            // fn set(&mut self, variant: #name, new_value: T) {
-            //     match variant {
-            //         #(#set_matches)*
-            //     }
-            // }
         }
 
         impl<T> core::ops::Index<#name> for #map_name<T> {
