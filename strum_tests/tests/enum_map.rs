@@ -40,6 +40,12 @@ fn from_closure() {
 }
 
 #[test]
+fn clone() {
+    let cm = ColorMap::filled(String::from("Some Text Data"));
+    assert_eq!(cm.clone(), cm);
+}
+
+#[test]
 fn index() {
     let map = ColorMap::new(18, 25, 7, 2);
     assert_eq!(map[Color::Red], 18);
@@ -73,11 +79,12 @@ fn option_all() {
 #[test]
 fn result_all_ok() {
     let mut map: ColorMap<Result<u8, u8>> = ColorMap::filled(Ok(4));
-    assert_eq!(map.clone().all_ok(), Some(ColorMap::filled(4)));
-
+    assert_eq!(map.clone().all_ok(), Ok(ColorMap::filled(4)));
     map[Color::Red] = Err(22);
-
-    assert_eq!(map.all_ok(), None);
+    map[Color::Yellow] = Err(100);
+    assert_eq!(map.clone().all_ok(), Err(22));
+    map[Color::Red] = Ok(1);
+    assert_eq!(map.all_ok(), Err(100));
 }
 
 #[test]

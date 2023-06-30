@@ -175,16 +175,10 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         impl<T, E> #map_name<Result<T, E>> {
             #[doc = #doc_result_all_ok]
-            #vis fn all_ok(self) -> Option<#map_name<T>> {
-                if let #map_name {
-                    #(#snake_idents: Ok(#snake_idents),)*
-                } = self {
-                    Some(#map_name {
-                        #(#snake_idents,)*
-                    })
-                } else {
-                    None
-                }
+            #vis fn all_ok(self) -> Result<#map_name<T>, E> {
+                Ok(#map_name {
+                    #(#snake_idents: self.#snake_idents?,)*
+                })
             }
         }
     })
