@@ -13,7 +13,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     if gen.lifetimes().count() > 0 {
         return Err(syn::Error::new(
             Span::call_site(),
-            "This macro doesn't support enums with lifetimes.",
+            "`EnumMap` doesn't support enums with lifetimes.",
         ));
     }
 
@@ -55,11 +55,11 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             continue;
         }
 
-        // Error on fields with data
+        // Error on variants with data
         let Fields::Unit = &variant.fields else {
             return Err(syn::Error::new(
                 variant.fields.span(),
-                "This macro doesn't support enums with non-unit variants",
+                "`EnumMap` doesn't support enums with non-unit variants",
             ))
         };
 
@@ -73,6 +73,14 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         transform_fields.push(quote! {#snake_case: func(#name::#pascal_case, &self.#snake_case),});
         pascal_idents.push(pascal_case);
         snake_idents.push(snake_case);
+    }
+
+    // Error on empty enums
+    if pascal_idents.is_empty() {
+        return Err(syn::Error::new(
+            variants.span(),
+            "`EnumMap` requires at least one non-disabled variant",
+        ));
     }
 
     // if the index operation can panic, add that to the documentation

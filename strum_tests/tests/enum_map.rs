@@ -12,6 +12,11 @@ enum Color {
     Indigo,
 }
 
+#[derive(EnumMap)]
+enum Keyword {
+    Const,
+}
+
 #[test]
 fn default() {
     assert_eq!(ColorMap::default(), ColorMap::new(0, 0, 0, 0));
