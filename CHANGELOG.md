@@ -2,6 +2,12 @@
 
 ## 0.25.0
 
+* [#276](https://github.com/Peternator7/strum/pull/276). Fixes [#275](https://github.com/Peternator7/strum/issues/275) and 
+  [#281](https://github.com/Peternator7/strum/issues/281). Not sure exactly why this broke, perhaps incompatibilities between
+  syn 1 and 2. PR fixes the issue by only looking at attributes of the "list" type `[attr(item, item)]`. 
+
+## 0.25.0
+
 ### Breaking Changes
 
 * [#261](https://github.com/Peternator7/strum/pull/261) Upgrade syn dependency to version 2. This bumps the msrv to 
