@@ -585,12 +585,12 @@ pub fn enum_messages(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// Add custom properties to enum variants.
 ///
 /// Enables the encoding of arbitary constants into enum variants. This method
-/// currently only supports adding additional string values. Other types of literals are still
-/// experimental in the rustc compiler. The generated code works by nesting match statements.
-/// The first match statement matches on the type of the enum, and the inner match statement
-/// matches on the name of the property requested. This design works well for enums with a small
-/// number of variants and properties, but scales linearly with the number of variants so may not
-/// be the best choice in all situations.
+/// currently only supports adding additional string, integer and boolean values. Other types
+/// of literals are still experimental in the rustc compiler. The generated code works by
+/// nesting match statements. The first match statement matches on the type of the enum,
+/// and the inner match statement matches on the name of the property requested. This design
+/// works well for enums with a small number of variants and properties, but scales linearly
+/// with the number of variants so may not be the best choice in all situations.
 ///
 /// ```
 ///
@@ -655,7 +655,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// // Bring trait into scope
 /// use std::str::FromStr;
 /// use strum::{IntoEnumIterator, EnumMessage};
-/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString, EnumMessage};
+/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString};
 ///
 /// #[derive(Debug)]
 /// struct NonDefault;
