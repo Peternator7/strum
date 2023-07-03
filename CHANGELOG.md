@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.25.0
+## 0.25.1 (strum_macros)
 
 * [#276](https://github.com/Peternator7/strum/pull/276). Fixes [#275](https://github.com/Peternator7/strum/issues/275) and 
   [#281](https://github.com/Peternator7/strum/issues/281). Not sure exactly why this broke, perhaps incompatibilities between
