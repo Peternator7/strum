@@ -4,23 +4,23 @@ use syn::{spanned::Spanned, Data, DeriveInput, Fields};
 
 use crate::helpers::{non_enum_error, snakify, HasStrumVariantProperties};
 
-pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
+pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let vis = &ast.vis;
-    let mut doc_comment = format!("A map over the variants of [{}]", name);
+    let mut doc_comment = format!("A map over the variants of `{name}`");
 
     if gen.lifetimes().count() > 0 {
         return Err(syn::Error::new(
             Span::call_site(),
-            "`EnumMap` doesn't support enums with lifetimes.",
+            "`EnumTable` doesn't support enums with lifetimes.",
         ));
     }
 
     let Data::Enum(data_enum) = &ast.data else {
         return Err(non_enum_error())
     };
-    let map_name = format_ident!("{}Map", name);
+    let table_name = format_ident!("{}Table", name);
 
     let variants = &data_enum.variants;
 
@@ -28,11 +28,11 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let mut pascal_idents = Vec::new();
     // the identifiers of each struct field, in snake_case
     let mut snake_idents = Vec::new();
-    // match arms in the form `MyEnumMap::Variant => &self.variant,`
+    // match arms in the form `MyEnumTable::Variant => &self.variant,`
     let mut get_matches = Vec::new();
-    // match arms in the form `MyEnumMap::Variant => &mut self.variant,`
+    // match arms in the form `MyEnumTable::Variant => &mut self.variant,`
     let mut get_matches_mut = Vec::new();
-    // match arms in the form `MyEnumMap::Variant => self.variant = new_value`
+    // match arms in the form `MyEnumTable::Variant => self.variant = new_value`
     let mut set_matches = Vec::new();
     // struct fields of the form `variant: func(MyEnum::Variant),*
     let mut closure_fields = Vec::new();
@@ -49,7 +49,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         if variant.get_variant_properties()?.disabled.is_some() {
             let disabled_ident = &variant.ident;
             let panic_message =
-                format!("Can't use `{disabled_ident}` with `{map_name}` - variant is disabled for Strum features");
+                format!("Can't use `{disabled_ident}` with `{table_name}` - variant is disabled for Strum features");
             disabled_variants.push(disabled_ident);
             disabled_matches.push(quote!(#name::#disabled_ident => panic!(#panic_message),));
             continue;
@@ -59,7 +59,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let Fields::Unit = &variant.fields else {
             return Err(syn::Error::new(
                 variant.fields.span(),
-                "`EnumMap` doesn't support enums with non-unit variants",
+                "`EnumTable` doesn't support enums with non-unit variants",
             ))
         };
 
@@ -79,27 +79,27 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     if pascal_idents.is_empty() {
         return Err(syn::Error::new(
             variants.span(),
-            "`EnumMap` requires at least one non-disabled variant",
+            "`EnumTable` requires at least one non-disabled variant",
         ));
     }
 
     // if the index operation can panic, add that to the documentation
     if !disabled_variants.is_empty() {
         doc_comment.push_str(&format!(
-            "\n# Panics\nIndexing `{map_name}` with any of the following variants will cause a panic:"
+            "\n# Panics\nIndexing `{table_name}` with any of the following variants will cause a panic:"
         ));
         for variant in disabled_variants {
             doc_comment.push_str(&format!("\n\n- `{name}::{variant}`"));
         }
     }
 
-    let doc_new = format!("Create a new {map_name} with a value for each variant of {name}");
+    let doc_new = format!("Create a new {table_name} with a value for each variant of {name}");
     let doc_closure =
-        format!("Create a new {map_name} by running a function on each variant of `{name}`");
-    let doc_transform = format!("Create a new `{map_name}` by running a function on each variant of `{name}` and the corresponding value in the current `{map_name}`");
-    let doc_filled = format!("Create a new `{map_name}` with the same value in each field.");
-    let doc_option_all = format!("Converts `{map_name}<Option<T>>` into `Option<{map_name}<T>>`. Returns `Some` if all fields are `Some`, otherwise returns `None`.");
-    let doc_result_all_ok = format!("Converts `{map_name}<Result<T, E>>` into `Option<{map_name}>`. Returns `Some` if all fields are `Ok`, otherwise returns `None`.");
+        format!("Create a new {table_name} by running a function on each variant of `{name}`");
+    let doc_transform = format!("Create a new `{table_name}` by running a function on each variant of `{name}` and the corresponding value in the current `{table_name}`");
+    let doc_filled = format!("Create a new `{table_name}` with the same value in each field.");
+    let doc_option_all = format!("Converts `{table_name}<Option<T>>` into `Option<{table_name}<T>>`. Returns `Some` if all fields are `Some`, otherwise returns `None`.");
+    let doc_result_all_ok = format!("Converts `{table_name}<Result<T, E>>` into `Result<{table_name}, E>`. Returns `Ok` if all fields are `Ok`, otherwise returns `Err`.");
 
     Ok(quote! {
         #[doc = #doc_comment]
@@ -107,46 +107,46 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             missing_copy_implementations,
         )]
         #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
-        #vis struct #map_name<T> {
+        #vis struct #table_name<T> {
             #(#snake_idents: T,)*
         }
 
-        impl<T: Clone> #map_name<T> {
+        impl<T: Clone> #table_name<T> {
             #[doc = #doc_filled]
-            #vis fn filled(value: T) -> #map_name<T> {
-                #map_name {
+            #vis fn filled(value: T) -> #table_name<T> {
+                #table_name {
                     #(#snake_idents: value.clone(),)*
                 }
             }
         }
 
-        impl<T> #map_name<T> {
+        impl<T> #table_name<T> {
             #[doc = #doc_new]
             #vis fn new(
                 #(#snake_idents: T,)*
-            ) -> #map_name<T> {
-                #map_name {
+            ) -> #table_name<T> {
+                #table_name {
                     #(#snake_idents,)*
                 }
             }
 
             #[doc = #doc_closure]
-            #vis fn from_closure<F: Fn(#name)->T>(func: F) -> #map_name<T> {
-              #map_name {
+            #vis fn from_closure<F: Fn(#name)->T>(func: F) -> #table_name<T> {
+              #table_name {
                 #(#closure_fields)*
               }
             }
 
             #[doc = #doc_transform]
-            #vis fn transform<U, F: Fn(#name, &T)->U>(&self, func: F) -> #map_name<U> {
-              #map_name {
+            #vis fn transform<U, F: Fn(#name, &T)->U>(&self, func: F) -> #table_name<U> {
+              #table_name {
                 #(#transform_fields)*
               }
             }
 
         }
 
-        impl<T> core::ops::Index<#name> for #map_name<T> {
+        impl<T> core::ops::Index<#name> for #table_name<T> {
             type Output = T;
 
             fn index(&self, idx: #name) -> &T {
@@ -157,7 +157,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
-        impl<T> core::ops::IndexMut<#name> for #map_name<T> {
+        impl<T> core::ops::IndexMut<#name> for #table_name<T> {
             fn index_mut(&mut self, idx: #name) -> &mut T {
                 match idx {
                     #(#get_matches_mut)*
@@ -166,13 +166,13 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
-        impl<T> #map_name<Option<T>> {
+        impl<T> #table_name<Option<T>> {
             #[doc = #doc_option_all]
-            #vis fn all(self) -> Option<#map_name<T>> {
-                if let #map_name {
+            #vis fn all(self) -> Option<#table_name<T>> {
+                if let #table_name {
                     #(#snake_idents: Some(#snake_idents),)*
                 } = self {
-                    Some(#map_name {
+                    Some(#table_name {
                         #(#snake_idents,)*
                     })
                 } else {
@@ -181,10 +181,10 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
-        impl<T, E> #map_name<Result<T, E>> {
+        impl<T, E> #table_name<Result<T, E>> {
             #[doc = #doc_result_all_ok]
-            #vis fn all_ok(self) -> Result<#map_name<T>, E> {
-                Ok(#map_name {
+            #vis fn all_ok(self) -> Result<#table_name<T>, E> {
+                Ok(#table_name {
                     #(#snake_idents: self.#snake_idents?,)*
                 })
             }

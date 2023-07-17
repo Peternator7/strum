@@ -1,6 +1,6 @@
-use strum::EnumMap;
+use strum::EnumTable;
 
-#[derive(EnumMap)]
+#[derive(EnumTable)]
 enum Color {
     Red,
     Yellow,
@@ -14,47 +14,47 @@ enum Color {
 
 // even though this isn't used, it needs to be a test
 // because if it doesn't compile, enum variants that conflict with keywords won't work
-#[derive(EnumMap)]
+#[derive(EnumTable)]
 enum Keyword {
     Const,
 }
 
 #[test]
 fn default() {
-    assert_eq!(ColorMap::default(), ColorMap::new(0, 0, 0, 0));
+    assert_eq!(ColorTable::default(), ColorTable::new(0, 0, 0, 0));
 }
 
 #[test]
 #[should_panic]
 fn disabled() {
-    let _ = ColorMap::<u8>::default()[Color::Indigo];
+    let _ = ColorTable::<u8>::default()[Color::Indigo];
 }
 
 #[test]
 fn filled() {
-    assert_eq!(ColorMap::filled(42), ColorMap::new(42, 42, 42, 42));
+    assert_eq!(ColorTable::filled(42), ColorTable::new(42, 42, 42, 42));
 }
 
 #[test]
 fn from_closure() {
     assert_eq!(
-        ColorMap::from_closure(|color| match color {
+        ColorTable::from_closure(|color| match color {
             Color::Red => 1,
             _ => 2,
         }),
-        ColorMap::new(1, 2, 2, 2)
+        ColorTable::new(1, 2, 2, 2)
     );
 }
 
 #[test]
 fn clone() {
-    let cm = ColorMap::filled(String::from("Some Text Data"));
+    let cm = ColorTable::filled(String::from("Some Text Data"));
     assert_eq!(cm.clone(), cm);
 }
 
 #[test]
 fn index() {
-    let map = ColorMap::new(18, 25, 7, 2);
+    let map = ColorTable::new(18, 25, 7, 2);
     assert_eq!(map[Color::Red], 18);
     assert_eq!(map[Color::Yellow], 25);
     assert_eq!(map[Color::Green], 7);
@@ -63,7 +63,7 @@ fn index() {
 
 #[test]
 fn index_mut() {
-    let mut map = ColorMap::new(18, 25, 7, 2);
+    let mut map = ColorTable::new(18, 25, 7, 2);
     map[Color::Green] = 5;
     map[Color::Red] *= 4;
     assert_eq!(map[Color::Green], 5);
@@ -72,7 +72,7 @@ fn index_mut() {
 
 #[test]
 fn option_all() {
-    let mut map: ColorMap<Option<u8>> = ColorMap::filled(None);
+    let mut map: ColorTable<Option<u8>> = ColorTable::filled(None);
     map[Color::Red] = Some(64);
     map[Color::Green] = Some(32);
     map[Color::Blue] = Some(16);
@@ -80,13 +80,13 @@ fn option_all() {
     assert_eq!(map.clone().all(), None);
 
     map[Color::Yellow] = Some(8);
-    assert_eq!(map.all(), Some(ColorMap::new(64, 8, 32, 16)));
+    assert_eq!(map.all(), Some(ColorTable::new(64, 8, 32, 16)));
 }
 
 #[test]
 fn result_all_ok() {
-    let mut map: ColorMap<Result<u8, u8>> = ColorMap::filled(Ok(4));
-    assert_eq!(map.clone().all_ok(), Ok(ColorMap::filled(4)));
+    let mut map: ColorTable<Result<u8, u8>> = ColorTable::filled(Ok(4));
+    assert_eq!(map.clone().all_ok(), Ok(ColorTable::filled(4)));
     map[Color::Red] = Err(22);
     map[Color::Yellow] = Err(100);
     assert_eq!(map.clone().all_ok(), Err(22));
@@ -96,6 +96,6 @@ fn result_all_ok() {
 
 #[test]
 fn transform() {
-    let all_two = ColorMap::filled(2);
-    assert_eq!(all_two.transform(|_, n| *n * 2), ColorMap::filled(4));
+    let all_two = ColorTable::filled(2);
+    assert_eq!(all_two.transform(|_, n| *n * 2), ColorTable::filled(4));
 }

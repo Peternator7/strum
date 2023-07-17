@@ -2,7 +2,7 @@ pub mod enum_count;
 pub mod enum_discriminants;
 pub mod enum_is;
 pub mod enum_iter;
-pub mod enum_map;
+pub mod enum_table;
 pub mod enum_messages;
 pub mod enum_properties;
 pub mod enum_variant_names;
