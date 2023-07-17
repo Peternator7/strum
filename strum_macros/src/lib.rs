@@ -409,6 +409,41 @@ pub fn enum_is(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
+/// Generated `try_as_*()` methods for all unnamed variants.
+/// E.g. `Message.try_as_write()`.
+///
+/// These methods will only be generated for unnamed variants, not for named or unit variants.
+///
+/// ```
+/// use strum_macros::EnumTryAs;
+///
+/// #[derive(EnumTryAs, Debug)]
+/// enum Message {
+///     Quit,
+///     Move { x: i32, y: i32 },
+///     Write(String),
+///     ChangeColor(i32, i32, i32),
+/// }
+///
+/// assert_eq!(
+///     Message::Write(String::from("Hello")).try_as_write(),
+///     Some(String::from("Hello"))
+/// );
+/// assert_eq!(
+///     Message::ChangeColor(1, 2, 3).try_as_change_color(),
+///     Some((1, 2, 3))
+/// );
+/// ```
+#[proc_macro_derive(EnumTryAs, attributes(strum))]
+pub fn enum_try_as(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks =
+        macros::enum_try_as::enum_try_as_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
 /// Add a function to enum that allows accessing variants by its discriminant
 ///
 /// This macro adds a standalone function to obtain an enum variant by its discriminant. The macro adds
