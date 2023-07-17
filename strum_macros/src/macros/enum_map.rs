@@ -64,7 +64,7 @@ pub fn enum_map_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         };
 
         let pascal_case = &variant.ident;
-        let snake_case = format_ident!("{}", snakify(&pascal_case.to_string()));
+        let snake_case = format_ident!("_{}", snakify(&pascal_case.to_string()));
 
         get_matches.push(quote! {#name::#pascal_case => &self.#snake_case,});
         get_matches_mut.push(quote! {#name::#pascal_case => &mut self.#snake_case,});

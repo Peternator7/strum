@@ -12,6 +12,8 @@ enum Color {
     Indigo,
 }
 
+// even though this isn't used, it needs to be a test
+// because if it doesn't compile, enum variants that conflict with keywords won't work
 #[derive(EnumMap)]
 enum Keyword {
     Const,
