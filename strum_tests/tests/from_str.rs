@@ -1,6 +1,8 @@
 use std::str::FromStr;
 use strum::EnumString;
 
+mod core {} // ensure macros call `::core`
+
 #[derive(Debug, Eq, PartialEq, EnumString)]
 enum Color {
     Red,

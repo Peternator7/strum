@@ -1,5 +1,7 @@
 use strum_macros::AsRefStr;
 
+mod core {} // ensure macros call `::core`
+
 #[derive(Debug, Eq, PartialEq, AsRefStr)]
 enum Color {
     #[strum(to_string = "RedRed")]

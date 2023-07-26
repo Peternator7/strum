@@ -1,6 +1,9 @@
 use enum_variant_type::EnumVariantType;
 use strum::{Display, EnumDiscriminants, EnumIter, EnumMessage, EnumString, IntoEnumIterator};
 
+
+mod core {} // ensure macros call `::core`
+
 #[allow(dead_code)]
 #[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
 #[strum_discriminants(derive(EnumIter))]

@@ -1,5 +1,7 @@
 use strum::EnumMessage;
 
+mod core {} // ensure macros call `::core`
+
 #[derive(Debug, Eq, PartialEq, EnumMessage)]
 enum Pets {
     // This comment is not collected since it starts with "//" instead of "///".

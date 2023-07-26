@@ -3,6 +3,8 @@ use std::str::FromStr;
 use std::string::ToString;
 use strum::{Display, EnumString, IntoStaticStr};
 
+mod core {} // ensure macros call `::core`
+
 #[derive(Debug, Eq, PartialEq, EnumString, Display, IntoStaticStr)]
 #[strum(serialize_all = "title_case")]
 enum Foo1 {
