@@ -1,5 +1,7 @@
 use strum::EnumProperty;
 
+mod core {} // ensure macros call `::core`
+
 #[derive(Debug, EnumProperty)]
 enum Test {
     #[strum(props(key = "value"))]

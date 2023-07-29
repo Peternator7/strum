@@ -1,3 +1,5 @@
+mod core {} // ensure macros call `::core`
+
 #[cfg(feature = "test_phf")]
 #[test]
 fn from_str_with_phf() {

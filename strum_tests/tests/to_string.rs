@@ -4,6 +4,8 @@ use std::str::FromStr;
 use std::string::ToString;
 use strum::{EnumString, ToString};
 
+mod core {} // ensure macros call `::core`
+
 #[derive(Debug, Eq, PartialEq, EnumString, ToString)]
 enum Color {
     #[strum(to_string = "RedRed")]

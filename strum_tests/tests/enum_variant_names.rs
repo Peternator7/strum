@@ -1,6 +1,8 @@
 use structopt::StructOpt;
 use strum::{EnumString, EnumVariantNames, VariantNames};
 
+mod core {} // ensure macros call `::core`
+
 #[test]
 fn simple() {
     #[allow(dead_code)]
