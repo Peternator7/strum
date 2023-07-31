@@ -409,10 +409,10 @@ pub fn enum_is(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-/// Generated `try_as_*()` methods for all unnamed variants.
+/// Generated `try_as_*()` methods for all tuple-style variants.
 /// E.g. `Message.try_as_write()`.
 ///
-/// These methods will only be generated for unnamed variants, not for named or unit variants.
+/// These methods will only be generated for tuple-style variants, not for named or unit variants.
 ///
 /// ```
 /// use strum_macros::EnumTryAs;

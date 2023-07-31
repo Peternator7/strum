@@ -8,6 +8,10 @@ enum Foo {
     #[strum(disabled)]
     #[allow(dead_code)]
     Disabled(u32),
+    #[allow(dead_code)]
+    Unit,
+    #[allow(dead_code)]
+    Named { _a: u32, _b: String },
 }
 
 #[test]

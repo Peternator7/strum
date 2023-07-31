@@ -37,7 +37,7 @@ pub fn enum_try_as_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     Some(quote! {
                         #[must_use]
                         #[inline]
-                        pub fn #move_fn_name(self) -> Option<(#(#types),*)> {
+                        pub fn #move_fn_name(self) -> ::core::option::Option<(#(#types),*)> {
                             match self {
                                 #enum_name::#variant_name (#(#field_names),*) => Some((#(#field_names),*)),
                                 _ => None
@@ -46,7 +46,7 @@ pub fn enum_try_as_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
                         #[must_use]
                         #[inline]
-                        pub const fn #ref_fn_name(&self) -> Option<(#(&#types),*)> {
+                        pub const fn #ref_fn_name(&self) -> ::core::option::Option<(#(&#types),*)> {
                             match self {
                                 #enum_name::#variant_name (#(#field_names),*) => Some((#(#field_names),*)),
                                 _ => None
@@ -55,7 +55,7 @@ pub fn enum_try_as_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
                         #[must_use]
                         #[inline]
-                        pub fn #mut_fn_name(&mut self) -> Option<(#(&mut #types),*)> {
+                        pub fn #mut_fn_name(&mut self) -> ::core::option::Option<(#(&mut #types),*)> {
                             match self {
                                 #enum_name::#variant_name (#(#field_names),*) => Some((#(#field_names),*)),
                                 _ => None
