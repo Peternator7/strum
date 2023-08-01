@@ -1,7 +1,9 @@
 use std::mem::{align_of, size_of};
 
 use enum_variant_type::EnumVariantType;
-use strum::{Display, EnumDiscriminants, EnumIter, EnumMessage, EnumString, IntoEnumIterator};
+use strum::{
+    Display, EnumDiscriminants, EnumIter, EnumMessage, EnumString, FromRepr, IntoEnumIterator,
+};
 
 mod core {} // ensure macros call `::core`
 
@@ -340,4 +342,24 @@ fn with_repr_align() {
         align_of::<WithReprAlignDiscriminants>()
     );
     assert_eq!(16, align_of::<WithReprAlignDiscriminants>());
+}
+
+#[allow(dead_code)]
+#[derive(EnumDiscriminants)]
+#[strum_discriminants(derive(FromRepr))]
+enum WithExplicitDicriminantValue {
+    Variant0 = 42 + 100,
+    Variant1 = 11,
+}
+
+#[test]
+fn with_explicit_discriminant_value() {
+    assert_eq!(
+        WithExplicitDicriminantValueDiscriminants::from_repr(11),
+        Some(WithExplicitDicriminantValueDiscriminants::Variant1)
+    );
+    assert_eq!(
+        142,
+        WithExplicitDicriminantValueDiscriminants::Variant0 as u8
+    );
 }

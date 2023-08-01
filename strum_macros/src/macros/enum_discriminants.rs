@@ -46,6 +46,10 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let mut discriminants = Vec::new();
     for variant in variants {
         let ident = &variant.ident;
+        let discriminant = variant
+            .discriminant
+            .as_ref()
+            .map(|(_, expr)| quote!( = #expr));
 
         // Don't copy across the "strum" meta attribute. Only passthrough the whitelisted
         // attributes and proxy `#[strum_discriminants(...)]` attributes
@@ -83,7 +87,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        discriminants.push(quote! { #(#attrs)* #ident });
+        discriminants.push(quote! { #(#attrs)* #ident #discriminant});
     }
 
     // Ideally:
