@@ -21,6 +21,7 @@ pub struct StrumTypeProperties {
     pub discriminant_others: Vec<TokenStream>,
     pub discriminant_vis: Option<Visibility>,
     pub use_phf: bool,
+    pub enum_repr: Option<TokenStream>,
 }
 
 impl HasTypeProperties for DeriveInput {
@@ -99,6 +100,17 @@ impl HasTypeProperties for DeriveInput {
                 }
                 EnumDiscriminantsMeta::Other { path, nested } => {
                     output.discriminant_others.push(quote! { #path(#nested) });
+                }
+            }
+        }
+
+        let attrs = &self.attrs;
+        for attr in attrs {
+            if let Ok(list) = attr.meta.require_list() {
+                if let Some(ident) = list.path.get_ident() {
+                    if ident == "repr" {
+                        output.enum_repr = Some(list.tokens.clone())
+                    }
                 }
             }
         }
