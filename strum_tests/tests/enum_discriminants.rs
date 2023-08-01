@@ -1,6 +1,7 @@
+use std::mem::{align_of, size_of};
+
 use enum_variant_type::EnumVariantType;
 use strum::{Display, EnumDiscriminants, EnumIter, EnumMessage, EnumString, IntoEnumIterator};
-
 
 mod core {} // ensure macros call `::core`
 
@@ -304,4 +305,39 @@ fn crate_module_path_test() {
     let expected = vec![SimpleDiscriminants::Variant0, SimpleDiscriminants::Variant1];
 
     assert_eq!(expected, discriminants);
+}
+
+#[allow(dead_code)]
+#[derive(EnumDiscriminants)]
+#[repr(u16)]
+enum WithReprUInt {
+    Variant0,
+    Variant1,
+}
+
+#[test]
+fn with_repr_uint() {
+    // These tests would not be proof of proper functioning on a 16 bit system
+    assert_eq!(size_of::<u16>(), size_of::<WithReprUIntDiscriminants>());
+    assert_eq!(
+        size_of::<WithReprUInt>(),
+        size_of::<WithReprUIntDiscriminants>()
+    )
+}
+
+#[allow(dead_code)]
+#[derive(EnumDiscriminants)]
+#[repr(align(16), u8)]
+enum WithReprAlign {
+    Variant0,
+    Variant1,
+}
+
+#[test]
+fn with_repr_align() {
+    assert_eq!(
+        align_of::<WithReprAlign>(),
+        align_of::<WithReprAlignDiscriminants>()
+    );
+    assert_eq!(16, align_of::<WithReprAlignDiscriminants>());
 }

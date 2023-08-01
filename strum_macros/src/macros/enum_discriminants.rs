@@ -40,6 +40,8 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     // Pass through all other attributes
     let pass_though_attributes = type_properties.discriminant_others;
 
+    let repr = type_properties.enum_repr.map(|repr| quote!(#[repr(#repr)]));
+
     // Add the variants without fields, but exclude the `strum` meta item
     let mut discriminants = Vec::new();
     for variant in variants {
@@ -153,6 +155,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     Ok(quote! {
         /// Auto-generated discriminant enum variants
         #derives
+        #repr
         #(#[ #pass_though_attributes ])*
         #discriminants_vis enum #discriminants_name {
             #(#discriminants),*
