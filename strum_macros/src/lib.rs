@@ -713,7 +713,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// of the generated enum. By default, the generated enum inherits the
 /// visibility of the parent enum it was generated from.
 ///
-/// ```nocompile
+/// ```
 /// use strum_macros::EnumDiscriminants;
 ///
 /// // You can set the visibility of the generated enum using the `#[strum_discriminants(vis(..))]` attribute:
