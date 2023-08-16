@@ -3,6 +3,8 @@
 use std::str::FromStr;
 use strum::{AsRefStr, AsStaticRef, AsStaticStr, EnumString, IntoStaticStr};
 
+mod core {} // ensure macros call `::core`
+
 #[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
 enum Color {
     #[strum(to_string = "RedRed")]

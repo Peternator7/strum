@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.25.2 (strum_macros)
+
+* [#289](https://github.com/Peternator7/strum/pull/289): Enables a previously disabled rustdoc.
+* [#287](https://github.com/Peternator7/strum/pull/287): Fixes a bug in EnumIter code gen so that we produce `::core` to
+  avoid issues with shadowing modules.
+
 ## 0.25.1 (strum_macros)
 
 * [#276](https://github.com/Peternator7/strum/pull/276). Fixes [#275](https://github.com/Peternator7/strum/issues/275) and 

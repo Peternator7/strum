@@ -1,5 +1,7 @@
 use strum::EnumIs;
 
+mod core {} // ensure macros call `::core`
+
 #[derive(EnumIs)]
 enum Foo {
     Unit,

@@ -1,5 +1,7 @@
 use strum::{EnumIter, IntoEnumIterator};
 
+mod core {} // ensure macros call `::core`
+
 #[derive(Debug, Eq, PartialEq, EnumIter)]
 enum Week {
     Sunday,
