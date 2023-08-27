@@ -122,15 +122,27 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         .collect::<Vec<_>>();
 
     let from_fn_body = quote! { match val { #(#arms),* } };
+    let discriminant_fn_body = quote! { match self { #(#arms),* } };
 
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
+
     let impl_from = quote! {
         impl #impl_generics ::core::convert::From< #name #ty_generics > for #discriminants_name #where_clause {
             fn from(val: #name #ty_generics) -> #discriminants_name {
                 #from_fn_body
             }
         }
+
     };
+
+    let impl_discriminant = quote! {
+        impl #impl_generics #name #ty_generics #where_clause {
+            pub fn discriminant(&self) -> #discriminants_name {
+                #discriminant_fn_body
+            }
+        }
+    };
+
     let impl_from_ref = {
         let mut generics = ast.generics.clone();
 
@@ -160,5 +172,6 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         #impl_from
         #impl_from_ref
+        #impl_discriminant
     })
 }

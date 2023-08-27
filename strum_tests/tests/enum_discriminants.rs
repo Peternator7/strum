@@ -186,6 +186,11 @@ fn from_ref_test() {
     assert_eq!(EnumIntoDiscriminants::B, (EnumInto::B(1)).into());
 }
 
+#[test]
+fn discriminant_fn_test() {
+    assert_eq!(EnumIntoDiscriminants::A, EnumInto::A(true).discriminant());
+}
+
 #[derive(Debug)]
 struct Rara;
 
@@ -305,3 +310,4 @@ fn crate_module_path_test() {
 
     assert_eq!(expected, discriminants);
 }
+
