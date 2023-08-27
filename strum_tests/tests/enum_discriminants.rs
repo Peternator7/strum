@@ -172,23 +172,28 @@ fn arbitrary_attributes_pass_through() {
 enum EnumInto {
     A(bool),
     B(i32),
+    C { a: i32 },
 }
 
 #[test]
 fn from_test() {
     assert_eq!(EnumIntoDiscriminants::A, EnumInto::A(true).into());
     assert_eq!(EnumIntoDiscriminants::B, EnumInto::B(1).into());
+    assert_eq!(EnumIntoDiscriminants::C, EnumInto::C { a: 1 }.into());
 }
 
 #[test]
 fn from_ref_test() {
     assert_eq!(EnumIntoDiscriminants::A, (EnumInto::A(true)).into());
     assert_eq!(EnumIntoDiscriminants::B, (EnumInto::B(1)).into());
+    assert_eq!(EnumIntoDiscriminants::C, (EnumInto::C { a: 1 }).into());
 }
 
 #[test]
 fn discriminant_fn_test() {
     assert_eq!(EnumIntoDiscriminants::A, EnumInto::A(true).discriminant());
+    assert_eq!(EnumIntoDiscriminants::B, EnumInto::B(1).discriminant());
+    assert_eq!(EnumIntoDiscriminants::C, EnumInto::C { a: 1 }.discriminant());
 }
 
 #[derive(Debug)]
