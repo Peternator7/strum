@@ -8,7 +8,7 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let vis = &ast.vis;
-    let mut doc_comment = format!("A map over the variants of `{name}`");
+    let mut doc_comment = format!("A map over the variants of `{}`", name);
 
     if gen.lifetimes().count() > 0 {
         return Err(syn::Error::new(
@@ -48,8 +48,10 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         // skip disabled variants
         if variant.get_variant_properties()?.disabled.is_some() {
             let disabled_ident = &variant.ident;
-            let panic_message =
-                format!("Can't use `{disabled_ident}` with `{table_name}` - variant is disabled for Strum features");
+            let panic_message = format!(
+                "Can't use `{}` with `{}` - variant is disabled for Strum features",
+                disabled_ident, table_name
+            );
             disabled_variants.push(disabled_ident);
             disabled_matches.push(quote!(#name::#disabled_ident => panic!(#panic_message),));
             continue;
@@ -86,20 +88,29 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     // if the index operation can panic, add that to the documentation
     if !disabled_variants.is_empty() {
         doc_comment.push_str(&format!(
-            "\n# Panics\nIndexing `{table_name}` with any of the following variants will cause a panic:"
+            "\n# Panics\nIndexing `{}` with any of the following variants will cause a panic:",
+            table_name
         ));
         for variant in disabled_variants {
-            doc_comment.push_str(&format!("\n\n- `{name}::{variant}`"));
+            doc_comment.push_str(&format!("\n\n- `{}::{}`", name, variant));
         }
     }
 
-    let doc_new = format!("Create a new {table_name} with a value for each variant of {name}");
-    let doc_closure =
-        format!("Create a new {table_name} by running a function on each variant of `{name}`");
-    let doc_transform = format!("Create a new `{table_name}` by running a function on each variant of `{name}` and the corresponding value in the current `{table_name}`");
-    let doc_filled = format!("Create a new `{table_name}` with the same value in each field.");
-    let doc_option_all = format!("Converts `{table_name}<Option<T>>` into `Option<{table_name}<T>>`. Returns `Some` if all fields are `Some`, otherwise returns `None`.");
-    let doc_result_all_ok = format!("Converts `{table_name}<Result<T, E>>` into `Result<{table_name}, E>`. Returns `Ok` if all fields are `Ok`, otherwise returns `Err`.");
+    let doc_new = format!(
+        "Create a new {} with a value for each variant of {}",
+        table_name, name
+    );
+    let doc_closure = format!(
+        "Create a new {} by running a function on each variant of `{}`",
+        table_name, name
+    );
+    let doc_transform = format!("Create a new `{}` by running a function on each variant of `{}` and the corresponding value in the current `{0}`", table_name, name);
+    let doc_filled = format!(
+        "Create a new `{}` with the same value in each field.",
+        table_name
+    );
+    let doc_option_all = format!("Converts `{}<Option<T>>` into `Option<{0}<T>>`. Returns `Some` if all fields are `Some`, otherwise returns `None`.", table_name);
+    let doc_result_all_ok = format!("Converts `{}<Result<T, E>>` into `Result<{0}<T>, E>`. Returns `Ok` if all fields are `Ok`, otherwise returns `Err`.", table_name);
 
     Ok(quote! {
         #[doc = #doc_comment]
