@@ -17,12 +17,12 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         ));
     }
 
-    let Data::Enum(data_enum) = &ast.data else {
-        return Err(non_enum_error())
+    let variants = match &ast.data {
+        Data::Enum(v) => &v.variants,
+        _ => return Err(non_enum_error()),
     };
-    let table_name = format_ident!("{}Table", name);
 
-    let variants = &data_enum.variants;
+    let table_name = format_ident!("{}Table", name);
 
     // the identifiers of each variant, in PascalCase
     let mut pascal_idents = Vec::new();
@@ -56,11 +56,11 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         // Error on variants with data
-        let Fields::Unit = &variant.fields else {
+        if variant.fields != Fields::Unit {
             return Err(syn::Error::new(
                 variant.fields.span(),
                 "`EnumTable` doesn't support enums with non-unit variants",
-            ))
+            ));
         };
 
         let pascal_case = &variant.ident;
@@ -146,7 +146,7 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         }
 
-        impl<T> core::ops::Index<#name> for #table_name<T> {
+        impl<T> ::core::ops::Index<#name> for #table_name<T> {
             type Output = T;
 
             fn index(&self, idx: #name) -> &T {
@@ -157,7 +157,7 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
-        impl<T> core::ops::IndexMut<#name> for #table_name<T> {
+        impl<T> ::core::ops::IndexMut<#name> for #table_name<T> {
             fn index_mut(&mut self, idx: #name) -> &mut T {
                 match idx {
                     #(#get_matches_mut)*
@@ -166,25 +166,25 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
-        impl<T> #table_name<Option<T>> {
+        impl<T> #table_name<::core::option::Option<T>> {
             #[doc = #doc_option_all]
-            #vis fn all(self) -> Option<#table_name<T>> {
+            #vis fn all(self) -> ::core::option::Option<#table_name<T>> {
                 if let #table_name {
-                    #(#snake_idents: Some(#snake_idents),)*
+                    #(#snake_idents: ::core::option::Option::Some(#snake_idents),)*
                 } = self {
-                    Some(#table_name {
+                    ::core::option::Option::Some(#table_name {
                         #(#snake_idents,)*
                     })
                 } else {
-                    None
+                    ::core::option::Option::None
                 }
             }
         }
 
-        impl<T, E> #table_name<Result<T, E>> {
+        impl<T, E> #table_name<::core::result::Result<T, E>> {
             #[doc = #doc_result_all_ok]
-            #vis fn all_ok(self) -> Result<#table_name<T>, E> {
-                Ok(#table_name {
+            #vis fn all_ok(self) -> ::core::result::Result<#table_name<T>, E> {
+                ::core::result::Result::Ok(#table_name {
                     #(#snake_idents: self.#snake_idents?,)*
                 })
             }
