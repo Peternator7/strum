@@ -1,6 +1,6 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use syn::{Data, DeriveInput, Fields};
+use syn::{punctuated::Punctuated, Data, DeriveInput, Fields, Token};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
@@ -29,7 +29,14 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let params = match variant.fields {
             Fields::Unit => quote! {},
             Fields::Unnamed(..) => quote! { (..) },
-            Fields::Named(..) => quote! { {..} },
+            Fields::Named(ref field_names) => {
+                let names: Punctuated<&Ident, Token!(,)> = field_names
+                    .named
+                    .iter()
+                    .map(|field| field.ident.as_ref().unwrap())
+                    .collect();
+                quote! { {#names} }
+            }
         };
 
         if variant_properties.to_string.is_none() && variant_properties.default.is_some() {
@@ -45,7 +52,14 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 }
             }
         } else {
-            arms.push(quote! { #name::#ident #params => f.pad(#output) });
+            let arm = match variant.fields {
+                Fields::Named(_) => quote! {
+                    #[allow(unused_variables)]
+                    #name::#ident #params => f.pad(&format!(#output))
+                },
+                _ => quote! { #name::#ident #params => f.pad(#output) },
+            };
+            arms.push(arm);
         }
     }
 
