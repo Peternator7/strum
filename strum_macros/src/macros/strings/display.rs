@@ -108,8 +108,8 @@ fn capture_format_string_idents(string_literal: &LitStr) -> syn::Result<Vec<Iden
     let mut new_var_start_index: Option<usize> = None;
     let mut var_used: Vec<Ident> = Vec::new();
 
-    for (i, chr) in format_str.chars().enumerate() {
-        if chr == '{' {
+    for (i, chr) in format_str.bytes().enumerate() {
+        if chr == b'{' {
             if new_var_start_index.is_some() {
                 return Err(syn::Error::new_spanned(
                     string_literal,
@@ -120,7 +120,7 @@ fn capture_format_string_idents(string_literal: &LitStr) -> syn::Result<Vec<Iden
             continue;
         }
 
-        if chr == '}' {
+        if chr == b'}' {
             let start_index = new_var_start_index.take().ok_or(syn::Error::new_spanned(
                 string_literal,
                 "Bracket closed without previous opened bracket",
