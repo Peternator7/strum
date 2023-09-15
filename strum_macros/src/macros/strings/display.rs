@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput, Fields};
+use syn::{Data, DeriveInput, Fields, LitStr};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
@@ -24,7 +24,10 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         // Look at all the serialize attributes.
-        let output = variant_properties.get_preferred_name(type_properties.case_style);
+        let mut output = variant_properties.get_preferred_name(type_properties.case_style);
+        if let Some(prefix) = &type_properties.prefix {
+            output = LitStr::new(&(prefix.value() + &output.value()), output.span());
+        }
 
         let params = match variant.fields {
             Fields::Unit => quote! {},
