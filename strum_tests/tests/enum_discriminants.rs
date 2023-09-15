@@ -1,7 +1,6 @@
 use enum_variant_type::EnumVariantType;
 use strum::{Display, EnumDiscriminants, EnumIter, EnumMessage, EnumString, IntoEnumIterator};
 
-
 mod core {} // ensure macros call `::core`
 
 #[allow(dead_code)]
