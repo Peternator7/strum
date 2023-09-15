@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{parse_quote, Data, DeriveInput, LitStr};
+use syn::{Data, DeriveInput, LitStr};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
@@ -22,12 +22,7 @@ pub fn enum_variant_names_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         .iter()
         .map(|v| {
             let props = v.get_variant_properties()?;
-            let preferred_name = props.get_preferred_name(type_properties.case_style);
-            if let Some(prefix) = &type_properties.prefix {
-                Ok(parse_quote!(#prefix, #preferred_name))
-            } else {
-                Ok(props.get_preferred_name(type_properties.case_style))
-            }
+            Ok(props.get_preferred_name(type_properties.case_style))
         })
         .collect::<syn::Result<Vec<LitStr>>>()?;
 
