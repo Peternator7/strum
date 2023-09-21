@@ -7,6 +7,7 @@ pub mod enum_properties;
 pub mod enum_try_as;
 pub mod enum_variant_names;
 pub mod from_repr;
+pub mod static_variants_array;
 
 mod strings;
 

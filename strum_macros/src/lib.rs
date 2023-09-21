@@ -194,6 +194,38 @@ pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     toks.into()
 }
 
+/// Adds a static array with all of the Enum's variants.
+/// 
+/// Implements `Strum::StaticVariantsArray` which adds an associated constant `ALL_VARIANTS`.
+/// This constant contains an array with all the variants of the enumerator.
+/// 
+/// This trait can only be autoderived if the enumerator is composed only of unit-type variants,
+/// meaning that the variants must not have any data.
+/// 
+/// ```
+/// use strum::StaticVariantsArray;
+/// use strum_macros::StaticVariantsArray;
+/// 
+/// #[derive(StaticVariantsArray, Debug, PartialEq, Eq)]
+/// enum Op {
+///     Add,
+///     Sub,
+///     Mul,
+///     Div,
+/// }
+/// 
+/// assert_eq!(Op::ALL_VARIANTS, &[Op::Add, Op::Sub, Op::Mul, Op::Div]);
+/// ```
+#[proc_macro_derive(StaticVariantsArray, attributes(strum))]
+pub fn static_variants_array(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks = macros::static_variants_array::static_variants_array_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
 #[proc_macro_derive(AsStaticStr, attributes(strum))]
 #[deprecated(
     since = "0.22.0",

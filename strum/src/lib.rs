@@ -211,6 +211,16 @@ pub trait VariantNames {
     const VARIANTS: &'static [&'static str];
 }
 
+/// A trait for retrieving a static array containing all the variants in an Enum.
+/// This trait can be autoderived by `strum_macros`. For derived usage, all the
+/// variants in the enumerator need to be unit-types, which means you can't autoderive
+/// enums with inner data in one or more variants. Consider using it alongside
+/// [`EnumDiscriminants`] if you require inner data but still want to have an
+/// static array of variants.
+pub trait StaticVariantsArray: std::marker::Sized + 'static {
+    const ALL_VARIANTS: &'static [Self];
+}
+
 #[cfg(feature = "derive")]
 pub use strum_macros::*;
 
@@ -241,5 +251,6 @@ DocumentMacroRexports! {
     EnumVariantNames,
     FromRepr,
     IntoStaticStr,
-    ToString
+    ToString,
+    StaticVariantsArray
 }
