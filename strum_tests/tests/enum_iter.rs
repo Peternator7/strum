@@ -211,3 +211,16 @@ fn crate_module_path_test() {
 
     assert_eq!(expected, results);
 }
+
+#[test]
+fn enum_iter_option() {
+    #[derive(Debug, Eq, PartialEq, EnumIter)]
+    enum Option {
+        BluePill,
+        RedPill,
+    }
+    let results = Option::iter().collect::<Vec<_>>();
+    let expected = vec![Option::BluePill, Option::RedPill];
+
+    assert_eq!(expected, results);
+}
