@@ -1,7 +1,8 @@
 use strum::{Display, EnumCount, EnumDiscriminants, EnumString};
+use strum_macros::EnumIs;
 
 #[allow(dead_code)]
-#[derive(Debug, Eq, PartialEq, EnumString, Display, EnumCount, EnumDiscriminants)]
+#[derive(Debug, Eq, PartialEq, EnumString, Display, EnumCount, EnumDiscriminants, EnumIs)]
 enum Color {
     /// Random Docs
     #[strum(to_string = "RedRed")]

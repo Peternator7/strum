@@ -10,7 +10,6 @@ pub fn enum_is_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     };
 
     let enum_name = &ast.ident;
-
     let variants: Vec<_> = variants
         .iter()
         .filter_map(|variant| {
@@ -20,10 +19,11 @@ pub fn enum_is_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             let variant_name = &variant.ident;
             let fn_name = format_ident!("is_{}", snakify(&variant_name.to_string()));
-
+            let doc_comment = format!("Returns [true] if the enum is [{}::{}] otherwise [false]", enum_name, variant_name);
             Some(quote! {
                 #[must_use]
                 #[inline]
+                #[doc = #doc_comment]
                 pub const fn #fn_name(&self) -> bool {
                     match self {
                         &#enum_name::#variant_name { .. } => true,
