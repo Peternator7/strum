@@ -79,7 +79,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 phf_exact_match_arms.push(quote! { #serialization => #name::#ident #params, });
 
                 if is_ascii_case_insensitive {
-                    // Store the lowercase and UPPERCASE variants in the phf map to capture 
+                    // Store the lowercase and UPPERCASE variants in the phf map to capture
                     let ser_string = serialization.value();
 
                     let lower =
@@ -113,6 +113,22 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
     };
+    let default_option = if default_kw.is_some() {
+        Some(&default)
+    } else {
+        None
+    };
+    let try_from_string = try_from_string(
+        name,
+        &impl_generics,
+        &ty_generics,
+        where_clause,
+        &strum_module_path,
+        &phf_exact_match_arms,
+        &standard_match_arms,
+        default_option,
+    );
+
     let standard_match_body = if standard_match_arms.is_empty() {
         default
     } else {
@@ -146,6 +162,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     Ok(quote! {
         #from_str
         #try_from_str
+        #try_from_string
     })
 }
 
@@ -174,6 +191,72 @@ fn try_from_str(
             type Error = #strum_module_path::ParseError;
             fn try_from(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<&str>>::Error> {
                 ::core::str::FromStr::from_str(s)
+            }
+        }
+    }
+}
+
+#[rustversion::before(1.34)]
+fn try_from_string(
+    _name: &proc_macro2::Ident,
+    _impl_generics: &syn::ImplGenerics,
+    _ty_generics: &syn::TypeGenerics,
+    _where_clause: Option<&syn::WhereClause>,
+    _strum_module_path: &syn::Path,
+    _phf_exact_match_arms: &[TokenStream],
+    _match_arms: &[TokenStream],
+    _default: Option<&TokenStream>,
+) -> TokenStream {
+    Default::default()
+}
+
+#[rustversion::since(1.34)]
+fn try_from_string(
+    name: &proc_macro2::Ident,
+    impl_generics: &syn::ImplGenerics,
+    ty_generics: &syn::TypeGenerics,
+    where_clause: Option<&syn::WhereClause>,
+    strum_module_path: &syn::Path,
+    phf_exact_match_arms: &[TokenStream],
+    standard_match_arms: &[TokenStream],
+    default: Option<&TokenStream>,
+) -> TokenStream {
+    if let Some(default) = default {
+        let phf_body = if phf_exact_match_arms.is_empty() {
+            quote!()
+        } else {
+            quote! {
+                use #strum_module_path::_private_phf_reexport_for_macro_if_phf_feature as phf;
+                static PHF: phf::Map<&'static str, #name> = phf::phf_map! {
+                    #(#phf_exact_match_arms)*
+                };
+                if let Some(value) = PHF.get(s.as_str()).cloned() {
+                    return ::core::result::Result::Ok(value);
+                }
+            }
+        };
+        quote! {
+        #[allow(clippy::use_self)]
+        impl #impl_generics ::core::convert::TryFrom<String> for #name #ty_generics #where_clause {
+            type Error = #strum_module_path::ParseError;
+            fn try_from(s: String) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<String>>::Error> {
+                #phf_body
+                ::core::result::Result::Ok(match s.as_str() {
+                    #(#standard_match_arms)*
+                    _ => return #default,
+                })
+            }
+        }
+        }
+    } else {
+        quote! {
+            #[inline(always)]
+            #[allow(clippy::use_self)]
+            impl #impl_generics ::core::convert::TryFrom<String> for #name #ty_generics #where_clause {
+                type Error = #strum_module_path::ParseError;
+                fn try_from(s: String) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<String>>::Error> {
+                    ::core::str::FromStr::from_str(s.as_str())
+                }
             }
         }
     }

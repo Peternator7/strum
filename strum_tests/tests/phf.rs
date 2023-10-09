@@ -13,7 +13,25 @@ fn from_str_with_phf() {
     assert_eq!("Red".parse::<Color>().unwrap(), Color::Red);
     assert_eq!("bLuE".parse::<Color>().unwrap(), Color::Blue);
 }
-
+#[cfg(feature = "test_phf")]
+#[test]
+fn from_str_with_phf_default() {
+    #[derive(Debug, PartialEq, Eq, Clone, strum::EnumString)]
+    #[strum(use_phf)]
+    enum Color {
+        #[strum(ascii_case_insensitive)]
+        Blue,
+        Red,
+        #[strum(default)]
+        Default(String),
+    }
+    assert_eq!("Red".parse::<Color>().unwrap(), Color::Red);
+    assert_eq!("bLuE".parse::<Color>().unwrap(), Color::Blue);
+    assert_eq!(
+        "Green".parse::<Color>().unwrap(),
+        Color::Default("Green".into())
+    );
+}
 #[cfg(feature = "test_phf")]
 #[test]
 fn from_str_with_phf_big() {
