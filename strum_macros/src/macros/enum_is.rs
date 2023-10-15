@@ -8,6 +8,7 @@ pub fn enum_is_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         Data::Enum(v) => &v.variants,
         _ => return Err(non_enum_error()),
     };
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
     let enum_name = &ast.ident;
     let variants: Vec<_> = variants
@@ -35,7 +36,7 @@ pub fn enum_is_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         .collect();
 
     Ok(quote! {
-        impl #enum_name {
+        impl #impl_generics #enum_name  #ty_generics #where_clause {
             #(#variants)*
         }
     }
