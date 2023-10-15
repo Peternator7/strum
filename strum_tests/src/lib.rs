@@ -1,6 +1,7 @@
 use strum::{Display, EnumCount, EnumDiscriminants, EnumString};
+use strum_macros::EnumIs;
 
-#[derive(Debug, Eq, PartialEq, EnumString, Display, EnumCount, EnumDiscriminants)]
+#[derive(Debug, Eq, PartialEq, EnumString, Display, EnumCount, EnumDiscriminants, EnumIs)]
 pub enum Color {
     /// Docs on red
     #[strum(to_string = "RedRed")]
