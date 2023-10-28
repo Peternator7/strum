@@ -49,8 +49,8 @@ fn to_red_string() {
 #[test]
 fn to_green_string() {
     assert_eq!(
-        String::from("lime"),
-        format!("{}", Color::Green("lime".into()))
+        String::from("  lime"),
+        format!("{:>6}", Color::Green("lime".into()))
     );
 }
 
@@ -105,7 +105,7 @@ enum NonStringDefault {
 #[test]
 fn non_string_default_to_string() {
     assert_eq!(
-        String::from("14"),
-        NonStringDefault::Number(14).to_string().as_ref()
+        String::from("0014"),
+        format!("{:04}", NonStringDefault::Number(14))
     );
 }
