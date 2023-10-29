@@ -159,6 +159,8 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
+        impl #impl_generics ::core::iter::FusedIterator for #iter_name #ty_generics #where_clause { }
+
         impl #impl_generics Clone for #iter_name #ty_generics #where_clause {
             fn clone(&self) -> #iter_name #ty_generics {
                 #iter_name {
