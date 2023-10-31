@@ -44,7 +44,7 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// variant. There is an option to match on different case conversions through the
 /// `#[strum(serialize_all = "snake_case")]` type attribute.
 ///
-/// See the [Additional Attributes](https://docs.rs/strum/0.22/strum/additional_attributes/index.html)
+/// See the [Additional Attributes](https://docs.rs/strum/latest/strum/additional_attributes/index.html)
 /// Section for more information on using this feature.
 ///
 /// If you have a large enum, you may want to consider using the `use_phf` attribute here. It leverages
