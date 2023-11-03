@@ -503,15 +503,11 @@ pub fn enum_try_as(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Three = 3,
 /// }
 ///
-/// # #[rustversion::since(1.46)]
+///
 /// const fn number_from_repr(d: u8) -> Option<Number> {
 ///     Number::from_repr(d)
 /// }
 ///
-/// # #[rustversion::before(1.46)]
-/// # fn number_from_repr(d: u8) -> Option<Number> {
-/// #     Number::from_repr(d)
-/// # }
 /// assert_eq!(None, number_from_repr(0));
 /// assert_eq!(Some(Number::One), number_from_repr(1));
 /// assert_eq!(None, number_from_repr(2));

@@ -45,7 +45,7 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 }
             }
         } else {
-            arms.push(quote! { #name::#ident #params => (#output).fmt(f) } );
+            arms.push(quote! { #name::#ident #params => (#output).fmt(f) });
         }
     }
 

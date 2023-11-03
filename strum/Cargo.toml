@@ -15,7 +15,7 @@ repository = "https://github.com/Peternator7/strum"
 readme = "../README.md"
 
 [dependencies]
-strum_macros = { path = "../strum_macros", optional = true, version = "0.25" }
+strum_macros = { path = "../strum_macros", default-features = false, optional = true, version = "0.25" }
 phf = { version = "0.10", features = ["macros"], optional = true }
 
 [dev-dependencies]
@@ -27,7 +27,7 @@ travis-ci = { repository = "Peternator7/strum" }
 [features]
 default = ["std"]
 derive = ["strum_macros"]
-std = []
+std = ["strum_macros/std"]
 
 [package.metadata.docs.rs]
 features = ["derive"]
