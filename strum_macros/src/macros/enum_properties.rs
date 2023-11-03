@@ -19,8 +19,6 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let ident = &variant.ident;
         let variant_properties = variant.get_variant_properties()?;
         let mut string_arms = Vec::new();
-        let mut bool_arms = Vec::new();
-        let mut num_arms = Vec::new();
         // But you can disable the messages.
         if variant_properties.disabled.is_some() {
             continue;
@@ -37,8 +35,6 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         string_arms.push(quote! { _ => ::core::option::Option::None });
-        bool_arms.push(quote! { _ => ::core::option::Option::None });
-        num_arms.push(quote! { _ => ::core::option::Option::None });
 
         arms.push(quote! {
             &#name::#ident #params => {

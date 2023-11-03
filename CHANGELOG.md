@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.25.3 (strum_macros)
+
+Received a number of bug fix PR's.
+
+* [#300](https://github.com/Peternator7/strum/pull/300): Fixes EnumIter for enums named `Option`.
+* [#301](https://github.com/Peternator7/strum/pull/301): Improved doc comments
+* [#304](https://github.com/Peternator7/strum/pull/304): Removed some unused Vec's
+* [#305](https://github.com/Peternator7/strum/pull/305): Added generic support to `EnumIs`
+
 ## 0.25.2 (strum_macros)
 
 * [#289](https://github.com/Peternator7/strum/pull/289): Enables a previously disabled rustdoc.
