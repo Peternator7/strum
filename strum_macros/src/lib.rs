@@ -890,3 +890,14 @@ pub fn enum_count(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     debug_print_generated(&ast, &toks);
     toks.into()
 }
+
+/// TODO: Doc this
+#[proc_macro_derive(EnumDeref, attributes(strum, strum_deref_target))]
+pub fn enum_deref(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks = macros::enum_deref::enum_deref_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}

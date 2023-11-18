@@ -206,6 +206,11 @@ pub trait EnumCount {
     const COUNT: usize;
 }
 
+/// TODO: Doc this
+pub trait EnumDeref: std::ops::Deref + std::ops::DerefMut {}
+
+impl<T: std::ops::Deref + std::ops::DerefMut> EnumDeref for T {}
+
 /// A trait for retrieving the names of each variant in Enum. This trait can
 /// be autoderived by `strum_macros`.
 pub trait VariantNames {

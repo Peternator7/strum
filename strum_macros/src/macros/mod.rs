@@ -1,4 +1,5 @@
 pub mod enum_count;
+pub mod enum_deref;
 pub mod enum_discriminants;
 pub mod enum_is;
 pub mod enum_iter;

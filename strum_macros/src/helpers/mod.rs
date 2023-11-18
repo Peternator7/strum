@@ -25,6 +25,22 @@ pub fn non_unit_variant_error() -> syn::Error {
     )
 }
 
+pub fn non_new_type_variant_error(additional_info: &str) -> syn::Error {
+    syn::Error::new(
+        Span::call_site(),
+        format!(
+            "This macro only supports enums of strictly new type variants, but {additional_info}"
+        ),
+    )
+}
+
+pub fn no_associated_deref_type_specified() -> syn::Error {
+    syn::Error::new(
+        Span::call_site(),
+        "expected a deref target specified via attribute, e.g. #[strum_deref(T)]",
+    )
+}
+
 pub fn strum_discriminants_passthrough_error(span: &impl Spanned) -> syn::Error {
     syn::Error::new(
         span.span(),
