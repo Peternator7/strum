@@ -123,3 +123,34 @@ fn traits() {
     assert_eq!(person.distance_walked(), 1500_f32);
     assert_eq!(ant.distance_walked(), 0.125_f32);
 }
+
+#[test]
+fn stack_and_heap() {
+    #[derive(EnumDeref)]
+    #[strum_deref_target(i32)]
+    enum Storage {
+        Stack(i32),
+        Heap(Box<i32>),
+    }
+
+    let mut stack = Storage::Stack(5);
+    let mut heap = Storage::Heap(Box::new(3));
+
+    {
+        // Assert that the compiler accepts the derefs
+        let _: &i32 = &stack;
+        let _: &i32 = &heap;
+
+        let _: &mut i32 = &mut stack;
+        let _: &mut i32 = &mut heap;
+    }
+
+    assert_eq!(*stack, 5);
+    assert_eq!(*heap, 3);
+
+    *stack += 10;
+    *heap *= 2;
+
+    assert_eq!(*stack, 15);
+    assert_eq!(*heap, 6);
+}
