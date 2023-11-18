@@ -204,7 +204,6 @@ pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// 
 /// ```
 /// use strum::StaticVariantsArray;
-/// use strum_macros::StaticVariantsArray;
 /// 
 /// #[derive(StaticVariantsArray, Debug, PartialEq, Eq)]
 /// enum Op {
@@ -722,7 +721,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// // Bring trait into scope
 /// use std::str::FromStr;
 /// use strum::{IntoEnumIterator, EnumMessage};
-/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString, EnumMessage};
+/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString};
 ///
 /// #[derive(Debug)]
 /// struct NonDefault;
