@@ -905,7 +905,6 @@ pub fn enum_count(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// 
 /// ```
 /// use strum::EnumDeref;
-/// use strum_macros::EnumDeref;
 /// 
 /// #[derive(EnumDeref)]
 /// #[strum_deref_target([u32])]
@@ -933,7 +932,6 @@ pub fn enum_count(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// ```
 /// use strum::EnumDeref;
-/// use strum_macros::EnumDeref;
 /// 
 /// #[derive(EnumDeref)]
 /// #[strum_deref_target(dyn core::fmt::Display)]
