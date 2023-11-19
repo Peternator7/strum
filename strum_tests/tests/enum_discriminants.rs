@@ -211,7 +211,6 @@ fn from_ref_test_complex() {
 }
 
 #[allow(dead_code)]
-#[rustversion::since(1.34)]
 #[derive(Debug, Eq, PartialEq, EnumDiscriminants, EnumVariantType)]
 #[strum_discriminants(
     name(VariantFilterAttrDiscs),
@@ -225,8 +224,7 @@ enum VariantFilterAttr {
     BrightWhite(i32),
 }
 
-#[rustversion::attr(since(1.34), test)]
-#[rustversion::since(1.34)]
+#[test]
 fn filter_variant_attributes_pass_through() {
     use std::str::FromStr;
 
@@ -245,7 +243,6 @@ fn filter_variant_attributes_pass_through() {
 }
 
 #[test]
-#[rustversion::since(1.34)]
 fn override_visibility() {
     mod private {
         use super::*;
@@ -253,27 +250,6 @@ fn override_visibility() {
         #[allow(dead_code)]
         #[derive(EnumDiscriminants)]
         #[strum_discriminants(name(PubDiscriminants), vis(pub))]
-        enum PrivateEnum {
-            VariantA(bool),
-            VariantB(bool),
-        }
-    }
-
-    assert_ne!(
-        private::PubDiscriminants::VariantA,
-        private::PubDiscriminants::VariantB,
-    );
-}
-
-#[test]
-#[rustversion::before(1.34)]
-fn override_visibility() {
-    mod private {
-        use super::*;
-
-        #[allow(dead_code)]
-        #[derive(EnumDiscriminants)]
-        #[strum_discriminants(name(PubDiscriminants), vis(r#pub))]
         enum PrivateEnum {
             VariantA(bool),
             VariantB(bool),

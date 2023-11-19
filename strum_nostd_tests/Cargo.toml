@@ -6,7 +6,5 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-strum = { path = "../strum", features = ["derive"], default-features = false }
-
-[dev-dependencies]
-rustversion = "1.0"
+strum = { path = "../strum", default-features = false }
+strum_macros = { path = "../strum_macros", default-features = false }
