@@ -48,6 +48,7 @@ Strum has implemented the following macros:
 | [EnumDiscriminants] | Generate a new type with only the discriminant names. |
 | [EnumCount] | Add a constant `usize` equal to the number of variants. |
 | [StaticVariantsArray] | Adds an associated `ALL_VARIANTS` constant which is an array of all enum discriminants |
+| [EnumDeref] | Implements `Deref` and `DeretMut` for a new-type enum based on a common `Target` |
 
 # Contributing
 
@@ -83,3 +84,4 @@ Strumming is also a very whimsical motion, much like writing Rust code.
 [EnumCount]: https://docs.rs/strum_macros/0.25/strum_macros/derive.EnumCount.html
 [FromRepr]: https://docs.rs/strum_macros/0.25/strum_macros/derive.FromRepr.html
 [StaticVariantsArray]: https://docs.rs/strum_macros/0.25/strum_macros/derive.StaticVariantsArray.html
+[EnumDeref]: https://docs.rs/strum_macros/0.25/strum_macros/derive.EnumDeref.html
