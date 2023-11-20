@@ -2,9 +2,7 @@ use proc_macro2::{Ident, TokenStream};
 use quote::quote;
 use syn::{Data, DeriveInput, Fields, FieldsUnnamed, Meta};
 
-use crate::helpers::{
-    no_associated_deref_type_specified, non_enum_error, non_new_type_variant_error,
-};
+use crate::helpers::{get_new_type_variant, no_associated_deref_type_specified, non_enum_error};
 
 pub fn enum_deref_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -31,22 +29,7 @@ pub fn enum_deref_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let idents: Vec<Ident> = variants
         .iter()
-        .cloned()
-        .map(|v| match &v.fields {
-            Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
-                if unnamed.len() != 1 {
-                    Err(non_new_type_variant_error(
-                        "the list of type parameters is different from 1",
-                    ))
-                } else {
-                    Ok(v.ident.clone())
-                }
-            }
-            _ => Err(non_new_type_variant_error(&format!(
-                "the variant {} is not a tuple-struct",
-                v.ident
-            ))),
-        })
+        .map(|variant| get_new_type_variant(variant).map(|(variant_ident, _)| variant_ident))
         .collect::<syn::Result<_>>()?;
 
     Ok(quote! {

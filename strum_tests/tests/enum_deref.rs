@@ -125,7 +125,7 @@ fn traits() {
 }
 
 #[test]
-fn stack_and_heap() {
+fn multi_level_deref() {
     #[derive(EnumDeref)]
     #[strum_deref_target(i32)]
     enum Storage {
