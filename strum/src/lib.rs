@@ -30,6 +30,8 @@
 // only for documentation purposes
 pub mod additional_attributes;
 
+use core::iter::FusedIterator;
+
 #[cfg(feature = "phf")]
 #[doc(hidden)]
 pub use phf as _private_phf_reexport_for_macro_if_phf_feature;
@@ -96,7 +98,7 @@ impl std::error::Error for ParseError {
 /// generic_iterator::<Color, _>(|color| println!("{:?}", color));
 /// ```
 pub trait IntoEnumIterator: Sized {
-    type Iterator: Iterator<Item = Self>;
+    type Iterator: Iterator<Item = Self> + Clone + DoubleEndedIterator + ExactSizeIterator + FusedIterator;
 
     fn iter() -> Self::Iterator;
 }

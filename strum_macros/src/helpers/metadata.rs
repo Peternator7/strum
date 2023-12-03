@@ -1,12 +1,5 @@
 use proc_macro2::TokenStream;
-use syn::{
-    parenthesized,
-    parse::{Parse, ParseStream},
-    parse2, parse_str,
-    punctuated::Punctuated,
-    Attribute, DeriveInput, Expr, ExprLit, Ident, Lit, LitBool, LitStr, Meta, MetaNameValue, Path,
-    Token, Variant, Visibility,
-};
+use syn::{parenthesized, parse::{Parse, ParseStream}, parse2, parse_str, punctuated::Punctuated, Attribute, DeriveInput, Expr, ExprLit, Ident, Lit, LitBool, LitStr, Meta, MetaNameValue, Path, Token, Variant, Visibility, MetaList};
 
 use super::case_style::CaseStyle;
 
@@ -22,6 +15,7 @@ pub mod kw {
     custom_keyword!(derive);
     custom_keyword!(name);
     custom_keyword!(vis);
+    custom_keyword!(attributes);
 
     // variant metadata
     custom_keyword!(message);
@@ -79,6 +73,7 @@ pub enum EnumDiscriminantsMeta {
     Derive { kw: kw::derive, paths: Vec<Path> },
     Name { kw: kw::name, name: Ident },
     Vis { kw: kw::vis, vis: Visibility },
+    Attributes { kw: kw::attributes, attributes: Vec<MetaList> },
     Other { path: Path, nested: TokenStream },
 }
 
@@ -105,6 +100,15 @@ impl Parse for EnumDiscriminantsMeta {
             parenthesized!(content in input);
             let vis = content.parse()?;
             Ok(EnumDiscriminantsMeta::Vis { kw, vis })
+        } else if input.peek(kw::attributes) {
+            let kw = input.parse()?;
+            let content;
+            parenthesized!(content in input);
+            let attributes = content.parse_terminated(MetaList::parse, Token![,])?;
+            Ok(EnumDiscriminantsMeta::Attributes {
+                kw,
+                attributes: attributes.into_iter().collect(),
+            })
         } else {
             let path = input.parse()?;
             let content;
