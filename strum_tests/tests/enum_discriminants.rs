@@ -1,6 +1,9 @@
-use enum_variant_type::EnumVariantType;
-use strum::{Display, EnumDiscriminants, EnumIter, EnumMessage, EnumString, IntoEnumIterator};
+use std::mem::{align_of, size_of};
 
+use enum_variant_type::EnumVariantType;
+use strum::{
+    Display, EnumDiscriminants, EnumIter, EnumMessage, EnumString, FromRepr, IntoEnumIterator,
+};
 
 mod core {} // ensure macros call `::core`
 
@@ -304,4 +307,59 @@ fn crate_module_path_test() {
     let expected = vec![SimpleDiscriminants::Variant0, SimpleDiscriminants::Variant1];
 
     assert_eq!(expected, discriminants);
+}
+
+#[allow(dead_code)]
+#[derive(EnumDiscriminants)]
+#[repr(u16)]
+enum WithReprUInt {
+    Variant0,
+    Variant1,
+}
+
+#[test]
+fn with_repr_uint() {
+    // These tests would not be proof of proper functioning on a 16 bit system
+    assert_eq!(size_of::<u16>(), size_of::<WithReprUIntDiscriminants>());
+    assert_eq!(
+        size_of::<WithReprUInt>(),
+        size_of::<WithReprUIntDiscriminants>()
+    )
+}
+
+#[allow(dead_code)]
+#[derive(EnumDiscriminants)]
+#[repr(align(16), u8)]
+enum WithReprAlign {
+    Variant0,
+    Variant1,
+}
+
+#[test]
+fn with_repr_align() {
+    assert_eq!(
+        align_of::<WithReprAlign>(),
+        align_of::<WithReprAlignDiscriminants>()
+    );
+    assert_eq!(16, align_of::<WithReprAlignDiscriminants>());
+}
+
+#[allow(dead_code)]
+#[derive(EnumDiscriminants)]
+#[strum_discriminants(derive(FromRepr))]
+enum WithExplicitDicriminantValue {
+    Variant0 = 42 + 100,
+    Variant1 = 11,
+}
+
+#[test]
+fn with_explicit_discriminant_value() {
+    assert_eq!(
+        WithExplicitDicriminantValueDiscriminants::from_repr(11),
+        Some(WithExplicitDicriminantValueDiscriminants::Variant1)
+    );
+    assert_eq!(
+        142,
+        WithExplicitDicriminantValueDiscriminants::Variant0 as u8
+    );
 }
