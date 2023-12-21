@@ -1,6 +1,6 @@
 use proc_macro2::{Span, TokenStream, TokenTree};
 use quote::{quote, ToTokens};
-use syn::{MetaList, parse_quote};
+use syn::{parse_quote, MetaList};
 use syn::{Data, DeriveInput, Fields};
 
 use crate::helpers::{non_enum_error, strum_discriminants_passthrough_error, HasTypeProperties};

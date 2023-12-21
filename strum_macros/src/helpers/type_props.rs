@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 use std::default::Default;
-use syn::{parse_quote, DeriveInput, Ident, Path, Visibility, MetaList};
+use syn::{parse_quote, DeriveInput, Ident, MetaList, Path, Visibility};
 
 use super::case_style::CaseStyle;
 use super::metadata::{DeriveInputExt, EnumDiscriminantsMeta, EnumMeta};

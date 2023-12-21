@@ -1,5 +1,12 @@
 use proc_macro2::TokenStream;
-use syn::{parenthesized, parse::{Parse, ParseStream}, parse2, parse_str, punctuated::Punctuated, Attribute, DeriveInput, Expr, ExprLit, Ident, Lit, LitBool, LitStr, Meta, MetaNameValue, Path, Token, Variant, Visibility, MetaList};
+use syn::{
+    parenthesized,
+    parse::{Parse, ParseStream},
+    parse2, parse_str,
+    punctuated::Punctuated,
+    Attribute, DeriveInput, Expr, ExprLit, Ident, Lit, LitBool, LitStr, Meta, MetaList,
+    MetaNameValue, Path, Token, Variant, Visibility,
+};
 
 use super::case_style::CaseStyle;
 
@@ -70,11 +77,26 @@ impl Parse for EnumMeta {
 }
 
 pub enum EnumDiscriminantsMeta {
-    Derive { kw: kw::derive, paths: Vec<Path> },
-    Name { kw: kw::name, name: Ident },
-    Vis { kw: kw::vis, vis: Visibility },
-    Attributes { kw: kw::attributes, attributes: Vec<MetaList> },
-    Other { path: Path, nested: TokenStream },
+    Derive {
+        kw: kw::derive,
+        paths: Vec<Path>,
+    },
+    Name {
+        kw: kw::name,
+        name: Ident,
+    },
+    Vis {
+        kw: kw::vis,
+        vis: Visibility,
+    },
+    Attributes {
+        kw: kw::attributes,
+        attributes: Vec<MetaList>,
+    },
+    Other {
+        path: Path,
+        nested: TokenStream,
+    },
 }
 
 impl Parse for EnumDiscriminantsMeta {

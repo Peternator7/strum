@@ -28,6 +28,7 @@ struct NonDefault;
 
 #[allow(dead_code)]
 #[derive(Debug, EnumDiscriminants)]
+#[strum_discriminants(attributes(allow(non_camel_case_types), doc()))]
 #[strum_discriminants(derive(EnumIter))]
 enum WithFields {
     Variant0(NonDefault),
@@ -290,6 +291,7 @@ fn override_visibility() {
 fn crate_module_path_test() {
     pub mod nested {
         pub mod module {
+            #[allow(unused_imports)]
             pub use strum;
         }
     }

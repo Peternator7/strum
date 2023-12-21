@@ -98,7 +98,11 @@ impl std::error::Error for ParseError {
 /// generic_iterator::<Color, _>(|color| println!("{:?}", color));
 /// ```
 pub trait IntoEnumIterator: Sized {
-    type Iterator: Iterator<Item = Self> + Clone + DoubleEndedIterator + ExactSizeIterator + FusedIterator;
+    type Iterator: Iterator<Item = Self>
+        + Clone
+        + DoubleEndedIterator
+        + ExactSizeIterator
+        + FusedIterator;
 
     fn iter() -> Self::Iterator;
 }

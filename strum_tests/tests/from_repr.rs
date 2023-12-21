@@ -44,6 +44,7 @@ fn const_test() {
 fn crate_module_path_test() {
     pub mod nested {
         pub mod module {
+            #[allow(unused_imports)]
             pub use strum;
         }
     }

@@ -11,7 +11,10 @@ enum Foo {
     #[allow(dead_code)]
     Unit,
     #[allow(dead_code)]
-    Named { _a: u32, _b: String },
+    Named {
+        _a: u32,
+        _b: String,
+    },
 }
 
 #[test]
