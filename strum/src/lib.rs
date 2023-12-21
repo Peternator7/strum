@@ -103,7 +103,6 @@ pub trait IntoEnumIterator: Sized {
         + DoubleEndedIterator
         + ExactSizeIterator
         + FusedIterator;
-
     fn iter() -> Self::Iterator;
 }
 
