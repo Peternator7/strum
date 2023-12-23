@@ -79,7 +79,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 phf_exact_match_arms.push(quote! { #serialization => #name::#ident #params, });
 
                 if is_ascii_case_insensitive {
-                    // Store the lowercase and UPPERCASE variants in the phf map to capture 
+                    // Store the lowercase and UPPERCASE variants in the phf map to capture
                     let ser_string = serialization.value();
 
                     let lower =
