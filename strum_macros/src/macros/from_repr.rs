@@ -1,4 +1,3 @@
-use heck::ToShoutySnakeCase;
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
 use syn::{Data, DeriveInput, Fields, Type};
@@ -73,7 +72,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
 
-        let const_var_str = format!("{}_DISCRIMINANT", variant.ident).to_shouty_snake_case();
+        let const_var_str = format!("{}_DISCRIMINANT", variant.ident);
         let const_var_ident = format_ident!("{}", const_var_str);
 
         let const_val_expr = match &variant.discriminant {
