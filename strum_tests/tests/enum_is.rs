@@ -1,7 +1,12 @@
+use std::borrow::Cow;
 use strum::EnumIs;
 
 mod core {} // ensure macros call `::core`
-
+#[derive(EnumIs)]
+enum LifeTimeTest<'a>{
+    One(Cow<'a, str>),
+    Two(&'a str)
+}
 #[derive(EnumIs)]
 enum Foo {
     Unit,
@@ -21,7 +26,15 @@ enum Foo {
     #[allow(dead_code)]
     Disabled,
 }
-
+#[test]
+fn generics_test(){
+    let foo = LifeTimeTest::One(Cow::Borrowed("Hello"));
+    assert!(foo.is_one());
+    let foo = LifeTimeTest::Two("Hello");
+    assert!(foo.is_two());
+    let foo = LifeTimeTest::One(Cow::Owned("Hello".to_string()));
+    assert!(foo.is_one());
+}
 #[test]
 fn simple_test() {
     assert!(Foo::Unit.is_unit());
