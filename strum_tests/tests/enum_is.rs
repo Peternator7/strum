@@ -11,8 +11,13 @@ enum LifeTimeTest<'a>{
 enum Foo {
     Unit,
     Named0 {},
-    Named1 { _a: char },
-    Named2 { _a: u32, _b: String },
+    Named1 {
+        _a: char,
+    },
+    Named2 {
+        _a: u32,
+        _b: String,
+    },
     Unnamed0(),
     Unnamed1(Option<u128>),
     Unnamed2(bool, u8),

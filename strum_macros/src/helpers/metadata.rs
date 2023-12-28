@@ -17,6 +17,7 @@ pub mod kw {
     // enum metadata
     custom_keyword!(serialize_all);
     custom_keyword!(use_phf);
+    custom_keyword!(prefix);
 
     // enum discriminant metadata
     custom_keyword!(derive);
@@ -45,6 +46,10 @@ pub enum EnumMeta {
         crate_module_path: Path,
     },
     UsePhf(kw::use_phf),
+    Prefix {
+        kw: kw::prefix,
+        prefix: LitStr,
+    },
 }
 
 impl Parse for EnumMeta {
@@ -69,6 +74,11 @@ impl Parse for EnumMeta {
             Ok(EnumMeta::AsciiCaseInsensitive(input.parse()?))
         } else if lookahead.peek(kw::use_phf) {
             Ok(EnumMeta::UsePhf(input.parse()?))
+        } else if lookahead.peek(kw::prefix) {
+            let kw = input.parse::<kw::prefix>()?;
+            input.parse::<Token![=]>()?;
+            let prefix = input.parse()?;
+            Ok(EnumMeta::Prefix { kw, prefix })
         } else {
             Err(lookahead.error())
         }
