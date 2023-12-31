@@ -10,11 +10,9 @@ test_phf = ["strum/phf"]
 
 [dependencies]
 strum = { path = "../strum", features = ["derive"] }
-strum_macros = { path = "../strum_macros", features = [] }
+strum_macros = { path = "../strum_macros", features = ["std"] }
 clap = "=2.33.0"
 enum_variant_type = "=0.2.0"
 structopt = "0.2.18"
 bitflags = "=1.2"
 
-[dev-dependencies]
-rustversion = "1.0"

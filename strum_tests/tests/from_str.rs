@@ -19,7 +19,6 @@ enum Color {
     Black,
 }
 
-#[rustversion::since(1.34)]
 fn assert_from_str<'a, T>(a: T, from: &'a str)
 where
     T: PartialEq + std::str::FromStr + std::convert::TryFrom<&'a str> + std::fmt::Debug,
@@ -28,15 +27,6 @@ where
 {
     assert_eq!(a, T::from_str(from).unwrap());
     assert_eq!(a, std::convert::TryFrom::try_from(from).unwrap());
-}
-
-#[rustversion::before(1.34)]
-fn assert_from_str<T>(a: T, from: &str)
-where
-    T: PartialEq + std::str::FromStr + std::fmt::Debug,
-    <T as std::str::FromStr>::Err: std::fmt::Debug,
-{
-    assert_eq!(a, T::from_str(from).unwrap());
 }
 
 #[test]
@@ -162,7 +152,6 @@ fn case_insensitive_enum_no_case_insensitive() {
     assert!(CaseInsensitiveEnum::from_str("nocaseinsensitive").is_err());
 }
 
-#[rustversion::since(1.34)]
 #[test]
 fn case_insensitive_enum_no_case_insensitive_try_from() {
     assert_from_str(CaseInsensitiveEnum::NoCaseInsensitive, "NoCaseInsensitive");

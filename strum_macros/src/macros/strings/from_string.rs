@@ -113,6 +113,69 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
     };
+
+    let try_from_body = |ty: TokenStream,
+                         standard_match_body: &TokenStream,
+                         phf_body: &TokenStream| {
+        quote! {
+                #[allow(clippy::use_self)]
+                impl #impl_generics ::core::convert::TryFrom<#ty> for #name #ty_generics #where_clause {
+                    type Error = #strum_module_path::ParseError;
+                    fn try_from(s: #ty) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<#ty>>::Error> {
+                        #phf_body
+                        #standard_match_body
+                }
+            }
+        }
+    };
+    #[cfg(feature = "std")]
+    let try_from_string = {
+        // Takes the match body and the phf body and returns
+
+        // If it has a default build the match body and phf body
+        // Else just pass to FromStr
+        if default_kw.is_some() {
+            if standard_match_arms.is_empty() {
+                try_from_body(quote! {::std::string::String}, &default, &quote!())
+            } else {
+                let standard_match_body = quote! {
+                    ::core::result::Result::Ok(match s.as_str() {
+                        #(#standard_match_arms)*
+                        _ => return #default,
+                    })
+                };
+                let phf_body = if phf_exact_match_arms.is_empty() {
+                    quote!()
+                } else {
+                    quote! {
+                        use #strum_module_path::_private_phf_reexport_for_macro_if_phf_feature as phf;
+                        static PHF: phf::Map<&'static str, #name> = phf::phf_map! {
+                            #(#phf_exact_match_arms)*
+                        };
+                        if let Some(value) = PHF.get(s.as_str()).cloned() {
+                            return ::core::result::Result::Ok(value);
+                        }
+                    }
+                };
+                try_from_body(
+                    quote! {::std::string::String},
+                    &standard_match_body,
+                    &phf_body,
+                )
+            }
+        } else {
+            try_from_body(
+                quote! {::std::string::String},
+                &quote! {
+                    ::core::str::FromStr::from_str(s.as_str())
+                },
+                &quote!(),
+            )
+        }
+    };
+    #[cfg(not(feature = "std"))]
+    let try_from_string = quote! {};
+
     let standard_match_body = if standard_match_arms.is_empty() {
         default
     } else {
@@ -123,58 +186,20 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             })
         }
     };
-
+    let try_from_str = try_from_body(quote! {&str}, &standard_match_body, &phf_body);
     let from_str = quote! {
         #[allow(clippy::use_self)]
         impl #impl_generics ::core::str::FromStr for #name #ty_generics #where_clause {
             type Err = #strum_module_path::ParseError;
             fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
-                #phf_body
-                #standard_match_body
+                ::core::convert::TryFrom::try_from(s)
             }
         }
     };
 
-    let try_from_str = try_from_str(
-        name,
-        &impl_generics,
-        &ty_generics,
-        where_clause,
-        &strum_module_path,
-    );
-
     Ok(quote! {
-        #from_str
         #try_from_str
+        #from_str
+        #try_from_string
     })
-}
-
-#[rustversion::before(1.34)]
-fn try_from_str(
-    _name: &proc_macro2::Ident,
-    _impl_generics: &syn::ImplGenerics,
-    _ty_generics: &syn::TypeGenerics,
-    _where_clause: Option<&syn::WhereClause>,
-    _strum_module_path: &syn::Path,
-) -> TokenStream {
-    Default::default()
-}
-
-#[rustversion::since(1.34)]
-fn try_from_str(
-    name: &proc_macro2::Ident,
-    impl_generics: &syn::ImplGenerics,
-    ty_generics: &syn::TypeGenerics,
-    where_clause: Option<&syn::WhereClause>,
-    strum_module_path: &syn::Path,
-) -> TokenStream {
-    quote! {
-        #[allow(clippy::use_self)]
-        impl #impl_generics ::core::convert::TryFrom<&str> for #name #ty_generics #where_clause {
-            type Error = #strum_module_path::ParseError;
-            fn try_from(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<&str>>::Error> {
-                ::core::str::FromStr::from_str(s)
-            }
-        }
-    }
 }

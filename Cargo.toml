@@ -1,8 +1,3 @@
 [workspace]
-members = [
-    "strum",
-    "strum_macros",
-    "strum_tests",
-    "strum_nostd_tests"
-]
- 
+members = ["strum", "strum_macros", "strum_tests"]
+exclude = ["strum_nostd_tests"]
