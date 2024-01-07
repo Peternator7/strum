@@ -30,7 +30,7 @@ fn simple_test() {
 }
 
 #[derive(Debug, Eq, PartialEq, EnumIter)]
-enum Complicated<U: Default, V: Default> {
+enum Complicated<U: Default, V: Default, const Y: usize> {
     A(U),
     B { v: V },
     C,
@@ -40,7 +40,7 @@ enum Complicated<U: Default, V: Default> {
 fn complicated_test() {
     let results = Complicated::iter().collect::<Vec<_>>();
     let expected = vec![
-        Complicated::A(0),
+        Complicated::<_,_,0>::A(0),
         Complicated::B { v: String::new() },
         Complicated::C,
     ];
@@ -50,7 +50,7 @@ fn complicated_test() {
 
 #[test]
 fn len_test() {
-    let mut i = Complicated::<(), ()>::iter();
+    let mut i = Complicated::<(), (), 0>::iter();
     assert_eq!(3, i.len());
     i.next();
 
@@ -68,7 +68,7 @@ fn len_test() {
 
 #[test]
 fn double_ended_len_test() {
-    let mut i = Complicated::<(), ()>::iter();
+    let mut i = Complicated::<(), (), 0>::iter();
     assert_eq!(3, i.len());
     i.next_back();
 
