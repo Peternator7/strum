@@ -1,4 +1,4 @@
-use crate::helpers::{non_enum_error, snakify, HasStrumVariantProperties};
+use crate::helpers::{case_style::snakify, non_enum_error, HasStrumVariantProperties};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
 use syn::{Data, DeriveInput};
