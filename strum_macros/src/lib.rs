@@ -444,6 +444,45 @@ pub fn enum_try_as(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
+/// Creates a new type that maps all the variants of an enum to another generic value.
+///
+/// This macro does not support any additional data on your variants.
+/// The macro creates a new type called `YourEnumTable<T>`.
+/// The table has a field of type `T` for each variant of `YourEnum`. The table automatically implements `Index<T>` and `IndexMut<T>`.
+/// ```
+/// use strum_macros::EnumTable;
+///
+/// #[derive(EnumTable)]
+/// enum Color {
+///     Red,
+///     Yellow,
+///     Green,
+///     Blue,
+/// }
+///
+/// assert_eq!(ColorTable::default(), ColorTable::new(0, 0, 0, 0));
+/// assert_eq!(ColorTable::filled(2), ColorTable::new(2, 2, 2, 2));
+/// assert_eq!(ColorTable::from_closure(|_| 3), ColorTable::new(3, 3, 3, 3));
+/// assert_eq!(ColorTable::default().transform(|_, val| val + 2), ColorTable::new(2, 2, 2, 2));
+///
+/// let mut complex_map = ColorTable::from_closure(|color| match color {
+///     Color::Red => 0,
+///     _ => 3
+/// });
+/// complex_map[Color::Green] = complex_map[Color::Red];
+/// assert_eq!(complex_map, ColorTable::new(0, 3, 0, 3));
+///
+/// ```
+#[proc_macro_derive(EnumTable, attributes(strum))]
+pub fn enum_table(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks =
+        macros::enum_table::enum_table_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
 /// Add a function to enum that allows accessing variants by its discriminant
 ///
 /// This macro adds a standalone function to obtain an enum variant by its discriminant. The macro adds

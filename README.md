@@ -42,6 +42,7 @@ Strum has implemented the following macros:
 | [IntoStaticStr] | Implements `From<MyEnum> for &'static str` on an enum |
 | [EnumVariantNames] | Adds an associated `VARIANTS` constant which is an array of discriminant names |
 | [EnumIter] | Creates a new type that iterates of the variants of an enum. |
+| [EnumMap] | Creates a new type that stores an item of a specified type for each variant of the enum. |
 | [EnumProperty] | Add custom properties to enum variants. |
 | [EnumMessage] | Add a verbose message to an enum variant. |
 | [EnumDiscriminants] | Generate a new type with only the discriminant names. |
