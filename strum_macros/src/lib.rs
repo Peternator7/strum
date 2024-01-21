@@ -317,6 +317,10 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     },
 ///     Blue(usize),
 ///     Yellow,
+///     #[strum(to_string = "purple with {sat} saturation")]
+///     Purple {
+///         sat: usize,
+///     },
 /// }
 ///
 /// // uses the serialize string for Display
@@ -331,6 +335,9 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Color::Blue(10),
 ///     Color::Green { range: 42 }
 /// );
+/// // you can also use named fields in message
+/// let purple = Color::Purple { sat: 10 };
+/// assert_eq!(String::from("purple with 10 saturation"), purple.to_string());
 /// ```
 #[proc_macro_derive(Display, attributes(strum))]
 pub fn display(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
