@@ -17,6 +17,14 @@ pub fn non_enum_error() -> syn::Error {
     syn::Error::new(Span::call_site(), "This macro only supports enums.")
 }
 
+pub fn non_unit_variant_error() -> syn::Error {
+    syn::Error::new(
+        Span::call_site(),
+        "This macro only supports enums of strictly unit variants. Consider \
+        using it in conjunction with [`EnumDiscriminants`]"
+    )
+}
+
 pub fn strum_discriminants_passthrough_error(span: &impl Spanned) -> syn::Error {
     syn::Error::new(
         span.span(),
