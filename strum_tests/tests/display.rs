@@ -10,6 +10,8 @@ enum Color {
     Blue { hue: usize },
     #[strum(serialize = "y", serialize = "yellow")]
     Yellow,
+    #[strum(to_string = "saturation is {sat}")]
+    Purple { sat: usize },
     #[strum(default)]
     Green(String),
 }
@@ -39,6 +41,14 @@ fn test_formatters() {
 #[test]
 fn to_yellow_string() {
     assert_eq!(String::from("yellow"), format!("{}", Color::Yellow));
+}
+
+#[test]
+fn to_purple_string() {
+    assert_eq!(
+        String::from("saturation is 10"),
+        (Color::Purple { sat: 10 }).to_string().as_ref()
+    );
 }
 
 #[test]
