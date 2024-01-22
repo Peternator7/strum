@@ -83,7 +83,10 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             },
         };
 
-        constant_defs.push(quote! {const #const_var_ident: #discriminant_type = #const_val_expr;});
+        constant_defs.push(quote! {
+            #[allow(non_upper_case_globals)]
+            const #const_var_ident: #discriminant_type = #const_val_expr;
+        });
         arms.push(quote! {v if v == #const_var_ident => ::core::option::Option::Some(#name::#ident #params)});
 
         prev_const_var_ident = Some(const_var_ident);
