@@ -82,7 +82,7 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
                     quote! {
                         #[allow(unused_variables)]
-                        #name::#ident #params => f.pad(&format!(#output, #args))
+                        #name::#ident #params => ::core::fmt::Display::fmt(&format!(#output, #args), f)
                     }
                 }
             } else {

@@ -347,9 +347,21 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// choose which serialization to used based on the following criteria:
 ///
 /// 1. If there is a `to_string` property, this value will be used. There can only be one per variant.
-/// 1. Of the various `serialize` properties, the value with the longest length is chosen. If that
+/// 2. Of the various `serialize` properties, the value with the longest length is chosen. If that
 ///    behavior isn't desired, you should use `to_string`.
-/// 1. The name of the variant will be used if there are no `serialize` or `to_string` attributes.
+/// 3. The name of the variant will be used if there are no `serialize` or `to_string` attributes.
+/// 4. If the enum has a `strum(prefix = "some_value_")`, every variant will have that prefix prepended
+///    to the serialization.
+/// 5. Enums with named fields support named field interpolation. The value will be interpolated into the output string.
+///    Note this means the variant will not "round trip" if you then deserialize the string.
+///
+///    ```rust
+///    #[derive(strum_macros::Display)]
+///    pub enum Color {
+///        #[strum(to_string = "saturation is {sat}")]
+///        Red { sat: usize },
+///    }
+///    ```
 ///
 /// ```
 /// // You need to bring the ToString trait into scope to use it
