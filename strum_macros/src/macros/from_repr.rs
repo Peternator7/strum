@@ -1,4 +1,3 @@
-use heck::ToShoutySnakeCase;
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
 use syn::{Data, DeriveInput, Fields, Type};
@@ -73,7 +72,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
 
-        let const_var_str = format!("{}_DISCRIMINANT", variant.ident).to_shouty_snake_case();
+        let const_var_str = format!("{}_DISCRIMINANT", variant.ident);
         let const_var_ident = format_ident!("{}", const_var_str);
 
         let const_val_expr = match &variant.discriminant {
@@ -84,7 +83,10 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             },
         };
 
-        constant_defs.push(quote! {const #const_var_ident: #discriminant_type = #const_val_expr;});
+        constant_defs.push(quote! {
+            #[allow(non_upper_case_globals)]
+            const #const_var_ident: #discriminant_type = #const_val_expr;
+        });
         arms.push(quote! {v if v == #const_var_ident => ::core::option::Option::Some(#name::#ident #params)});
 
         prev_const_var_ident = Some(const_var_ident);
