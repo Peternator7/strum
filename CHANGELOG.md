@@ -10,7 +10,8 @@
   added the implementation in your code.
 * `Display` now supports format strings using named fields in the enum variant. This should be a no-op for most code.
   However, if you were outputting a string like `"Hello {field}"`, this will now be interpretted as a format string.
-
+* EnumDiscriminant now inherits the repr and discriminant values from your main enum. This makes the discriminant type
+  closer to a mirror of the original and that's always the goal.
 
 ### New features
 
@@ -33,14 +34,14 @@
   }
   ```
 
-* The `EnumMap` macro has been *experimentally* added. This macro adds a new type that stores an item for each variant
+* The `EnumTable` macro has been *experimentally* added. This macro adds a new type that stores an item for each variant
   of the enum. This is useful for storing a value for each variant of an enum. This is an experimental feature because
   I'm not convinced the current api surface area is correct.
 
   ```rust
-  use strum::EnumMap;
+  use strum::EnumTable;
 
-  #[derive(Copy, Clone, Debug, EnumMap)]
+  #[derive(Copy, Clone, Debug, EnumTable)]
   enum Color {
     Red,
     Blue,
@@ -74,6 +75,8 @@
 * [#297](https://github.com/Peternator7/strum/pull/297): New macro, add `VariantArray`
 * [#296](https://github.com/Peternator7/strum/pull/296): adds prefix attribute to To/From String macros.
 * [#294](https://github.com/Peternator7/strum/pull/294): use named enum fields in to_string macro.
+* [#288](https://github.com/Peternator7/strum/pull/288): discriminant enums now inherit the repr from the original enum.
+* [#279](https://github.com/Peternator7/strum/pull/279): Add `EnumTable` macro to generate a mapping between fieldless variants and data.
 
 
 ## 0.25.3 (strum_macros)

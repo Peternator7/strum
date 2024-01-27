@@ -85,4 +85,4 @@ Strumming is also a very whimsical motion, much like writing Rust code.
 [FromRepr]: https://docs.rs/strum_macros/latest/strum_macros/derive.FromRepr.html
 [VariantArray]: https://docs.rs/strum_macros/latest/strum_macros/derive.StaticVariantsArray.html
 [VariantNames]: https://docs.rs/strum_macros/latest/strum_macros/derive.EnumVariantNames.html
-[EnumTable]: https://docs.rs/strum_macros/latest/strum_macros/derive.EnumMap.html
+[EnumTable]: https://docs.rs/strum_macros/latest/strum_macros/derive.EnumTable.html

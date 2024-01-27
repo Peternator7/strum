@@ -516,7 +516,7 @@ pub fn enum_try_as(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// This macro only supports enums with unit type variants.A new type called `YourEnumTable<T>`. Essentially, it's a wrapper
 /// `[T; YourEnum::Count]` where gets/sets are infallible. Some important caveats to note:
 ///
-/// * The size of `YourEnumMap<T>` increases with the number of variants, not the number of values because it's always
+/// * The size of `YourEnumTable<T>` increases with the number of variants, not the number of values because it's always
 ///   fully populated. This means it may not be a good choice for sparsely populated maps.
 ///
 /// * Lookups are basically constant time since it's functionally an array index.
