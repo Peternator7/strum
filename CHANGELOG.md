@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.26.1
+
+* [#325](https://github.com/Peternator7/strum/pull/325): use `core` instead of `std` in VariantArray.
+
 ## 0.26.0
 
 ### Breaking Changes
