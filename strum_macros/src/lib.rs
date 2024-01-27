@@ -170,11 +170,11 @@ pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// ```
 /// // import the macros needed
-/// use strum_macros::{EnumString, EnumVariantNames};
+/// use strum_macros::{EnumString};
 /// // You need to import the trait, to have access to VARIANTS
 /// use strum::VariantNames;
 ///
-/// #[derive(Debug, EnumString, EnumVariantNames)]
+/// #[derive(Debug, EnumString, strum_macros::VariantNames)]
 /// #[strum(serialize_all = "kebab-case")]
 /// enum Color {
 ///     Red,
@@ -184,7 +184,7 @@ pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 /// assert_eq!(["red", "blue", "yellow", "rebecca-purple"], Color::VARIANTS);
 /// ```
-#[proc_macro_derive(EnumVariantNames, attributes(strum))]
+#[proc_macro_derive(VariantNames, attributes(strum))]
 pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -194,38 +194,54 @@ pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     toks.into()
 }
 
+#[doc(hidden)]
+#[proc_macro_derive(EnumVariantNames, attributes(strum))]
+#[deprecated(
+    since = "0.26.0",
+    note = "please use `#[derive(VariantNames)]` instead"
+)]
+pub fn variant_names_deprecated(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks = macros::enum_variant_names::enum_variant_names_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
 /// Adds a static array with all of the Enum's variants.
-/// 
-/// Implements `Strum::StaticVariantsArray` which adds an associated constant `ALL_VARIANTS`.
+///
+/// Implements `strum::VariantArray` which adds an associated constant `VARIANTS`.
 /// This constant contains an array with all the variants of the enumerator.
-/// 
+///
 /// This trait can only be autoderived if the enumerator is composed only of unit-type variants,
 /// meaning that the variants must not have any data.
-/// 
+///
 /// ```
-/// use strum::StaticVariantsArray;
-/// 
-/// #[derive(StaticVariantsArray, Debug, PartialEq, Eq)]
+/// use strum::VariantArray;
+///
+/// #[derive(VariantArray, Debug, PartialEq, Eq)]
 /// enum Op {
 ///     Add,
 ///     Sub,
 ///     Mul,
 ///     Div,
 /// }
-/// 
-/// assert_eq!(Op::ALL_VARIANTS, &[Op::Add, Op::Sub, Op::Mul, Op::Div]);
+///
+/// assert_eq!(Op::VARIANTS, &[Op::Add, Op::Sub, Op::Mul, Op::Div]);
 /// ```
-#[proc_macro_derive(StaticVariantsArray, attributes(strum))]
+#[proc_macro_derive(VariantArray, attributes(strum))]
 pub fn static_variants_array(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::static_variants_array::static_variants_array_inner(&ast)
+    let toks = macros::enum_variant_array::static_variants_array_inner(&ast)
         .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
 
 #[proc_macro_derive(AsStaticStr, attributes(strum))]
+#[doc(hidden)]
 #[deprecated(
     since = "0.22.0",
     note = "please use `#[derive(IntoStaticStr)]` instead"
@@ -313,6 +329,7 @@ pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     since = "0.22.0",
     note = "please use `#[derive(Display)]` instead. See issue https://github.com/Peternator7/strum/issues/132"
 )]
+#[doc(hidden)]
 #[proc_macro_derive(ToString, attributes(strum))]
 pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
@@ -484,10 +501,24 @@ pub fn enum_try_as(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Creates a new type that maps all the variants of an enum to another generic value.
 ///
-/// This macro does not support any additional data on your variants.
-/// The macro creates a new type called `YourEnumTable<T>`.
-/// The table has a field of type `T` for each variant of `YourEnum`. The table automatically implements `Index<T>` and `IndexMut<T>`.
-/// ```
+/// This macro only supports enums with unit type variants.A new type called `YourEnumTable<T>`. Essentially, it's a wrapper
+/// `[T; YourEnum::Count]` where gets/sets are infallible. Some important caveats to note:
+///
+/// * The size of `YourEnumMap<T>` increases with the number of variants, not the number of values because it's always
+///   fully populated. This means it may not be a good choice for sparsely populated maps.
+///
+/// * Lookups are basically constant time since it's functionally an array index.
+///
+/// * Your variants cannot have associated data. You can use `EnumDiscriminants` to generate an Enum with the same
+///   names to work around this.
+///
+/// # Stability
+///
+/// Several people expressed interest in a data structure like this and pushed the PR through to completion, but the api
+/// seems incomplete, and I reserve the right to deprecate it in the future if it becomes clear the design is flawed.
+///
+/// # Example
+/// ```rust
 /// use strum_macros::EnumTable;
 ///
 /// #[derive(EnumTable)]
@@ -507,9 +538,9 @@ pub fn enum_try_as(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Color::Red => 0,
 ///     _ => 3
 /// });
+///
 /// complex_map[Color::Green] = complex_map[Color::Red];
 /// assert_eq!(complex_map, ColorTable::new(0, 3, 0, 3));
-///
 /// ```
 #[proc_macro_derive(EnumTable, attributes(strum))]
 pub fn enum_table(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -595,7 +626,6 @@ pub fn enum_table(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert_eq!(Some(Number::Three), number_from_repr(3));
 /// assert_eq!(None, number_from_repr(4));
 /// ```
-
 #[proc_macro_derive(FromRepr, attributes(strum))]
 pub fn from_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);

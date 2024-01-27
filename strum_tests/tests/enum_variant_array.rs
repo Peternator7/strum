@@ -1,10 +1,10 @@
-use strum::{StaticVariantsArray, EnumDiscriminants};
+use strum::{EnumDiscriminants, VariantArray};
 
 mod core {} // ensure macros call `::core`
 
 #[test]
 fn simple() {
-    #[derive(StaticVariantsArray, PartialEq, Eq, Debug)]
+    #[derive(VariantArray, PartialEq, Eq, Debug)]
     enum Operation {
         Add,
         Sub,
@@ -13,7 +13,7 @@ fn simple() {
     }
 
     assert_eq!(
-        Operation::ALL_VARIANTS,
+        Operation::VARIANTS,
         &[
             Operation::Add,
             Operation::Sub,
@@ -27,19 +27,16 @@ fn simple() {
 fn in_enum_discriminants() {
     #[allow(dead_code)]
     #[derive(EnumDiscriminants)]
-    #[strum_discriminants(derive(StaticVariantsArray))]
+    #[strum_discriminants(derive(VariantArray))]
     #[strum_discriminants(name(GeometricShapeDiscriminants))]
     enum GeometricShape {
         Point,
         Circle(i32),
-        Rectangle {
-            width: i32,
-            height: i32,
-        }
+        Rectangle { width: i32, height: i32 },
     }
 
     assert_eq!(
-        GeometricShapeDiscriminants::ALL_VARIANTS,
+        GeometricShapeDiscriminants::VARIANTS,
         &[
             GeometricShapeDiscriminants::Point,
             GeometricShapeDiscriminants::Circle,
@@ -50,18 +47,15 @@ fn in_enum_discriminants() {
 
 #[test]
 fn empty_enum() {
-    #[derive(StaticVariantsArray, PartialEq, Eq, Debug)]
+    #[derive(VariantArray, PartialEq, Eq, Debug)]
     enum Empty {}
 
-    assert_eq!(
-        Empty::ALL_VARIANTS,
-        &[],
-    );
+    assert_eq!(Empty::VARIANTS, &[],);
 }
 
 #[test]
 fn variants_with_values() {
-    #[derive(StaticVariantsArray, PartialEq, Eq, Debug)]
+    #[derive(VariantArray, PartialEq, Eq, Debug)]
     enum WeekDay {
         Sunday = 0,
         Monday = 1,
@@ -73,7 +67,7 @@ fn variants_with_values() {
     }
 
     assert_eq!(
-        WeekDay::ALL_VARIANTS,
+        WeekDay::VARIANTS,
         &[
             WeekDay::Sunday,
             WeekDay::Monday,

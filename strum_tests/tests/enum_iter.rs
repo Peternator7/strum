@@ -40,7 +40,7 @@ enum Complicated<U: Default, V: Default, const Y: usize> {
 fn complicated_test() {
     let results = Complicated::iter().collect::<Vec<_>>();
     let expected = vec![
-        Complicated::<_,_,0>::A(0),
+        Complicated::<_, _, 0>::A(0),
         Complicated::B { v: String::new() },
         Complicated::C,
     ];

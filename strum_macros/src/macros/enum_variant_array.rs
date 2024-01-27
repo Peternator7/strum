@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, Fields};
 
-use crate::helpers::{non_enum_error, HasTypeProperties, non_unit_variant_error};
+use crate::helpers::{non_enum_error, non_unit_variant_error, HasTypeProperties};
 
 pub fn static_variants_array_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -20,17 +20,15 @@ pub fn static_variants_array_inner(ast: &DeriveInput) -> syn::Result<TokenStream
     let idents = variants
         .iter()
         .cloned()
-        .map(|v| {
-            match v.fields {
-                Fields::Unit => Ok(v.ident),
-                _ => Err(non_unit_variant_error())
-            }
+        .map(|v| match v.fields {
+            Fields::Unit => Ok(v.ident),
+            _ => Err(non_unit_variant_error()),
         })
         .collect::<syn::Result<Vec<_>>>()?;
 
     Ok(quote! {
-        impl #impl_generics #strum_module_path::StaticVariantsArray for #name #ty_generics #where_clause {
-            const ALL_VARIANTS: &'static [Self] = &[ #(#name::#idents),* ];
+        impl #impl_generics #strum_module_path::VariantArray for #name #ty_generics #where_clause {
+            const VARIANTS: &'static [Self] = &[ #(#name::#idents),* ];
         }
     })
 }
