@@ -72,7 +72,7 @@ information through strings.
 
 Strumming is also a very whimsical motion, much like writing Rust code.
 
-[EnumString]: https://docs.rs/strum_macros/0.25/strum_macros/derive.EnumString.html
+[EnumString]: https://docs.rs/strum_macros/latest/strum_macros/derive.EnumString.html
 [Display]: https://docs.rs/strum_macros/latest/strum_macros/derive.Display.html
 [AsRefStr]: https://docs.rs/strum_macros/latest/strum_macros/derive.AsRefStr.html
 [IntoStaticStr]: https://docs.rs/strum_macros/latest/strum_macros/derive.IntoStaticStr.html
