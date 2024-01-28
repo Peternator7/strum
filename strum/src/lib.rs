@@ -223,7 +223,7 @@ pub trait VariantNames {
 /// enums with inner data in one or more variants. Consider using it alongside
 /// [`EnumDiscriminants`] if you require inner data but still want to have an
 /// static array of variants.
-pub trait VariantArray: std::marker::Sized + 'static {
+pub trait VariantArray: core::marker::Sized + 'static {
     const VARIANTS: &'static [Self];
 }
 
