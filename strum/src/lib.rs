@@ -16,11 +16,11 @@
 //!
 //! ```toml
 //! [dependencies]
-//! strum = "0.25"
-//! strum_macros = "0.25"
+//! strum = "0.26"
+//! strum_macros = "0.26"
 //!
 //! # You can also access strum_macros exports directly through strum using the "derive" feature
-//! strum = { version = "0.25", features = ["derive"] }
+//! strum = { version = "0.26", features = ["derive"] }
 //! ```
 //!
 
@@ -98,7 +98,11 @@ impl std::error::Error for ParseError {
 /// generic_iterator::<Color, _>(|color| println!("{:?}", color));
 /// ```
 pub trait IntoEnumIterator: Sized {
-    type Iterator: Iterator<Item = Self> + Clone + DoubleEndedIterator + ExactSizeIterator + FusedIterator;
+    type Iterator: Iterator<Item = Self>
+        + Clone
+        + DoubleEndedIterator
+        + ExactSizeIterator
+        + FusedIterator;
 
     fn iter() -> Self::Iterator;
 }
@@ -219,8 +223,8 @@ pub trait VariantNames {
 /// enums with inner data in one or more variants. Consider using it alongside
 /// [`EnumDiscriminants`] if you require inner data but still want to have an
 /// static array of variants.
-pub trait StaticVariantsArray: std::marker::Sized + 'static {
-    const ALL_VARIANTS: &'static [Self];
+pub trait VariantArray: std::marker::Sized + 'static {
+    const VARIANTS: &'static [Self];
 }
 
 #[cfg(feature = "derive")]
@@ -242,7 +246,6 @@ macro_rules! DocumentMacroRexports {
 // 2018 edition is almost 2 years old, but we'll need to give people some time to do that.
 DocumentMacroRexports! {
     AsRefStr,
-    AsStaticStr,
     Display,
     EnumCount,
     EnumDiscriminants,
@@ -250,9 +253,8 @@ DocumentMacroRexports! {
     EnumMessage,
     EnumProperty,
     EnumString,
-    EnumVariantNames,
+    VariantNames,
     FromRepr,
     IntoStaticStr,
-    ToString,
-    StaticVariantsArray
+    VariantArray
 }

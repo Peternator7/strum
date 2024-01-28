@@ -21,7 +21,7 @@ pub fn non_unit_variant_error() -> syn::Error {
     syn::Error::new(
         Span::call_site(),
         "This macro only supports enums of strictly unit variants. Consider \
-        using it in conjunction with [`EnumDiscriminants`]"
+        using it in conjunction with [`EnumDiscriminants`]",
     )
 }
 

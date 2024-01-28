@@ -15,11 +15,11 @@ repository = "https://github.com/Peternator7/strum"
 readme = "../README.md"
 
 [dependencies]
-strum_macros = { path = "../strum_macros", optional = true, version = "0.25" }
+strum_macros = { path = "../strum_macros", optional = true, version = "0.26" }
 phf = { version = "0.10", features = ["macros"], optional = true }
 
 [dev-dependencies]
-strum_macros = { path = "../strum_macros", version = "0.25" }
+strum_macros = { path = "../strum_macros", version = "0.26" }
 
 [badges]
 travis-ci = { repository = "Peternator7/strum" }
