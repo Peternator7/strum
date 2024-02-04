@@ -118,11 +118,14 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-/// Converts enum variants to `&'static str`.
+/// Converts enum variants to `&'a str`, where `'a` is the lifetime of the input enum reference.
 ///
 /// Implements `AsRef<str>` on your enum using the same rules as
 /// `Display` for determining what string is returned. The difference is that `as_ref()` returns
 /// a `&str` instead of a `String` so you don't allocate any additional memory with each call.
+///
+/// If you require a `&'static str`, you can use
+/// [`strum::IntoStaticStr`](crate::IntoStaticStr) instead.
 ///
 /// ```
 /// // You need to bring the AsRef trait into scope to use it
