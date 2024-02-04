@@ -2,6 +2,13 @@ use strum::EnumString;
 
 mod core {} // ensure macros call `::core`
 
+#[derive(Debug, Default, Eq, PartialEq, EnumString, strum::Display)]
+enum InnerColor {
+    #[default]
+    Violet,
+    Fuchsia,
+}
+
 #[derive(Debug, Eq, PartialEq, EnumString, strum::Display)]
 enum Color {
     #[strum(to_string = "RedRed")]
@@ -14,6 +21,8 @@ enum Color {
     Purple { sat: usize },
     #[strum(default)]
     Green(String),
+    #[strum(transparent)]
+    Inner(InnerColor),
 }
 
 #[test]
@@ -61,6 +70,14 @@ fn to_green_string() {
     assert_eq!(
         String::from("  lime"),
         format!("{:>6}", Color::Green("lime".into()))
+    );
+}
+
+#[test]
+fn to_violet_string() {
+    assert_eq!(
+        String::from("Violet"),
+        format!("{}", Color::Inner(InnerColor::Violet))
     );
 }
 
@@ -117,5 +134,23 @@ fn non_string_default_to_string() {
     assert_eq!(
         String::from("0014"),
         format!("{:04}", NonStringDefault::Number(14))
+    );
+}
+
+#[derive(strum::Display, Debug, Eq, PartialEq)]
+#[strum(serialize_all = "snake_case")]
+enum TransparentString {
+    #[strum(transparent)]
+    Something(String),
+}
+
+#[test]
+fn transparent_string() {
+    assert_eq!(
+        String::from("string in here"),
+        format!(
+            "{}",
+            TransparentString::Something("string in here".to_owned())
+        )
     );
 }

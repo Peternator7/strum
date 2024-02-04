@@ -5,6 +5,14 @@ use strum::{AsRefStr, AsStaticRef, AsStaticStr, EnumString, IntoStaticStr};
 
 mod core {} // ensure macros call `::core`
 
+#[derive(Debug, Default, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
+enum InnerColor {
+    #[default]
+    Purple,
+    Violet,
+    Fuchsia,
+}
+
 #[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
 enum Color {
     #[strum(to_string = "RedRed")]
@@ -15,6 +23,8 @@ enum Color {
     Yellow,
     #[strum(default)]
     Green(String),
+    #[strum(transparent)]
+    Inner(InnerColor),
 }
 
 #[test]
@@ -39,6 +49,11 @@ fn as_yellow_str() {
 fn as_green_str() {
     assert_eq!("Green", (Color::Green(String::default())).as_ref());
     let _: &'static str = (Color::Green(String::default())).as_static();
+}
+
+#[test]
+fn as_fuchsia_str() {
+    assert_eq!("Purple", (Color::Inner(InnerColor::Purple)).as_ref());
 }
 
 #[derive(IntoStaticStr)]
@@ -73,6 +88,7 @@ fn test_into_static_str() {
     assert_eq!("RedRed", <&'static str>::from(&Color::Red));
     assert_eq!("blue", <&'static str>::from(&Color::Blue { hue: 0 }));
     assert_eq!("yellow", <&'static str>::from(&Color::Yellow));
+    assert_eq!("Purple", <&'static str>::from(&Color::Inner(InnerColor::Purple)));
 
     assert_eq!("A", <&'static str>::from(Foo::A));
     assert_eq!("C", <&'static str>::from(Foo::C(&17)));
