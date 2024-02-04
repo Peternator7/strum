@@ -25,10 +25,10 @@ pub fn non_unit_variant_error() -> syn::Error {
     )
 }
 
-pub fn non_single_field_variant_error() -> syn::Error {
+pub fn non_single_field_variant_error(attr: &str) -> syn::Error {
     syn::Error::new(
         Span::call_site(),
-        "This attribute only supports enum variants with a single field",
+        format_args!("The [`{attr}`] attribute only supports enum variants with a single field"),
     )
 }
 

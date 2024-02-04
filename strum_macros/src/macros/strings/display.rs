@@ -34,7 +34,7 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     let ident = f.named.last().unwrap().ident.as_ref().unwrap();
                     quote! { {ref #ident} => ::core::fmt::Display::fmt(#ident, f) }
                 }
-                _ => return Err(non_single_field_variant_error()),
+                _ => return Err(non_single_field_variant_error("transparent")),
             };
 
             arms.push(quote! { #name::#ident #arm_end });

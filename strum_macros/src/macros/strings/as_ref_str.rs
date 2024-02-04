@@ -33,7 +33,7 @@ fn get_arms(ast: &DeriveInput) -> syn::Result<Vec<TokenStream>> {
                     let ident = f.named.last().unwrap().ident.as_ref().unwrap();
                     quote! { {ref #ident} => ::core::convert::AsRef::<str>::as_ref(#ident) }
                 }
-                _ => return Err(non_single_field_variant_error()),
+                _ => return Err(non_single_field_variant_error("transparent")),
             };
 
             quote! { #name::#ident #arm_end }
