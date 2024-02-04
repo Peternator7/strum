@@ -5,12 +5,17 @@ use strum::{AsRefStr, AsStaticRef, AsStaticStr, EnumString, IntoStaticStr};
 
 mod core {} // ensure macros call `::core`
 
-#[derive(Debug, Default, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
+#[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
 enum InnerColor {
-    #[default]
     Purple,
     Violet,
     Fuchsia,
+}
+
+impl Default for InnerColor {
+    fn default() -> Self {
+        InnerColor::Purple
+    }
 }
 
 #[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
@@ -88,7 +93,10 @@ fn test_into_static_str() {
     assert_eq!("RedRed", <&'static str>::from(&Color::Red));
     assert_eq!("blue", <&'static str>::from(&Color::Blue { hue: 0 }));
     assert_eq!("yellow", <&'static str>::from(&Color::Yellow));
-    assert_eq!("Purple", <&'static str>::from(&Color::Inner(InnerColor::Purple)));
+    assert_eq!(
+        "Purple",
+        <&'static str>::from(&Color::Inner(InnerColor::Purple))
+    );
 
     assert_eq!("A", <&'static str>::from(Foo::A));
     assert_eq!("C", <&'static str>::from(Foo::C(&17)));
