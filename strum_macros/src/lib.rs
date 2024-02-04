@@ -249,9 +249,9 @@ pub fn static_variants_array(input: proc_macro::TokenStream) -> proc_macro::Toke
 pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::as_ref_str::as_static_str_inner(
+    let toks = macros::into_static_str::as_static_str_inner(
         &ast,
-        &macros::as_ref_str::GenerateTraitVariant::AsStaticStr,
+        &macros::into_static_str::GenerateTraitVariant::AsStaticStr,
     )
     .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
@@ -291,9 +291,9 @@ pub fn as_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = macros::as_ref_str::as_static_str_inner(
+    let toks = macros::into_static_str::as_static_str_inner(
         &ast,
-        &macros::as_ref_str::GenerateTraitVariant::From,
+        &macros::into_static_str::GenerateTraitVariant::From,
     )
     .unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
