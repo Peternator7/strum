@@ -73,6 +73,10 @@
 //!     ```
 //!     The plugin will fail if the data doesn't implement From<&str>. You can only have one `default`
 //!     on your enum.
+//! 
+//! - `transparent`: Signals that the inner field's implementation should be used, instead of generating 
+//!    one for this variant. Only applicable to enum variants with a single field. Compatible with the 
+//!    `AsRefStr`, `Display` and `IntoStaticStr` derive macros.
 //!
 //! - `disabled`: removes variant from generated code.
 //!
