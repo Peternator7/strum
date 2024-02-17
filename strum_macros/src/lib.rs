@@ -155,6 +155,18 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Color::Blue(10).as_ref(),
 ///     Color::Green { range: 42 }.as_ref()
 /// );
+///
+/// // With prefix on all variants
+/// #[derive(AsRefStr, Debug)]
+/// #[strum(prefix = "/")]
+/// enum ColorWithPrefix {
+///     #[strum(serialize = "redred")]
+///     Red,
+///     Green,
+/// }
+///
+/// assert_eq!("/redred", ColorWithPrefix::Red.as_ref());
+/// assert_eq!("/Green", ColorWithPrefix::Green.as_ref());
 /// ```
 #[proc_macro_derive(AsRefStr, attributes(strum))]
 pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
