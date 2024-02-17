@@ -1,7 +1,8 @@
 use strum::{Display, EnumString};
+use strum_macros::AsRefStr;
 
 #[allow(dead_code)]
-#[derive(Debug, EnumString, Display)]
+#[derive(Debug, EnumString, Display, AsRefStr)]
 #[strum(prefix = "colour/")]
 enum Color {
     #[strum(to_string = "RedRed")]
@@ -17,4 +18,5 @@ enum Color {
 #[test]
 fn prefix_redred() {
     assert_eq!(String::from("colour/RedRed"), (Color::Red).to_string());
+    assert_eq!(("colour/RedRed"), (Color::Red).as_ref());
 }
