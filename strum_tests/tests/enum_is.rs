@@ -1,3 +1,4 @@
+#![allow(clippy::disallowed_names)]
 use std::borrow::Cow;
 use strum::EnumIs;
 
