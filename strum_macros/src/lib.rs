@@ -458,17 +458,21 @@ pub fn enum_iter(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// E.g. `Color.is_red()`.
 ///
 /// ```
-///
 /// use strum_macros::EnumIs;
 ///
 /// #[derive(EnumIs, Debug)]
 /// enum Color {
 ///     Red,
 ///     Green { range: usize },
+///     // Generated function names can be customized; default would be `is_rebecca_purple`, but
+///     // this generates `is_rebeccapurple` to match the CSS color name.
+///     #[strum(name = "rebeccapurple")]
+///     RebeccaPurple,
 /// }
 ///
 /// assert!(Color::Red.is_red());
 /// assert!(Color::Green{range: 0}.is_green());
+/// assert!(Color::RebeccaPurple.is_rebeccapurple());
 /// ```
 #[proc_macro_derive(EnumIs, attributes(strum))]
 pub fn enum_is(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

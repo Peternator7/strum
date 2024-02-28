@@ -21,6 +21,7 @@ pub struct StrumVariantProperties {
     pub string_props: Vec<(LitStr, LitStr)>,
     serialize: Vec<LitStr>,
     pub to_string: Option<LitStr>,
+    pub name: Option<LitStr>,
     ident: Option<Ident>,
 }
 
@@ -68,6 +69,8 @@ impl HasStrumVariantProperties for Variant {
         let mut default_with_kw = None;
         let mut to_string_kw = None;
         let mut ascii_case_insensitive_kw = None;
+        let mut name_kw = None;
+
         for meta in self.get_metadata()? {
             match meta {
                 VariantMeta::Message { value, kw } => {
@@ -134,6 +137,14 @@ impl HasStrumVariantProperties for Variant {
                 }
                 VariantMeta::Props { props, .. } => {
                     output.string_props.extend(props);
+                }
+                VariantMeta::Name { kw, value } => {
+                    if let Some(fst_kw) = name_kw {
+                        return Err(occurrence_error(fst_kw, kw, "name"));
+                    }
+
+                    name_kw = Some(kw);
+                    output.name = Some(value);
                 }
             }
         }

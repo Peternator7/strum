@@ -22,6 +22,8 @@ enum Foo {
     Unnamed1(Option<u128>),
     Unnamed2(bool, u8),
     MultiWordName,
+    #[strum(name = "aliased_name")]
+    CustomName,
     #[strum(disabled)]
     #[allow(dead_code)]
     Disabled,
@@ -82,6 +84,11 @@ fn unnamed_2() {
 #[test]
 fn multi_word() {
     assert!(Foo::MultiWordName.is_multi_word_name());
+}
+
+#[test]
+fn aliased_name() {
+    assert!(Foo::CustomName.is_aliased_name());
 }
 
 #[test]
