@@ -30,14 +30,24 @@ impl StrumVariantProperties {
         LitStr::new(&ident.convert_case(case_style), ident.span())
     }
 
-    pub fn get_preferred_name(&self, case_style: Option<CaseStyle>) -> LitStr {
-        self.to_string.as_ref().cloned().unwrap_or_else(|| {
+    pub fn get_preferred_name(
+        &self,
+        case_style: Option<CaseStyle>,
+        prefix: Option<&LitStr>,
+    ) -> LitStr {
+        let mut output = self.to_string.as_ref().cloned().unwrap_or_else(|| {
             self.serialize
                 .iter()
                 .max_by_key(|s| s.value().len())
                 .cloned()
                 .unwrap_or_else(|| self.ident_as_str(case_style))
-        })
+        });
+
+        if let Some(prefix) = prefix {
+            output = LitStr::new(&(prefix.value() + &output.value()), output.span());
+        }
+
+        output
     }
 
     pub fn get_serializations(&self, case_style: Option<CaseStyle>) -> Vec<LitStr> {

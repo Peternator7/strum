@@ -24,10 +24,8 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         // Look at all the serialize attributes.
-        let mut output = variant_properties.get_preferred_name(type_properties.case_style);
-        if let Some(prefix) = &type_properties.prefix {
-            output = LitStr::new(&(prefix.value() + &output.value()), output.span());
-        }
+        let output = variant_properties
+            .get_preferred_name(type_properties.case_style, type_properties.prefix.as_ref());
 
         let params = match variant.fields {
             Fields::Unit => quote! {},

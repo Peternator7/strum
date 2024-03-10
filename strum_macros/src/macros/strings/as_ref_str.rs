@@ -25,7 +25,9 @@ fn get_arms(ast: &DeriveInput) -> syn::Result<Vec<TokenStream>> {
         // Look at all the serialize attributes.
         // Use `to_string` attribute (not `as_ref_str` or something) to keep things consistent
         // (i.e. always `enum.as_ref().to_string() == enum.to_string()`).
-        let output = variant_properties.get_preferred_name(type_properties.case_style);
+        let output = variant_properties
+            .get_preferred_name(type_properties.case_style, type_properties.prefix.as_ref());
+
         let params = match variant.fields {
             Fields::Unit => quote! {},
             Fields::Unnamed(..) => quote! { (..) },
