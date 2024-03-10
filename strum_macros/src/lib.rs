@@ -569,6 +569,7 @@ pub fn enum_try_as(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// complex_map[Color::Green] = complex_map[Color::Red];
 /// assert_eq!(complex_map, ColorTable::new(0, 3, 0, 3));
 /// ```
+#[doc(hidden)]
 #[proc_macro_derive(EnumTable, attributes(strum))]
 pub fn enum_table(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
