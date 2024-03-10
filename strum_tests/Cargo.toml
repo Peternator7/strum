@@ -13,7 +13,7 @@ strum = { path = "../strum", features = ["derive"] }
 strum_macros = { path = "../strum_macros", features = [] }
 clap = "=2.33.0"
 enum_variant_type = "=0.2.0"
-structopt = "0.2.18"
+structopt = "0.3.26"
 bitflags = "=1.2"
 
 [dev-dependencies]
