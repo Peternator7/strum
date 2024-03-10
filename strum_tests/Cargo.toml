@@ -14,7 +14,7 @@ strum_macros = { path = "../strum_macros", features = [] }
 clap = "=2.33.0"
 enum_variant_type = "=0.2.0"
 structopt = "0.2.18"
-bitflags = "=1.2"
+bitflags = "=2.4"
 
 [dev-dependencies]
 rustversion = "1.0"
