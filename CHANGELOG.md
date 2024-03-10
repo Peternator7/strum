@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.26.2
+
+* [#337](https://github.com/Peternator7/strum/pull/337): Fix missing generic impls for `EnumTryAs`
+* [#334](https://github.com/Peternator7/strum/pull/334): Support prefix in `AsRefStr`. Technically a breaking change,
+  but `prefix` was just added in `0.26.0` so it's a newer feature and it makes the feature more consisent in general.
+
 ## 0.26.1
 
 * [#325](https://github.com/Peternator7/strum/pull/325): use `core` instead of `std` in VariantArray.
