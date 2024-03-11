@@ -132,7 +132,7 @@ fn capture_format_string_idents(string_literal: &LitStr) -> syn::Result<Vec<Iden
             ))?;
 
             let inside_brackets = &format_str[start_index + 1..i];
-            let ident_str = inside_brackets.split(":").next().unwrap();
+            let ident_str = inside_brackets.split(":").next().unwrap().trim_end();
             let ident = syn::parse_str::<Ident>(ident_str).map_err(|_| {
                 syn::Error::new_spanned(
                     string_literal,
