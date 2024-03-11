@@ -14,6 +14,8 @@ enum Color {
     Purple { sat: usize },
     #[strum(default)]
     Green(String),
+    #[strum(to_string = "Orange({0})")]
+    Orange(usize),
 }
 
 #[test]
@@ -61,6 +63,14 @@ fn to_green_string() {
     assert_eq!(
         String::from("  lime"),
         format!("{:>6}", Color::Green("lime".into()))
+    );
+}
+
+#[test]
+fn to_orange_string() {
+    assert_eq!(
+        String::from("Orange(10)"),
+        Color::Orange(10).to_string().as_ref()
     );
 }
 
