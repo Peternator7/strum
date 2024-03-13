@@ -367,7 +367,7 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// 3. The name of the variant will be used if there are no `serialize` or `to_string` attributes.
 /// 4. If the enum has a `strum(prefix = "some_value_")`, every variant will have that prefix prepended
 ///    to the serialization.
-/// 5. Enums with named fields support named field interpolation. The value will be interpolated into the output string.
+/// 5. Enums with fields support string interpolation.
 ///    Note this means the variant will not "round trip" if you then deserialize the string.
 ///
 ///    ```rust
@@ -375,6 +375,8 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///    pub enum Color {
 ///        #[strum(to_string = "saturation is {sat}")]
 ///        Red { sat: usize },
+///        #[strum(to_string = "hue is {1}, saturation is {0}")]
+///        Blue(usize, usize),
 ///    }
 ///    ```
 ///
