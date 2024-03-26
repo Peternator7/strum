@@ -210,6 +210,12 @@ pub trait EnumCount {
     const COUNT: usize;
 }
 
+pub trait EnumDiscriminants {
+    type Discriminants;
+
+    fn discriminants(&self) -> Self::Discriminants;
+}
+
 /// A trait for retrieving the names of each variant in Enum. This trait can
 /// be autoderived by `strum_macros`.
 pub trait VariantNames {
