@@ -124,7 +124,7 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                         }
                     }
                 }
-                Fields::Unit => quote! { #name::#ident #params => ::core::fmt::Display::fmt(#output, f) }
+                Fields::Unit => quote! { #name::#ident #params => ::core::fmt::Display::fmt(&format!(#output), f) }
             };
 
             arms.push(arm);
