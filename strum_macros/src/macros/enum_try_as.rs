@@ -65,7 +65,7 @@ pub fn enum_try_as_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     })
                 },
                 _ => {
-                    return None;
+                    None
                 }
             }
 
