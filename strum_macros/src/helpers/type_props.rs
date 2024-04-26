@@ -23,6 +23,7 @@ pub struct StrumTypeProperties {
     pub use_phf: bool,
     pub prefix: Option<LitStr>,
     pub enum_repr: Option<TokenStream>,
+    pub const_into_str: bool,
 }
 
 impl HasTypeProperties for DeriveInput {
@@ -37,6 +38,8 @@ impl HasTypeProperties for DeriveInput {
         let mut use_phf_kw = None;
         let mut crate_module_path_kw = None;
         let mut prefix_kw = None;
+        let mut const_into_str = None;
+
         for meta in strum_meta {
             match meta {
                 EnumMeta::SerializeAll { case_style, kw } => {
@@ -81,6 +84,14 @@ impl HasTypeProperties for DeriveInput {
 
                     prefix_kw = Some(kw);
                     output.prefix = Some(prefix);
+                }
+                EnumMeta::ConstIntoStr(kw) => {
+                    if let Some(fst_kw) = const_into_str {
+                        return Err(occurrence_error(fst_kw, kw, "const_into_str"));
+                    }
+
+                    const_into_str = Some(kw);
+                    output.const_into_str = true;
                 }
             }
         }

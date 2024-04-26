@@ -16,6 +16,7 @@ pub mod kw {
 
     // enum metadata
     custom_keyword!(serialize_all);
+    custom_keyword!(const_into_str);
     custom_keyword!(use_phf);
     custom_keyword!(prefix);
 
@@ -51,6 +52,7 @@ pub enum EnumMeta {
         kw: kw::prefix,
         prefix: LitStr,
     },
+    ConstIntoStr(kw::const_into_str)
 }
 
 impl Parse for EnumMeta {
@@ -80,6 +82,8 @@ impl Parse for EnumMeta {
             input.parse::<Token![=]>()?;
             let prefix = input.parse()?;
             Ok(EnumMeta::Prefix { kw, prefix })
+        } else if lookahead.peek(kw::const_into_str) {
+            Ok(EnumMeta::ConstIntoStr(input.parse()?))
         } else {
             Err(lookahead.error())
         }
