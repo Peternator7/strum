@@ -67,7 +67,7 @@ impl std::error::Error for ParseError {
 }
 
 /// This trait designates that an `Enum` can be iterated over. It can
-/// be auto generated using `strum_macros` on your behalf.
+/// be auto generated using the [`EnumIter`](derive.EnumIter.html) derive macro.
 ///
 /// # Example
 ///

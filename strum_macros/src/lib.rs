@@ -3,6 +3,10 @@
 //! Strum is a set of macros and traits for working with
 //! enums and strings easier in Rust.
 //!
+//! This crate only contains derive macros for use with the
+//! [`strum`](https://docs.rs/strum)
+//! crate.  The macros provied by this crate are also available by
+//! enabling the `derive` feature in aforementioned `strum` crate.
 
 #![recursion_limit = "128"]
 
@@ -428,7 +432,7 @@ pub fn display(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// Creates a new type that iterates of the variants of an enum.
 ///
 /// Iterate over the variants of an Enum. Any additional data on your variants will be set to `Default::default()`.
-/// The macro implements `strum::IntoEnumIterator` on your enum and creates a new type called `YourEnumIter` that is the iterator object.
+/// The macro implements [`strum::IntoEnumIterator`](https://docs.rs/strum/latest/strum/trait.IntoEnumIterator.html) on your enum and creates a new type called `YourEnumIter` that is the iterator object.
 /// You cannot derive `EnumIter` on any type with a lifetime bound (`<'a>`) because the iterator would surely
 /// create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
 ///
