@@ -116,8 +116,8 @@ pub fn as_static_str_inner(
             }
         },
         GenerateTraitVariant::From  => quote! {
-            impl #name #ty_generics {
-                pub const fn into_str(&self) -> &'static str #where_clause {
+            impl #impl_generics #name #ty_generics #where_clause {
+                pub const fn into_str(&self) -> &'static str {
                     match *self {
                         #(#arms3),*
                     }
