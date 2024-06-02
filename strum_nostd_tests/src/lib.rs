@@ -5,7 +5,7 @@ mod tests {
     use core::str::FromStr;
     use strum::EnumString;
 
-    #[derive(Debug, Eq, PartialEq, EnumString)]
+    #[derive(Debug, Eq, PartialEq, EnumString, strum::Display)]
     enum Color {
         Red,
         Blue {
