@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.26.4 (strum_macros)
+
+* [#360](https://github.com/Peternator7/strum/pull/360): Fixes bug introduced with new string interpolation feature where
+  unit structs took an implicit unnecessary dependency on `::core::alloc`.
+
 ## 0.26.3 (strum_macros)
 
 * [#344](https://github.com/Peternator7/strum/pull/344): Hide `EnumTable` because it's going to be deprecated in the next
