@@ -124,7 +124,17 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                         }
                     }
                 }
-                Fields::Unit => quote! { #name::#ident #params => ::core::fmt::Display::fmt(&format!(#output), f) }
+                Fields::Unit => {
+                    let used_vars = capture_format_strings(&output)?;
+                    if !used_vars.is_empty() {
+                        return Err(syn::Error::new_spanned(
+                            &output,
+                            "Unit variants do not support interpolation",
+                        ));
+                    }
+
+                    quote! { #name::#ident #params => ::core::fmt::Display::fmt(#output, f) }
+                }
             };
 
             arms.push(arm);
