@@ -1,4 +1,4 @@
-#![allow(deprecated)]
+#![allow(deprecated, dead_code)]
 
 use std::str::FromStr;
 use strum::{AsRefStr, AsStaticRef, AsStaticStr, EnumString, IntoStaticStr};

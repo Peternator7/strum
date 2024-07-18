@@ -5,6 +5,7 @@ pub use self::variant_props::HasStrumVariantProperties;
 
 pub mod case_style;
 pub mod inner_variant_props;
+pub mod lifetime_check;
 mod metadata;
 pub mod type_props;
 pub mod variant_props;

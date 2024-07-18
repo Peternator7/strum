@@ -37,7 +37,8 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     .enumerate()
                     .map(|(index, field)| {
                         assert!(field.ident.is_none());
-                        let ident = syn::parse_str::<Ident>(format!("field{}", index).as_str()).unwrap();
+                        let ident =
+                            syn::parse_str::<Ident>(format!("field{}", index).as_str()).unwrap();
                         quote! { ref #ident }
                     })
                     .collect();
@@ -97,14 +98,14 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                             #name::#ident #params => ::core::fmt::Display::fmt(&format!(#output, #args), f)
                         }
                     }
-                },
+                }
                 Fields::Unnamed(ref unnamed_fields) => {
                     let used_vars = capture_format_strings(&output)?;
                     if used_vars.iter().any(String::is_empty) {
                         return Err(syn::Error::new_spanned(
                             &output,
                             "Empty {} is not allowed; Use manual numbering ({0})",
-                        ))
+                        ));
                     }
                     if used_vars.is_empty() {
                         quote! { #name::#ident #params => ::core::fmt::Display::fmt(#output, f) }
@@ -157,14 +158,17 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 }
 
 fn capture_format_string_idents(string_literal: &LitStr) -> syn::Result<Vec<Ident>> {
-    capture_format_strings(string_literal)?.into_iter().map(|ident| {
-        syn::parse_str::<Ident>(ident.as_str()).map_err(|_| {
-            syn::Error::new_spanned(
-                string_literal,
-                "Invalid identifier inside format string bracket",
-            )
+    capture_format_strings(string_literal)?
+        .into_iter()
+        .map(|ident| {
+            syn::parse_str::<Ident>(ident.as_str()).map_err(|_| {
+                syn::Error::new_spanned(
+                    string_literal,
+                    "Invalid identifier inside format string bracket",
+                )
+            })
         })
-    }).collect()
+        .collect()
 }
 
 fn capture_format_strings(string_literal: &LitStr) -> syn::Result<Vec<String>> {
@@ -193,7 +197,7 @@ fn capture_format_strings(string_literal: &LitStr) -> syn::Result<Vec<String>> {
             ))?;
 
             let inside_brackets = &format_str[start_index + 1..i];
-            let ident_str = inside_brackets.split(":").next().unwrap().trim_end();
+            let ident_str = inside_brackets.split(':').next().unwrap().trim_end();
             var_used.push(ident_str.to_owned());
         }
     }

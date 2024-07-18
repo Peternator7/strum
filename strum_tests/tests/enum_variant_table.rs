@@ -6,7 +6,7 @@ enum Color {
     Yellow,
     Green,
     #[strum(disabled)]
-    Teal,
+    _Teal,
     Blue,
     #[strum(disabled)]
     Indigo,
@@ -16,7 +16,7 @@ enum Color {
 // because if it doesn't compile, enum variants that conflict with keywords won't work
 #[derive(EnumTable)]
 enum Keyword {
-    Const,
+    _Const,
 }
 
 #[test]
