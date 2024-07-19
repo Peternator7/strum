@@ -36,6 +36,20 @@ fn variant_names_trait() {
 }
 
 #[test]
+fn disabled() {
+    #[allow(dead_code)]
+    #[derive(VariantNames)]
+    enum Color {
+        Red,
+        Blue,
+        #[strum(disabled)]
+        Yellow,
+    }
+
+    assert_eq!(Color::VARIANTS, &["Red", "Blue"]);
+}
+
+#[test]
 fn plain_kebab() {
     #[allow(dead_code)]
     #[derive(VariantNames)]
