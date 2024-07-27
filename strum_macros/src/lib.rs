@@ -54,7 +54,7 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// If you have a large enum, you may want to consider using the `use_phf` attribute here. It leverages
 /// perfect hash functions to parse much quicker than a standard `match`. (MSRV 1.46)
 ///
-/// # Example howto use `EnumString`
+/// # Example how to use `EnumString`
 /// ```
 /// use std::str::FromStr;
 /// use strum_macros::EnumString;
