@@ -3,8 +3,8 @@ use quote::quote;
 use syn::{Data, DeriveInput, Fields};
 
 use crate::helpers::{
-    non_enum_error, occurrence_error, HasInnerVariantProperties, HasStrumVariantProperties,
-    HasTypeProperties,
+    lifetime_check::contains_lifetime, non_enum_error, occurrence_error, HasInnerVariantProperties,
+    HasStrumVariantProperties, HasTypeProperties,
 };
 
 pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
@@ -21,6 +21,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let mut default_kw = None;
     let mut default =
         quote! { ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) };
+    let mut is_default_generic_over_lifetime = false;
 
     let mut phf_exact_match_arms = Vec::new();
     let mut standard_match_arms = Vec::new();
@@ -37,19 +38,27 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 return Err(occurrence_error(fst_kw, kw, "default"));
             }
 
-            match &variant.fields {
-                Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {}
-                _ => {
-                    return Err(syn::Error::new_spanned(
-                        variant,
-                        "Default only works on newtype structs with a single String field",
-                    ))
+            let fields_error = syn::Error::new_spanned(
+                variant,
+                "Default only works on newtype structs with a single String field",
+            );
+            let field = match &variant.fields {
+                Fields::Unnamed(fields) => {
+                    if let Some(field) = fields.unnamed.iter().next() {
+                        field
+                    } else {
+                        return Err(fields_error);
+                    }
                 }
-            }
+                _ => return Err(fields_error),
+            };
+
             default_kw = Some(kw);
             default = quote! {
                 ::core::result::Result::Ok(#name::#ident(s.into()))
             };
+            is_default_generic_over_lifetime = contains_lifetime(&field.ty);
+
             continue;
         }
 
@@ -143,56 +152,60 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
     };
 
-    let from_str = quote! {
-        #[allow(clippy::use_self)]
-        impl #impl_generics ::core::str::FromStr for #name #ty_generics #where_clause {
-            type Err = #strum_module_path::ParseError;
-            fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
-                #phf_body
-                #standard_match_body
+    let error_ty = if default_kw.is_some() {
+        quote! { ::core::convert::Infallible }
+    } else {
+        quote! { #strum_module_path::ParseError }
+    };
+
+    let from_str_owned = if !is_default_generic_over_lifetime {
+        quote! {
+            #[allow(clippy::use_self)]
+            impl #impl_generics ::core::str::FromStr for #name #ty_generics #where_clause {
+                type Err = #error_ty;
+                fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
+                    ::core::convert::TryFrom::try_from(s)
+                }
+            }
+        }
+    } else {
+        TokenStream::default()
+    };
+
+    let str_lifetime = if is_default_generic_over_lifetime {
+        ast.generics.lifetimes().next().map(|param| &param.lifetime)
+    } else {
+        None
+    };
+
+    let from_str = if default_kw.is_some() {
+        quote! {
+            impl #impl_generics From<& #str_lifetime str> for #name #ty_generics #where_clause {
+                fn from(s: & #str_lifetime str) -> #name #ty_generics {
+                    let result: Result<_, ::core::convert::Infallible> = (|| {
+                        #phf_body
+                        #standard_match_body
+                    })();
+
+                    result.unwrap()
+                }
+            }
+        }
+    } else {
+        quote! {
+            #[allow(clippy::use_self)]
+            impl #impl_generics ::core::convert::TryFrom<& #str_lifetime str> for #name #ty_generics #where_clause {
+                type Error = #error_ty;
+                fn try_from(s: & #str_lifetime str) -> ::core::result::Result< #name #ty_generics, <Self as ::core::convert::TryFrom<& #str_lifetime str>>::Error> {
+                    #phf_body
+                    #standard_match_body
+                }
             }
         }
     };
-    let try_from_str = try_from_str(
-        name,
-        &impl_generics,
-        &ty_generics,
-        where_clause,
-        &strum_module_path,
-    );
 
     Ok(quote! {
+        #from_str_owned
         #from_str
-        #try_from_str
     })
-}
-
-#[rustversion::before(1.34)]
-fn try_from_str(
-    _name: &proc_macro2::Ident,
-    _impl_generics: &syn::ImplGenerics,
-    _ty_generics: &syn::TypeGenerics,
-    _where_clause: Option<&syn::WhereClause>,
-    _strum_module_path: &syn::Path,
-) -> TokenStream {
-    Default::default()
-}
-
-#[rustversion::since(1.34)]
-fn try_from_str(
-    name: &proc_macro2::Ident,
-    impl_generics: &syn::ImplGenerics,
-    ty_generics: &syn::TypeGenerics,
-    where_clause: Option<&syn::WhereClause>,
-    strum_module_path: &syn::Path,
-) -> TokenStream {
-    quote! {
-        #[allow(clippy::use_self)]
-        impl #impl_generics ::core::convert::TryFrom<&str> for #name #ty_generics #where_clause {
-            type Error = #strum_module_path::ParseError;
-            fn try_from(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<&str>>::Error> {
-                ::core::str::FromStr::from_str(s)
-            }
-        }
-    }
 }

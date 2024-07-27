@@ -28,6 +28,15 @@ enum Color {
     White(String),
 }
 
+#[derive(Debug, Eq, PartialEq, EnumString)]
+#[strum(serialize_all = "UPPERCASE")]
+enum HttpMethod<'a> {
+    Get,
+    Post,
+    #[strum(default)]
+    Unrecognized(&'a str),
+}
+
 #[rustversion::since(1.34)]
 fn assert_from_str<'a, T>(a: T, from: &'a str)
 where
@@ -228,4 +237,11 @@ fn color_default_with_white() {
             panic!("Failed t o get  correct enum value {:?}", other);
         }
     }
+}
+
+#[test]
+fn http_method_from() {
+    assert_eq!(HttpMethod::Get, HttpMethod::from("GET"));
+    assert_eq!(HttpMethod::Post, HttpMethod::from("POST"));
+    assert_eq!(HttpMethod::Unrecognized("HEAD"), HttpMethod::from("HEAD"));
 }

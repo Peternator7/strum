@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::borrow::Cow;
 use strum::EnumIs;
 
@@ -28,12 +30,9 @@ enum Foo {
 }
 #[test]
 fn generics_test() {
-    let foo = LifeTimeTest::One(Cow::Borrowed("Hello"));
-    assert!(foo.is_one());
-    let foo = LifeTimeTest::Two("Hello");
-    assert!(foo.is_two());
-    let foo = LifeTimeTest::One(Cow::Owned("Hello".to_string()));
-    assert!(foo.is_one());
+    assert!(LifeTimeTest::One(Cow::Borrowed("Hello")).is_one());
+    assert!(LifeTimeTest::Two("Hello").is_two());
+    assert!(LifeTimeTest::One(Cow::Owned("Hello".to_string())).is_one());
 }
 #[test]
 fn simple_test() {
@@ -47,19 +46,19 @@ fn named_0() {
 
 #[test]
 fn named_1() {
-    let foo = Foo::Named1 {
-        _a: Default::default(),
-    };
-    assert!(foo.is_named_1());
+    assert!(Foo::Named1 {
+        _a: Default::default()
+    }
+    .is_named_1());
 }
 
 #[test]
 fn named_2() {
-    let foo = Foo::Named2 {
+    assert!(Foo::Named2 {
         _a: Default::default(),
-        _b: Default::default(),
-    };
-    assert!(foo.is_named_2());
+        _b: Default::default()
+    }
+    .is_named_2());
 }
 
 #[test]
@@ -69,14 +68,12 @@ fn unnamed_0() {
 
 #[test]
 fn unnamed_1() {
-    let foo = Foo::Unnamed1(Default::default());
-    assert!(foo.is_unnamed_1());
+    assert!(Foo::Unnamed1(Default::default()).is_unnamed_1());
 }
 
 #[test]
 fn unnamed_2() {
-    let foo = Foo::Unnamed2(Default::default(), Default::default());
-    assert!(foo.is_unnamed_2());
+    assert!(Foo::Unnamed2(Default::default(), Default::default()).is_unnamed_2());
 }
 
 #[test]

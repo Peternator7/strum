@@ -19,23 +19,24 @@ enum Foo {
 
 #[test]
 fn unnamed_0() {
-    let foo = Foo::Unnamed0();
-    assert_eq!(Some(()), foo.try_as_unnamed_0());
+    assert_eq!(Some(()), Foo::Unnamed0().try_as_unnamed_0());
 }
 
 #[test]
 fn unnamed_1() {
-    let foo = Foo::Unnamed1(128);
-    assert_eq!(Some(&128), foo.try_as_unnamed_1_ref());
+    assert_eq!(Some(&128), Foo::Unnamed1(128).try_as_unnamed_1_ref());
 }
 
 #[test]
 fn unnamed_2() {
-    let foo = Foo::Unnamed2(true, String::from("Hay"));
-    assert_eq!(Some((true, String::from("Hay"))), foo.try_as_unnamed_2());
+    assert_eq!(
+        Some((true, String::from("Hay"))),
+        Foo::Unnamed2(true, String::from("Hay")).try_as_unnamed_2()
+    );
 }
 
 #[test]
+#[allow(clippy::disallowed_names)]
 fn can_mutate() {
     let mut foo = Foo::Unnamed1(128);
     if let Some(value) = foo.try_as_unnamed_1_mut() {
@@ -46,6 +47,5 @@ fn can_mutate() {
 
 #[test]
 fn doesnt_match_other_variations() {
-    let foo = Foo::Unnamed1(66);
-    assert_eq!(None, foo.try_as_unnamed_0());
+    assert_eq!(None, Foo::Unnamed1(66).try_as_unnamed_0());
 }

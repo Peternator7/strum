@@ -42,6 +42,5 @@ pub fn enum_is_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         impl #impl_generics #enum_name  #ty_generics #where_clause {
             #(#variants)*
         }
-    }
-    .into())
+    })
 }

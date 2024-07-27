@@ -1,4 +1,4 @@
-#![allow(deprecated)]
+#![allow(deprecated, clippy::to_string_trait_impl)]
 
 use std::str::FromStr;
 use std::string::ToString;
