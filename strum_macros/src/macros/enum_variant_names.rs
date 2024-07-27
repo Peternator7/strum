@@ -20,10 +20,16 @@ pub fn enum_variant_names_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let names = variants
         .iter()
-        .map(|v| {
-            let props = v.get_variant_properties()?;
-            Ok(props
-                .get_preferred_name(type_properties.case_style, type_properties.prefix.as_ref()))
+        .filter_map(|v| {
+            let properties = v.get_variant_properties();
+            match properties {
+                Ok(props) if props.disabled.is_none() => Some(Ok(props.get_preferred_name(
+                    type_properties.case_style,
+                    type_properties.prefix.as_ref(),
+                ))),
+                Ok(_) => None,
+                Err(error) => Some(Err(error)),
+            }
         })
         .collect::<syn::Result<Vec<LitStr>>>()?;
 
