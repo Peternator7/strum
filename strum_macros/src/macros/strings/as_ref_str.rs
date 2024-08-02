@@ -99,7 +99,7 @@ pub fn as_static_str_inner(
                 }
             }
         },
-        GenerateTraitVariant::From => quote! {
+        GenerateTraitVariant::From if !type_properties.const_into_str => quote! {
             impl #impl_generics ::core::convert::From<#name #ty_generics> for &'static str #where_clause {
                 fn from(x: #name #ty_generics) -> &'static str {
                     match x {
@@ -112,6 +112,28 @@ pub fn as_static_str_inner(
                     match *x {
                         #(#arms3),*
                     }
+                }
+            }
+        },
+        GenerateTraitVariant::From  => quote! {
+            impl #impl_generics #name #ty_generics #where_clause {
+                pub const fn into_str(&self) -> &'static str {
+                    match self {
+                        #(#arms3),*
+                    }
+                }
+            }
+
+            impl #impl_generics ::core::convert::From<#name #ty_generics> for &'static str #where_clause {
+                fn from(x: #name #ty_generics) -> &'static str {
+                    match x {
+                        #(#arms2),*
+                    }
+                }
+            }
+            impl #impl_generics2 ::core::convert::From<&'_derivative_strum #name #ty_generics> for &'static str #where_clause {
+                fn from(x: &'_derivative_strum #name #ty_generics) -> &'static str {
+                    x.into_str()
                 }
             }
         },
