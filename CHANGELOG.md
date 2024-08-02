@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.26.4 (strum_macros)
+
+* [#360](https://github.com/Peternator7/strum/pull/360): Fixes bug introduced with new string interpolation feature where
+  unit structs took an implicit unnecessary dependency on `::core::alloc`.
+
+## 0.26.3 (strum_macros)
+
+* [#344](https://github.com/Peternator7/strum/pull/344): Hide `EnumTable` because it's going to be deprecated in the next
+  version.
+* [#357](https://github.com/Peternator7/strum/pull/357): Fixes an incompatiblity with `itertools` by using the fully
+  qualified name rather than the inherent method.
+* [#345](https://github.com/Peternator7/strum/pull/345): Allows unnamed tuple like variants to use their variants in
+  string interpolation. `#[strum(to_string = "Field 0: {0}, Field 1: {1})")]` will now work for tuple variants
+
 ## 0.26.2
 
 * [#337](https://github.com/Peternator7/strum/pull/337): Fix missing generic impls for `EnumTryAs`
