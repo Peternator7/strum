@@ -22,6 +22,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     // Derives for the generated enum
     let type_properties = ast.get_type_properties()?;
+    let strum_module_path = type_properties.crate_module_path();
 
     let derives = type_properties.discriminant_derives;
 
@@ -163,6 +164,10 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         #(#[ #pass_though_attributes ])*
         #discriminants_vis enum #discriminants_name {
             #(#discriminants),*
+        }
+
+        impl #impl_generics #strum_module_path::EnumDiscriminants for #name #ty_generics #where_clause {
+            type Discriminants = #discriminants_name;
         }
 
         #impl_from
