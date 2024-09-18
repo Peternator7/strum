@@ -18,6 +18,8 @@ pub mod kw {
     custom_keyword!(serialize_all);
     custom_keyword!(use_phf);
     custom_keyword!(prefix);
+    custom_keyword!(parse_err_ty);
+    custom_keyword!(parse_err_fn);
 
     // enum discriminant metadata
     custom_keyword!(derive);
@@ -51,6 +53,14 @@ pub enum EnumMeta {
         kw: kw::prefix,
         prefix: LitStr,
     },
+    ParseErrTy {
+        kw: kw::parse_err_ty,
+        path: Path,
+    },
+    ParseErrFn {
+        kw: kw::parse_err_fn,
+        path: Path,
+    },
 }
 
 impl Parse for EnumMeta {
@@ -80,6 +90,20 @@ impl Parse for EnumMeta {
             input.parse::<Token![=]>()?;
             let prefix = input.parse()?;
             Ok(EnumMeta::Prefix { kw, prefix })
+        } else if lookahead.peek(kw::parse_err_ty) {
+            let kw = input.parse::<kw::parse_err_ty>()?;
+            input.parse::<Token![=]>()?;
+            let path_str: LitStr = input.parse()?;
+            let path_tokens = parse_str(&path_str.value())?;
+            let path = parse2(path_tokens)?;
+            Ok(EnumMeta::ParseErrTy { kw, path })
+        } else if lookahead.peek(kw::parse_err_fn) {
+            let kw = input.parse::<kw::parse_err_fn>()?;
+            input.parse::<Token![=]>()?;
+            let path_str: LitStr = input.parse()?;
+            let path_tokens = parse_str(&path_str.value())?;
+            let path = parse2(path_tokens)?;
+            Ok(EnumMeta::ParseErrFn { kw, path })
         } else {
             Err(lookahead.error())
         }
