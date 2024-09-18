@@ -229,3 +229,36 @@ fn color_default_with_white() {
         }
     }
 }
+
+#[derive(Debug, EnumString)]
+#[strum(
+    parse_err_fn = "some_enum_not_found_err",
+    parse_err_ty = "CaseCustomParseErrorNotFoundError"
+)]
+enum CaseCustomParseErrorEnum {
+    #[strum(serialize = "red")]
+    Red,
+    #[strum(serialize = "blue")]
+    Blue,
+}
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+struct CaseCustomParseErrorNotFoundError(String);
+impl std::fmt::Display for CaseCustomParseErrorNotFoundError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "not found `{}`", self.0)
+    }
+}
+impl std::error::Error for CaseCustomParseErrorNotFoundError {}
+fn some_enum_not_found_err(s: &str) -> CaseCustomParseErrorNotFoundError {
+    CaseCustomParseErrorNotFoundError(s.to_string())
+}
+
+#[test]
+fn case_custom_parse_error() {
+    let r = "yellow".parse::<CaseCustomParseErrorEnum>();
+    assert!(r.is_err());
+    assert_eq!(
+        CaseCustomParseErrorNotFoundError("yellow".to_string()),
+        r.unwrap_err()
+    );
+}
