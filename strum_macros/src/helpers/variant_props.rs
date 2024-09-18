@@ -9,7 +9,7 @@ pub trait HasStrumVariantProperties {
     fn get_variant_properties(&self) -> syn::Result<StrumVariantProperties>;
 }
 
-#[derive(Clone, Eq, PartialEq, Debug, Default)]
+#[derive(Clone, Default)]
 pub struct StrumVariantProperties {
     pub disabled: Option<kw::disabled>,
     pub default: Option<kw::default>,
