@@ -166,8 +166,12 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             #(#discriminants),*
         }
 
-        impl #impl_generics #strum_module_path::EnumDiscriminants for #name #ty_generics #where_clause {
-            type Discriminants = #discriminants_name;
+        impl #impl_generics #strum_module_path::IntoDiscriminant for #name #ty_generics #where_clause {
+            type Discriminant = #discriminants_name;
+
+            fn discriminant(&self) -> Self::Discriminant {
+                <Self::Discriminant as ::core::convert::From<&Self>>::from(self)
+            }
         }
 
         #impl_from
