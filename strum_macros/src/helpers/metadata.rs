@@ -295,7 +295,6 @@ fn get_metadata_inner<'a, T: Parse>(
         })
 }
 
-#[derive(Debug)]
 pub enum InnerVariantMeta {
     DefaultWith { kw: kw::default_with, value: LitStr },
 }
