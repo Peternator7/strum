@@ -58,7 +58,7 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         // Error on variants with data
-        if variant.fields != Fields::Unit {
+        if !matches!(variant.fields, Fields::Unit) {
             return Err(syn::Error::new(
                 variant.fields.span(),
                 "`EnumTable` doesn't support enums with non-unit variants",
