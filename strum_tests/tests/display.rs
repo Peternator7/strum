@@ -129,3 +129,27 @@ fn non_string_default_to_string() {
         format!("{:04}", NonStringDefault::Number(14))
     );
 }
+
+#[derive(Debug, strum::Display)]
+enum Color2<'a> {
+    #[strum(to_string = "{foo:bar} { ---- }")]
+    Red,
+    #[strum(to_string = "{0} {1} {{")]
+    Blue(&'a str, u8),
+    #[strum(to_string = "{red} {blue} {green} {{")]
+    Green { red: u8, blue: u8, green: u8 },
+}
+#[test]
+fn to_string_with_placeholder() {
+    assert_eq!("{foo:bar} { ---- }", Color2::Red.to_string());
+    assert_eq!("foo 123 {", Color2::Blue("foo", 123).to_string());
+    assert_eq!(
+        "0 0 255 {",
+        Color2::Green {
+            red: 0,
+            blue: 0,
+            green: 255
+        }
+        .to_string()
+    );
+}
