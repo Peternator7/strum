@@ -41,9 +41,16 @@ fn crate_module_path_test() {
     enum Test {
         #[strum(props(key = "value"))]
         A,
+        #[strum(props(answer = 42))]
         B,
+        #[strum(props(to_be = false))]
+        C,
     }
 
     let a = Test::A;
     assert_eq!("value", a.get_str("key").unwrap());
+    let b = Test::B;
+    assert_eq!(42, b.get_int("answer").unwrap());
+    let c = Test::C;
+    assert_eq!(false, c.get_bool("to_be").unwrap());
 }
