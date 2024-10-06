@@ -1,6 +1,6 @@
 [package]
 name = "strum"
-version = "0.26.2"
+version = "0.26.3"
 edition = "2018"
 authors = ["Peter Glotfelty <peter.glotfelty@microsoft.com>"]
 license = "MIT"
