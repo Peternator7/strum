@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use proc_macro2::{TokenStream};
 use quote::{format_ident, quote, ToTokens};
 use syn::{Data, DeriveInput};
@@ -26,6 +27,8 @@ pub fn enum_assign_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let mut variant_enums: Vec<_> = Vec::new();
     let mut variant_structs: Vec<_> = Vec::new();
     let mut variant_inner_structs: Vec<_> = Vec::new();
+
+    let mut all_types: Vec<_> = Vec::new();
 
     let _variants: Vec<_> = variants
         .iter()
@@ -64,43 +67,11 @@ pub fn enum_assign_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 });
             }
 
-            /*
-            let _fields = match &variant.fields {
-                Fields::Named(named) => {
-                    let mut args: Vec<_> = Vec::new();
-                    for field in named.named.iter() {
-                        let var = field.clone().ident.unwrap();
-                        let fd = field.ty.to_token_stream();
-                        args.push(quote! {
-                            pub #var: #fd,
-                        })
-                    }
-                    types.push(quote! {
-                            #(#args)*
-                    });
-                    quote! { (..) }
-                }
-                Fields::Unnamed(unamed) => {
-                    let mut args: Vec<_> = Vec::new();
-                    for (i, field) in unamed.unnamed.iter().enumerate() {
-                        let var = format_ident!("var_{}", i);
-                        let fd = field.ty.to_token_stream();
-                        args.push( quote! {
-                            pub #var: #fd,
-                        } )
-                    }
-                    types.push(quote! {
-                        #(#args)*
-                    });
-                    quote! { (..) }
-                }
-                Fields::Unit => {
-                    quote! {}
-                }
-            };
-            */
-
             if variant_args.len() > 0 {
+                all_types.push(quote! {
+                    (#(#types),*)
+                });
+
                 variant_enums.push(quote! {
                     #variant_ident(#enum_name_structs::#enum_name_variant_struct),
                 });
@@ -125,7 +96,22 @@ pub fn enum_assign_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         })
                 .collect();
 
+    all_types.dedup_by(|t1, t2| {
+        t1.to_string().eq(&t2.to_string())
+    });
+
+    let mut temp: HashSet<_> = HashSet::new();
+    let all_types: Vec<_> = all_types.iter().filter_map(|ty| {
+        let tys = ty.to_string();
+        let id = format_ident!("{}", tys.replace(&[',', '(', ')', ':', '<', '>', '?', '[', ']', '{', '}', '|'], "").trim().replace(&[' '], "_").to_lowercase());
+        if !temp.insert(tys) {
+            return None;
+        }
+        Some(quote! { #id })
+    }).collect();
     Ok(quote! {
+        #(#all_types)*
+
         #derives
         pub enum #enum_name_struct {
             #(#variant_enums)*
