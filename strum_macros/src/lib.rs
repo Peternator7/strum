@@ -18,6 +18,7 @@ mod macros;
 use proc_macro2::TokenStream;
 use std::env;
 use syn::DeriveInput;
+use crate::macros::enum_assign::enum_assign_inner;
 
 fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
     let debug = env::var("STRUM_DEBUG");
@@ -30,6 +31,15 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
             println!("{}", toks);
         }
     }
+}
+
+#[proc_macro_derive(EnumAssign, attributes(strum))]
+pub fn enum_assign(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks = enum_assign_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
 }
 
 /// Converts strings to enum variants based on their name.

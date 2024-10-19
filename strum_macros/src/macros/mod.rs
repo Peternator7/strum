@@ -10,6 +10,8 @@ pub mod enum_variant_array;
 pub mod enum_variant_names;
 pub mod from_repr;
 
+pub mod enum_assign;
+
 mod strings;
 
 pub use self::strings::as_ref_str;
