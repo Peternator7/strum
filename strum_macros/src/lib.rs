@@ -39,7 +39,6 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 ///
 /// # Example how to use `EnumGroups`
 /// ```
-/// use strum_macros::EnumGroups;
 /// #[derive(EnumGroups)]
 /// enum Foo {
 ///     Unit(),
@@ -53,8 +52,8 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 ///     },
 ///     Group2_1(Option<u128>, bool),
 ///     Group2_2(Option<u128>, bool),
-///     Group3_1(bool),
-///     Group3_2(bool),
+///     Enabled(bool),
+///     Error(ErrorString),
 ///     #[strum(disabled)]
 ///     #[allow(dead_code)]
 ///     Disabled(bool),
@@ -62,19 +61,21 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 ///
 /// /*
 /// // Example of the generated code:
-/// #[derive(Debug, PartialEq, Eq,)]
+/// #[derive(Debug, PartialEq, Eq)]
 /// pub struct FooGroups {
 ///     g_u32_string: Option<(u32, String)>,
-///     g_option_u128__bool: Option <(Option<u128>, bool)>,
+///     g_option_u128__bool: Option<(Option<u128>, bool)>,
 ///     g_bool: Option<(bool)>,
+///     g_errorstring: Option<(ErrorString)>,
 /// }
 /// impl Foo {
 ///     fn get_groups(&self) -> FooGroups {
 ///         let mut g = FooGroups {
 ///             g_u32_string: None,
 ///             g_option_u128__bool: None,
-///             g_bool: None
-///             };
+///             g_bool: None,
+///             g_errorstring: None,
+///         };
 ///         match self {
 ///             Foo::Group1_1 { _a, _b } =>
 ///                 { g.g_u32_string = Some((_a.clone(), _b.clone())); }
@@ -84,10 +85,10 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 ///                 { g.g_option_u128__bool = Some((_0.clone(), _1.clone())); }
 ///             Foo::Group2_2(_0, _1) =>
 ///                 { g.g_option_u128__bool = Some((_0.clone(), _1.clone())); }
-///             Foo::Group3_1(_0) =>
+///             Foo::Enabled(_0) =>
 ///                 { g.g_bool = Some((_0.clone())); }
-///             Foo::Group3_2(_0) =>
-///                 { g.g_bool = Some((_0.clone())); }
+///             Foo::Error(_0) =>
+///                 { g.g_errorstring = Some((_0.clone())); }
 ///             _ => {}
 ///         }
 ///         return g;
@@ -111,6 +112,12 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// // there is another variant with the same args.
 /// let e3 = Foo::Disabled(true);
 /// assert_ne!(true, e3.get_groups().g_bool.unwrap());
+///
+/// // Create different groups my using custom types.
+/// type ErrorString = String;
+///
+/// let e4 = Foo::Error("MyError".to_string());
+/// assert_eq!("MyError", e4.get_groups().g_errorstring.unwrap());
 ///```
 ///
 #[proc_macro_derive(EnumGroups, attributes(strum))]
