@@ -247,7 +247,7 @@ Received a number of bug fix PR's.
 * [#171](https://github.com/Peternator7/strum/pull/171): Improve `no-std` support. 
 
 * [#170](https://github.com/Peternator7/strum/pull/170): enable changing the path to strum traits. This is necessary
-  if you re-export strum as a submodule in another crate.
+  if you re-export strum as a submodule in Another crate.
 
 ## 0.21.1
 

@@ -10,7 +10,7 @@ pub mod enum_variant_array;
 pub mod enum_variant_names;
 pub mod from_repr;
 
-pub mod enum_assign;
+pub mod enum_groups;
 
 mod strings;
 

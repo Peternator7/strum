@@ -1,19 +1,19 @@
-use strum_macros::EnumAssign;
-#[derive(EnumAssign)]
+use strum_macros::EnumGroups;
+#[derive(EnumGroups)]
 enum Foo {
     Unit(),
-    Named0(),
-    Named1 {
-        _a: char,
-    },
-    Named2 {
+    Group1_1 {
         _a: u32,
         _b: String,
     },
-    Unnamed0(),
-    Unnamed1(Option<u128>),
-    Unnamed2(bool, u8),
-    MultiWordName(),
+    Group1_2 {
+        _c: u32,
+        _d: String,
+    },
+    Group2_1(Option<u128>, bool),
+    Group2_2(Option<u128>, bool),
+    Group3_1(bool),
+    Group3_2(bool),
     #[strum(disabled)]
     #[allow(dead_code)]
     Disabled(bool),
@@ -21,9 +21,19 @@ enum Foo {
 
 #[test]
 fn test_func() {
-    let n1 = Foo::Named1 { _a: 'a' };
+    // if you are confident in the results you may call `.unwrap()`
+    let e1 = Foo::Group2_1(Some(5), true);
+    assert_eq!((Some(5), true), e1.get_groups().g_option_u128__bool.unwrap());
 
-    if let Some(g) = n1.groups().g_char {
-        println!("{}", g);
+    // otherwise you may use a `if let Some(var) = ...`
+    let e2 = Foo::Group1_1 { _a: 0, _b: "Hello".to_string() };
+    if let Some((u, s)) = e2.get_groups().g_u32_string {
+        assert_eq!((0, "Hello".to_string()), (u, s))
     }
+
+    // Disabled Units will not get added to a group.
+    // and will not have a group generated for them unless
+    // there is another variant with the same args.
+    let e3 = Foo::Disabled(true);
+    assert_eq!(true, e3.get_groups().g_bool.is_none());
 }

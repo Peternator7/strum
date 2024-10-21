@@ -1,15 +1,16 @@
 use std::collections::HashSet;
-use proc_macro2::{TokenStream};
+
+use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
-use syn::{Data, DeriveInput, parse_quote};
+use syn::{Data, DeriveInput};
+
 use crate::helpers::{HasStrumVariantProperties, HasTypeProperties, non_enum_error};
 
-pub fn enum_assign_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
+pub fn enum_groups_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let variants = match &ast.data {
         Data::Enum(v) => &v.variants,
         _ => return Err(non_enum_error()),
     };
-   let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
     let type_properties = ast.get_type_properties()?;
 
@@ -20,14 +21,16 @@ pub fn enum_assign_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     };
 
     let enum_name = &ast.ident;
-    let enum_name_group = format_ident!("{}Group", enum_name);
+    let enum_name_group = format_ident!("{}Groups", enum_name);
 
     let mut all_types: Vec<_> = Vec::new();
 
     let _variants: Vec<_> = variants
         .iter()
         .filter_map(|variant| {
-            if variant.get_variant_properties().ok()?.disabled.is_some() {
+            let variant_properties = variant.get_variant_properties();
+
+            if variant_properties.ok()?.disabled.is_some() {
                 return None;
             }
 
@@ -65,9 +68,8 @@ pub fn enum_assign_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let mut temp: HashSet<_> = HashSet::new();
     let groups: Vec<_> = all_types.iter().filter_map(|(ident, args, ty, is_named)| {
         let tys = ty.to_string().trim().to_lowercase();
-        if !temp.insert(tys.clone()) { return None; }
         let id = format_ident!("g_{}", tys
-            .replace(&[',', '(', ')', ':', '<', '>', '?', '[', ']', '{', '}', '|'], "")
+            .replace(&[',', '(', ')', ':', '<', '>', '?', '[', ']', '{', '}'], "")
             .replace(&[' '], "_")
             .replace("__", "_"));
         let ref_args = quote! { (#(#args.clone()),*) };
@@ -82,6 +84,8 @@ pub fn enum_assign_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
         arms.push(arm);
+        if !temp.insert(tys.clone()) { return None; }
+
         struct_groups.push(quote! {
             #id: Option<#ty>,
         });
@@ -96,13 +100,13 @@ pub fn enum_assign_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         impl #enum_name {
-            fn groups(&self) -> #enum_name_group {
+            fn get_groups(&self) -> #enum_name_group {
                 let mut g = #enum_name_group {
                     #(#groups: None),*
                 };
                 match self {
                     #(#arms)*
-                    _ => { return g; }
+                    _ => {}
                 }
                 return g;
             }

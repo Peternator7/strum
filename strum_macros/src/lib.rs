@@ -18,7 +18,6 @@ mod macros;
 use proc_macro2::TokenStream;
 use std::env;
 use syn::DeriveInput;
-use crate::macros::enum_assign::enum_assign_inner;
 
 fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
     let debug = env::var("STRUM_DEBUG");
@@ -33,11 +32,92 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
     }
 }
 
-#[proc_macro_derive(EnumAssign, attributes(strum))]
-pub fn enum_assign(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+/// Groups enum variant arguments into a struct.
+///
+/// implements `get_groups()` function on enum that returns `EnumGroups` struct (this is auto-generated based on the enum argument types).
+/// Each enum variant will match and convert its arguments into the `EnumGroups` struct.
+///
+/// # Example how to use `EnumGroups`
+/// ```
+/// use strum_macros::EnumGroups;
+/// #[derive(EnumGroups)]
+/// enum Foo {
+///     Unit(),
+///     Group1_1 {
+///         _a: u32,
+///         _b: String,
+///     },
+///     Group1_2 {
+///         _c: u32,
+///         _d: String,
+///     },
+///     Group2_1(Option<u128>, bool),
+///     Group2_2(Option<u128>, bool),
+///     Group3_1(bool),
+///     Group3_2(bool),
+///     #[strum(disabled)]
+///     #[allow(dead_code)]
+///     Disabled(bool),
+/// }
+///
+/// /*
+/// // Example of the generated code:
+/// #[derive(Debug, PartialEq, Eq,)]
+/// pub struct FooGroups {
+///     g_u32_string: Option<(u32, String)>,
+///     g_option_u128__bool: Option <(Option<u128>, bool)>,
+///     g_bool: Option<(bool)>,
+/// }
+/// impl Foo {
+///     fn get_groups(&self) -> FooGroups {
+///         let mut g = FooGroups {
+///             g_u32_string: None,
+///             g_option_u128__bool: None,
+///             g_bool: None
+///             };
+///         match self {
+///             Foo::Group1_1 { _a, _b } =>
+///                 { g.g_u32_string = Some((_a.clone(), _b.clone())); }
+///             Foo::Group1_2 { _c, _d } =>
+///                 { g.g_u32_string = Some((_c.clone(), _d.clone())); }
+///             Foo::Group2_1(_0, _1) =>
+///                 { g.g_option_u128__bool = Some((_0.clone(), _1.clone())); }
+///             Foo::Group2_2(_0, _1) =>
+///                 { g.g_option_u128__bool = Some((_0.clone(), _1.clone())); }
+///             Foo::Group3_1(_0) =>
+///                 { g.g_bool = Some((_0.clone())); }
+///             Foo::Group3_2(_0) =>
+///                 { g.g_bool = Some((_0.clone())); }
+///             _ => {}
+///         }
+///         return g;
+///     }
+/// }
+/// */
+///
+///
+/// // if you are confident in the results you may call `.unwrap()`///
+/// let e1 = Foo::Group2_1(Some(5), true);///
+/// assert_eq!((Some(5), true), e1.get_groups().g_option_u128__bool.unwrap());
+///
+/// // otherwise you may use a `if let Some(var) = ...`
+/// let e2 = Foo::Group1_1 { _a: 0, _b: "Hello".to_string() };
+/// if let Some((u, s)) = e2.get_groups().g_u32_string {
+/// assert_eq!((0, "Hello".to_string()), (u, s))
+/// }
+///
+/// // Disabled Units will not get added to a group.
+/// // and will not have a group generated for them unless
+/// // there is another variant with the same args.
+/// let e3 = Foo::Disabled(true);
+/// assert_ne!(true, e3.get_groups().g_bool.unwrap());
+///```
+///
+#[proc_macro_derive(EnumGroups, attributes(strum))]
+pub fn enum_groups(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
-    let toks = enum_assign_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
+    let toks = macros::enum_groups::enum_groups_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
     debug_print_generated(&ast, &toks);
     toks.into()
 }
