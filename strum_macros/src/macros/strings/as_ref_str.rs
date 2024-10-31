@@ -55,6 +55,7 @@ pub fn as_ref_str_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let arms = get_arms(ast)?;
     Ok(quote! {
         impl #impl_generics ::core::convert::AsRef<str> for #name #ty_generics #where_clause {
+            #[inline]
             fn as_ref(&self) -> &str {
                 match *self {
                     #(#arms),*
@@ -92,6 +93,7 @@ pub fn as_static_str_inner(
     Ok(match trait_variant {
         GenerateTraitVariant::AsStaticStr => quote! {
             impl #impl_generics #strum_module_path::AsStaticRef<str> for #name #ty_generics #where_clause {
+                #[inline]
                 fn as_static(&self) -> &'static str {
                     match *self {
                         #(#arms),*
@@ -101,6 +103,7 @@ pub fn as_static_str_inner(
         },
         GenerateTraitVariant::From => quote! {
             impl #impl_generics ::core::convert::From<#name #ty_generics> for &'static str #where_clause {
+                #[inline]
                 fn from(x: #name #ty_generics) -> &'static str {
                     match x {
                         #(#arms2),*
@@ -108,6 +111,7 @@ pub fn as_static_str_inner(
                 }
             }
             impl #impl_generics2 ::core::convert::From<&'_derivative_strum #name #ty_generics> for &'static str #where_clause {
+                #[inline]
                 fn from(x: &'_derivative_strum #name #ty_generics) -> &'static str {
                     match *x {
                         #(#arms3),*
