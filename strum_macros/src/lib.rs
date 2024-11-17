@@ -3,6 +3,10 @@
 //! Strum is a set of macros and traits for working with
 //! enums and strings easier in Rust.
 //!
+//! This crate only contains derive macros for use with the
+//! [`strum`](https://docs.rs/strum)
+//! crate.  The macros provied by this crate are also available by
+//! enabling the `derive` feature in aforementioned `strum` crate.
 
 #![recursion_limit = "128"]
 
@@ -44,13 +48,13 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// variant. There is an option to match on different case conversions through the
 /// `#[strum(serialize_all = "snake_case")]` type attribute.
 ///
-/// See the [Additional Attributes](https://docs.rs/strum/0.22/strum/additional_attributes/index.html)
+/// See the [Additional Attributes](https://docs.rs/strum/latest/strum/additional_attributes/index.html)
 /// Section for more information on using this feature.
 ///
 /// If you have a large enum, you may want to consider using the `use_phf` attribute here. It leverages
 /// perfect hash functions to parse much quicker than a standard `match`. (MSRV 1.46)
 ///
-/// # Example howto use `EnumString`
+/// # Example how to use `EnumString`
 /// ```
 /// use std::str::FromStr;
 /// use strum_macros::EnumString;
@@ -118,11 +122,14 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-/// Converts enum variants to `&'static str`.
+/// Converts enum variants to `&'a str`, where `'a` is the lifetime of the input enum reference.
 ///
 /// Implements `AsRef<str>` on your enum using the same rules as
 /// `Display` for determining what string is returned. The difference is that `as_ref()` returns
 /// a `&str` instead of a `String` so you don't allocate any additional memory with each call.
+///
+/// If you require a `&'static str`, you can use
+/// [`strum::IntoStaticStr`](crate::IntoStaticStr) instead.
 ///
 /// ```
 /// // You need to bring the AsRef trait into scope to use it
@@ -152,6 +159,18 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Color::Blue(10).as_ref(),
 ///     Color::Green { range: 42 }.as_ref()
 /// );
+///
+/// // With prefix on all variants
+/// #[derive(AsRefStr, Debug)]
+/// #[strum(prefix = "/")]
+/// enum ColorWithPrefix {
+///     #[strum(serialize = "redred")]
+///     Red,
+///     Green,
+/// }
+///
+/// assert_eq!("/redred", ColorWithPrefix::Red.as_ref());
+/// assert_eq!("/Green", ColorWithPrefix::Green.as_ref());
 /// ```
 #[proc_macro_derive(AsRefStr, attributes(strum))]
 pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -163,18 +182,18 @@ pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-/// Implements `Strum::VariantNames` which adds an associated constant `VARIANTS` which is an array of discriminant names.
+/// Implements `Strum::VariantNames` which adds an associated constant `VARIANTS` which is a `'static` slice of discriminant names.
 ///
 /// Adds an `impl` block for the `enum` that adds a static `VARIANTS` array of `&'static str` that are the discriminant names.
 /// This will respect the `serialize_all` attribute on the `enum` (like `#[strum(serialize_all = "snake_case")]`.
 ///
 /// ```
 /// // import the macros needed
-/// use strum_macros::{EnumString, EnumVariantNames};
+/// use strum_macros::{EnumString};
 /// // You need to import the trait, to have access to VARIANTS
 /// use strum::VariantNames;
 ///
-/// #[derive(Debug, EnumString, EnumVariantNames)]
+/// #[derive(Debug, EnumString, strum_macros::VariantNames)]
 /// #[strum(serialize_all = "kebab-case")]
 /// enum Color {
 ///     Red,
@@ -184,7 +203,7 @@ pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// }
 /// assert_eq!(["red", "blue", "yellow", "rebecca-purple"], Color::VARIANTS);
 /// ```
-#[proc_macro_derive(EnumVariantNames, attributes(strum))]
+#[proc_macro_derive(VariantNames, attributes(strum))]
 pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -194,7 +213,54 @@ pub fn variant_names(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     toks.into()
 }
 
+#[doc(hidden)]
+#[proc_macro_derive(EnumVariantNames, attributes(strum))]
+#[deprecated(
+    since = "0.26.0",
+    note = "please use `#[derive(VariantNames)]` instead"
+)]
+pub fn variant_names_deprecated(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks = macros::enum_variant_names::enum_variant_names_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
+/// Adds a `'static` slice with all of the Enum's variants.
+///
+/// Implements `strum::VariantArray` which adds an associated constant `VARIANTS`.
+/// This constant contains an array with all the variants of the enumerator.
+///
+/// This trait can only be autoderived if the enumerator is composed only of unit-type variants,
+/// meaning that the variants must not have any data.
+///
+/// ```
+/// use strum::VariantArray;
+///
+/// #[derive(VariantArray, Debug, PartialEq, Eq)]
+/// enum Op {
+///     Add,
+///     Sub,
+///     Mul,
+///     Div,
+/// }
+///
+/// assert_eq!(Op::VARIANTS, &[Op::Add, Op::Sub, Op::Mul, Op::Div]);
+/// ```
+#[proc_macro_derive(VariantArray, attributes(strum))]
+pub fn static_variants_array(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks = macros::enum_variant_array::static_variants_array_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
 #[proc_macro_derive(AsStaticStr, attributes(strum))]
+#[doc(hidden)]
 #[deprecated(
     since = "0.22.0",
     note = "please use `#[derive(IntoStaticStr)]` instead"
@@ -282,6 +348,7 @@ pub fn into_static_str(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     since = "0.22.0",
     note = "please use `#[derive(Display)]` instead. See issue https://github.com/Peternator7/strum/issues/132"
 )]
+#[doc(hidden)]
 #[proc_macro_derive(ToString, attributes(strum))]
 pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
@@ -299,9 +366,23 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// choose which serialization to used based on the following criteria:
 ///
 /// 1. If there is a `to_string` property, this value will be used. There can only be one per variant.
-/// 1. Of the various `serialize` properties, the value with the longest length is chosen. If that
+/// 2. Of the various `serialize` properties, the value with the longest length is chosen. If that
 ///    behavior isn't desired, you should use `to_string`.
-/// 1. The name of the variant will be used if there are no `serialize` or `to_string` attributes.
+/// 3. The name of the variant will be used if there are no `serialize` or `to_string` attributes.
+/// 4. If the enum has a `strum(prefix = "some_value_")`, every variant will have that prefix prepended
+///    to the serialization.
+/// 5. Enums with fields support string interpolation.
+///    Note this means the variant will not "round trip" if you then deserialize the string.
+///
+///    ```rust
+///    #[derive(strum_macros::Display)]
+///    pub enum Color {
+///        #[strum(to_string = "saturation is {sat}")]
+///        Red { sat: usize },
+///        #[strum(to_string = "hue is {1}, saturation is {0}")]
+///        Blue(usize, usize),
+///    }
+///    ```
 ///
 /// ```
 /// // You need to bring the ToString trait into scope to use it
@@ -317,6 +398,10 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     },
 ///     Blue(usize),
 ///     Yellow,
+///     #[strum(to_string = "purple with {sat} saturation")]
+///     Purple {
+///         sat: usize,
+///     },
 /// }
 ///
 /// // uses the serialize string for Display
@@ -331,6 +416,9 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///     Color::Blue(10),
 ///     Color::Green { range: 42 }
 /// );
+/// // you can also use named fields in message
+/// let purple = Color::Purple { sat: 10 };
+/// assert_eq!(String::from("purple with 10 saturation"), purple.to_string());
 /// ```
 #[proc_macro_derive(Display, attributes(strum))]
 pub fn display(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -341,10 +429,10 @@ pub fn display(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
-/// Creates a new type that iterates of the variants of an enum.
+/// Creates a new type that iterates over the variants of an enum.
 ///
 /// Iterate over the variants of an Enum. Any additional data on your variants will be set to `Default::default()`.
-/// The macro implements `strum::IntoEnumIterator` on your enum and creates a new type called `YourEnumIter` that is the iterator object.
+/// The macro implements [`strum::IntoEnumIterator`](https://docs.rs/strum/latest/strum/trait.IntoEnumIterator.html) on your enum and creates a new type called `YourEnumIter` that is the iterator object.
 /// You cannot derive `EnumIter` on any type with a lifetime bound (`<'a>`) because the iterator would surely
 /// create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
 ///
@@ -444,6 +532,60 @@ pub fn enum_try_as(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
+/// Creates a new type that maps all the variants of an enum to another generic value.
+///
+/// This macro only supports enums with unit type variants.A new type called `YourEnumTable<T>`. Essentially, it's a wrapper
+/// `[T; YourEnum::Count]` where gets/sets are infallible. Some important caveats to note:
+///
+/// * The size of `YourEnumTable<T>` increases with the number of variants, not the number of values because it's always
+///   fully populated. This means it may not be a good choice for sparsely populated maps.
+///
+/// * Lookups are basically constant time since it's functionally an array index.
+///
+/// * Your variants cannot have associated data. You can use `EnumDiscriminants` to generate an Enum with the same
+///   names to work around this.
+///
+/// # Stability
+///
+/// Several people expressed interest in a data structure like this and pushed the PR through to completion, but the api
+/// seems incomplete, and I reserve the right to deprecate it in the future if it becomes clear the design is flawed.
+///
+/// # Example
+/// ```rust
+/// use strum_macros::EnumTable;
+///
+/// #[derive(EnumTable)]
+/// enum Color {
+///     Red,
+///     Yellow,
+///     Green,
+///     Blue,
+/// }
+///
+/// assert_eq!(ColorTable::default(), ColorTable::new(0, 0, 0, 0));
+/// assert_eq!(ColorTable::filled(2), ColorTable::new(2, 2, 2, 2));
+/// assert_eq!(ColorTable::from_closure(|_| 3), ColorTable::new(3, 3, 3, 3));
+/// assert_eq!(ColorTable::default().transform(|_, val| val + 2), ColorTable::new(2, 2, 2, 2));
+///
+/// let mut complex_map = ColorTable::from_closure(|color| match color {
+///     Color::Red => 0,
+///     _ => 3
+/// });
+///
+/// complex_map[Color::Green] = complex_map[Color::Red];
+/// assert_eq!(complex_map, ColorTable::new(0, 3, 0, 3));
+/// ```
+#[doc(hidden)]
+#[proc_macro_derive(EnumTable, attributes(strum))]
+pub fn enum_table(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks =
+        macros::enum_table::enum_table_inner(&ast).unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
 /// Add a function to enum that allows accessing variants by its discriminant
 ///
 /// This macro adds a standalone function to obtain an enum variant by its discriminant. The macro adds
@@ -452,7 +594,7 @@ pub fn enum_try_as(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// data. The discriminant follows the same rules as `rustc`. The first discriminant is zero and each
 /// successive variant has a discriminant of one greater than the previous variant, except where an
 /// explicit discriminant is specified. The type of the discriminant will match the `repr` type if
-/// it is specifed.
+/// it is specified.
 ///
 /// When the macro is applied using rustc >= 1.46 and when there is no additional data on any of
 /// the variants, the `from_repr` function is marked `const`. rustc >= 1.46 is required
@@ -518,7 +660,6 @@ pub fn enum_try_as(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// assert_eq!(Some(Number::Three), number_from_repr(3));
 /// assert_eq!(None, number_from_repr(4));
 /// ```
-
 #[proc_macro_derive(FromRepr, attributes(strum))]
 pub fn from_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
@@ -533,7 +674,7 @@ pub fn from_repr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// Encode strings into the enum itself. The `strum_macros::EmumMessage` macro implements the `strum::EnumMessage` trait.
 /// `EnumMessage` looks for `#[strum(message="...")]` attributes on your variants.
-/// You can also provided a `detailed_message="..."` attribute to create a seperate more detailed message than the first.
+/// You can also provided a `detailed_message="..."` attribute to create a separate more detailed message than the first.
 ///
 /// `EnumMessage` also exposes the variants doc comments through `get_documentation()`. This is useful in some scenarios,
 /// but `get_message` should generally be preferred. Rust doc comments are intended for developer facing documentation,
@@ -619,7 +760,7 @@ pub fn enum_messages(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 
 /// Add custom properties to enum variants.
 ///
-/// Enables the encoding of arbitary constants into enum variants. This method
+/// Enables the encoding of arbitrary constants into enum variants. This method
 /// currently only supports adding additional string values. Other types of literals are still
 /// experimental in the rustc compiler. The generated code works by nesting match statements.
 /// The first match statement matches on the type of the enum, and the inner match statement
@@ -690,7 +831,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// // Bring trait into scope
 /// use std::str::FromStr;
 /// use strum::{IntoEnumIterator, EnumMessage};
-/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString, EnumMessage};
+/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString};
 ///
 /// #[derive(Debug)]
 /// struct NonDefault;

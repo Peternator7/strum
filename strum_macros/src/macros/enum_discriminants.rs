@@ -22,6 +22,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     // Derives for the generated enum
     let type_properties = ast.get_type_properties()?;
+    let strum_module_path = type_properties.crate_module_path();
 
     let derives = type_properties.discriminant_derives;
 
@@ -40,10 +41,16 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     // Pass through all other attributes
     let pass_though_attributes = type_properties.discriminant_others;
 
+    let repr = type_properties.enum_repr.map(|repr| quote!(#[repr(#repr)]));
+
     // Add the variants without fields, but exclude the `strum` meta item
     let mut discriminants = Vec::new();
     for variant in variants {
         let ident = &variant.ident;
+        let discriminant = variant
+            .discriminant
+            .as_ref()
+            .map(|(_, expr)| quote!( = #expr));
 
         // Don't copy across the "strum" meta attribute. Only passthrough the whitelisted
         // attributes and proxy `#[strum_discriminants(...)]` attributes
@@ -81,7 +88,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        discriminants.push(quote! { #(#attrs)* #ident });
+        discriminants.push(quote! { #(#attrs)* #ident #discriminant});
     }
 
     // Ideally:
@@ -126,6 +133,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let impl_from = quote! {
         impl #impl_generics ::core::convert::From< #name #ty_generics > for #discriminants_name #where_clause {
+            #[inline]
             fn from(val: #name #ty_generics) -> #discriminants_name {
                 #from_fn_body
             }
@@ -143,6 +151,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         quote! {
             impl #impl_generics ::core::convert::From< #enum_life #name #ty_generics > for #discriminants_name #where_clause {
+                #[inline]
                 fn from(val: #enum_life #name #ty_generics) -> #discriminants_name {
                     #from_fn_body
                 }
@@ -153,9 +162,19 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     Ok(quote! {
         /// Auto-generated discriminant enum variants
         #derives
+        #repr
         #(#[ #pass_though_attributes ])*
         #discriminants_vis enum #discriminants_name {
             #(#discriminants),*
+        }
+
+        impl #impl_generics #strum_module_path::IntoDiscriminant for #name #ty_generics #where_clause {
+            type Discriminant = #discriminants_name;
+
+            #[inline]
+            fn discriminant(&self) -> Self::Discriminant {
+                <Self::Discriminant as ::core::convert::From<&Self>>::from(self)
+            }
         }
 
         #impl_from

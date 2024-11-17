@@ -1,8 +1,10 @@
-pub use self::case_style::{CaseStyleHelpers, snakify};
+pub use self::case_style::snakify;
+pub use self::inner_variant_props::HasInnerVariantProperties;
 pub use self::type_props::HasTypeProperties;
 pub use self::variant_props::HasStrumVariantProperties;
 
 pub mod case_style;
+pub mod inner_variant_props;
 mod metadata;
 pub mod type_props;
 pub mod variant_props;
@@ -13,6 +15,14 @@ use syn::spanned::Spanned;
 
 pub fn non_enum_error() -> syn::Error {
     syn::Error::new(Span::call_site(), "This macro only supports enums.")
+}
+
+pub fn non_unit_variant_error() -> syn::Error {
+    syn::Error::new(
+        Span::call_site(),
+        "This macro only supports enums of strictly unit variants. Consider \
+        using it in conjunction with [`EnumDiscriminants`]",
+    )
 }
 
 pub fn strum_discriminants_passthrough_error(span: &impl Spanned) -> syn::Error {

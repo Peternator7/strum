@@ -1,62 +1,31 @@
-use heck::ToShoutySnakeCase;
 use proc_macro2::{Span, TokenStream};
-use quote::{format_ident, quote, ToTokens};
-use syn::{Data, DeriveInput, Fields, PathArguments, Type, TypeParen};
+use quote::{format_ident, quote};
+use syn::{Data, DeriveInput, Fields, Type};
 
-use crate::helpers::{non_enum_error, HasStrumVariantProperties};
+use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
 pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let gen = &ast.generics;
     let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
     let vis = &ast.vis;
-    let attrs = &ast.attrs;
 
     let mut discriminant_type: Type = syn::parse("usize".parse().unwrap()).unwrap();
-    for attr in attrs {
-        let path = attr.path();
-
-        let mut ts = if let Ok(ts) = attr
-            .meta
-            .require_list()
-            .map(|metas| metas.to_token_stream().into_iter())
-        {
-            ts
-        } else {
-            continue;
-        };
-        // Discard the path
-        let _ = ts.next();
-        let tokens: TokenStream = ts.collect();
-
-        if path.leading_colon.is_some() {
-            continue;
-        }
-        if path.segments.len() != 1 {
-            continue;
-        }
-        let segment = path.segments.first().unwrap();
-        if segment.ident != "repr" {
-            continue;
-        }
-        if segment.arguments != PathArguments::None {
-            continue;
-        }
-        let typ_paren = match syn::parse2::<Type>(tokens.clone()) {
-            Ok(Type::Paren(TypeParen { elem, .. })) => *elem,
-            _ => continue,
-        };
-        let inner_path = match &typ_paren {
-            Type::Path(t) => t,
-            _ => continue,
-        };
-        if let Some(seg) = inner_path.path.segments.last() {
-            for t in &[
-                "u8", "u16", "u32", "u64", "usize", "i8", "i16", "i32", "i64", "isize",
-            ] {
-                if seg.ident == t {
-                    discriminant_type = typ_paren;
-                    break;
+    if let Some(type_path) = ast
+        .get_type_properties()
+        .ok()
+        .and_then(|tp| tp.enum_repr)
+        .and_then(|repr_ts| syn::parse2::<Type>(repr_ts).ok())
+    {
+        if let Type::Path(path) = type_path.clone() {
+            if let Some(seg) = path.path.segments.last() {
+                for t in &[
+                    "u8", "u16", "u32", "u64", "usize", "i8", "i16", "i32", "i64", "isize",
+                ] {
+                    if seg.ident == t {
+                        discriminant_type = type_path;
+                        break;
+                    }
                 }
             }
         }
@@ -103,7 +72,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
 
-        let const_var_str = format!("{}_DISCRIMINANT", variant.ident).to_shouty_snake_case();
+        let const_var_str = format!("{}_DISCRIMINANT", variant.ident);
         let const_var_ident = format_ident!("{}", const_var_str);
 
         let const_val_expr = match &variant.discriminant {
@@ -114,7 +83,10 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             },
         };
 
-        constant_defs.push(quote! {const #const_var_ident: #discriminant_type = #const_val_expr;});
+        constant_defs.push(quote! {
+            #[allow(non_upper_case_globals)]
+            const #const_var_ident: #discriminant_type = #const_val_expr;
+        });
         arms.push(quote! {v if v == #const_var_ident => ::core::option::Option::Some(#name::#ident #params)});
 
         prev_const_var_ident = Some(const_var_ident);
@@ -141,6 +113,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         #[allow(clippy::use_self)]
         impl #impl_generics #name #ty_generics #where_clause {
             #[doc = "Try to create [Self] from the raw representation"]
+            #[inline]
             #vis #const_if_possible fn from_repr(discriminant: #discriminant_type) -> Option<#name #ty_generics> {
                 #(#constant_defs)*
                 match discriminant {

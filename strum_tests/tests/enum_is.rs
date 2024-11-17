@@ -3,16 +3,21 @@ use strum::EnumIs;
 
 mod core {} // ensure macros call `::core`
 #[derive(EnumIs)]
-enum LifeTimeTest<'a>{
+enum LifeTimeTest<'a> {
     One(Cow<'a, str>),
-    Two(&'a str)
+    Two(&'a str),
 }
 #[derive(EnumIs)]
 enum Foo {
     Unit,
     Named0 {},
-    Named1 { _a: char },
-    Named2 { _a: u32, _b: String },
+    Named1 {
+        _a: char,
+    },
+    Named2 {
+        _a: u32,
+        _b: String,
+    },
     Unnamed0(),
     Unnamed1(Option<u128>),
     Unnamed2(bool, u8),
@@ -22,7 +27,7 @@ enum Foo {
     Disabled,
 }
 #[test]
-fn generics_test(){
+fn generics_test() {
     let foo = LifeTimeTest::One(Cow::Borrowed("Hello"));
     assert!(foo.is_one());
     let foo = LifeTimeTest::Two("Hello");

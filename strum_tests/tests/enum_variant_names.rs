@@ -1,12 +1,12 @@
 use structopt::StructOpt;
-use strum::{EnumString, EnumVariantNames, VariantNames};
+use strum::{EnumString, VariantNames};
 
 mod core {} // ensure macros call `::core`
 
 #[test]
 fn simple() {
     #[allow(dead_code)]
-    #[derive(EnumVariantNames)]
+    #[derive(VariantNames)]
     enum Color {
         Red,
         #[strum(serialize = "b")]
@@ -21,7 +21,7 @@ fn simple() {
 #[test]
 fn variant_names_trait() {
     #[allow(dead_code)]
-    #[derive(EnumVariantNames)]
+    #[derive(VariantNames)]
     enum Color {
         Red,
         Blue,
@@ -38,7 +38,7 @@ fn variant_names_trait() {
 #[test]
 fn plain_kebab() {
     #[allow(dead_code)]
-    #[derive(EnumVariantNames)]
+    #[derive(VariantNames)]
     #[strum(serialize_all = "kebab_case")]
     enum Color {
         Red,
@@ -56,7 +56,7 @@ fn plain_kebab() {
 #[test]
 fn non_plain_camel() {
     #[allow(dead_code)]
-    #[derive(EnumVariantNames)]
+    #[derive(VariantNames)]
     #[strum(serialize_all = "kebab_case")]
     enum Color {
         DeepPink,
@@ -85,7 +85,7 @@ fn clap_and_structopt() {
         color: Color,
     }
 
-    #[derive(Debug, EnumString, EnumVariantNames)]
+    #[derive(Debug, EnumString, VariantNames)]
     #[strum(serialize_all = "kebab_case")]
     enum Color {
         Red,
@@ -116,7 +116,7 @@ fn crate_module_path_test() {
     }
 
     #[allow(dead_code)]
-    #[derive(EnumVariantNames)]
+    #[derive(VariantNames)]
     #[strum(crate = "nested::module::strum")]
     enum Color {
         Red,

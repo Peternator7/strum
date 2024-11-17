@@ -74,14 +74,17 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         if !documentation.is_empty() {
             let params = params.clone();
             // Strip a single leading space from each documentation line.
-            let documentation: Vec<LitStr> = documentation.iter().map(|lit_str| {
-                let line = lit_str.value();
-                if line.starts_with(' ') {
-                    LitStr::new(&line.as_str()[1..], lit_str.span())
-                } else {
-                    lit_str.clone()
-                }
-            }).collect();
+            let documentation: Vec<LitStr> = documentation
+                .iter()
+                .map(|lit_str| {
+                    let line = lit_str.value();
+                    if line.starts_with(' ') {
+                        LitStr::new(&line.as_str()[1..], lit_str.span())
+                    } else {
+                        lit_str.clone()
+                    }
+                })
+                .collect();
             if documentation.len() == 1 {
                 let text = &documentation[0];
                 documentation_arms
@@ -110,24 +113,28 @@ pub fn enum_message_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     Ok(quote! {
         impl #impl_generics #strum_module_path::EnumMessage for #name #ty_generics #where_clause {
+            #[inline]
             fn get_message(&self) -> ::core::option::Option<&'static str> {
                 match self {
                     #(#arms),*
                 }
             }
 
+            #[inline]
             fn get_detailed_message(&self) -> ::core::option::Option<&'static str> {
                 match self {
                     #(#detailed_arms),*
                 }
             }
 
+            #[inline]
             fn get_documentation(&self) -> ::core::option::Option<&'static str> {
                 match self {
                     #(#documentation_arms),*
                 }
             }
 
+            #[inline]
             fn get_serializations(&self) -> &'static [&'static str] {
                 match self {
                     #(#serializations),*

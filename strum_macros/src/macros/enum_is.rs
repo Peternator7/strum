@@ -1,4 +1,4 @@
-use crate::helpers::{non_enum_error, snakify, HasStrumVariantProperties};
+use crate::helpers::{case_style::snakify, non_enum_error, HasStrumVariantProperties};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{Data, DeriveInput};
@@ -20,7 +20,10 @@ pub fn enum_is_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             let variant_name = &variant.ident;
             let fn_name = format_ident!("is_{}", snakify(&variant_name.to_string()));
-            let doc_comment = format!("Returns [true] if the enum is [{}::{}] otherwise [false]", enum_name, variant_name);
+            let doc_comment = format!(
+                "Returns [true] if the enum is [{}::{}] otherwise [false]",
+                enum_name, variant_name
+            );
             Some(quote! {
                 #[must_use]
                 #[inline]

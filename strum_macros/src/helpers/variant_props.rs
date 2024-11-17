@@ -9,10 +9,11 @@ pub trait HasStrumVariantProperties {
     fn get_variant_properties(&self) -> syn::Result<StrumVariantProperties>;
 }
 
-#[derive(Clone, Eq, PartialEq, Debug, Default)]
+#[derive(Clone, Default)]
 pub struct StrumVariantProperties {
     pub disabled: Option<kw::disabled>,
     pub default: Option<kw::default>,
+    pub default_with: Option<LitStr>,
     pub ascii_case_insensitive: Option<bool>,
     pub message: Option<LitStr>,
     pub detailed_message: Option<LitStr>,
@@ -29,14 +30,24 @@ impl StrumVariantProperties {
         LitStr::new(&ident.convert_case(case_style), ident.span())
     }
 
-    pub fn get_preferred_name(&self, case_style: Option<CaseStyle>) -> LitStr {
-        self.to_string.as_ref().cloned().unwrap_or_else(|| {
+    pub fn get_preferred_name(
+        &self,
+        case_style: Option<CaseStyle>,
+        prefix: Option<&LitStr>,
+    ) -> LitStr {
+        let mut output = self.to_string.as_ref().cloned().unwrap_or_else(|| {
             self.serialize
                 .iter()
                 .max_by_key(|s| s.value().len())
                 .cloned()
                 .unwrap_or_else(|| self.ident_as_str(case_style))
-        })
+        });
+
+        if let Some(prefix) = prefix {
+            output = LitStr::new(&(prefix.value() + &output.value()), output.span());
+        }
+
+        output
     }
 
     pub fn get_serializations(&self, case_style: Option<CaseStyle>) -> Vec<LitStr> {
@@ -62,9 +73,10 @@ impl HasStrumVariantProperties for Variant {
 
         let mut message_kw = None;
         let mut detailed_message_kw = None;
-        let mut to_string_kw = None;
         let mut disabled_kw = None;
         let mut default_kw = None;
+        let mut default_with_kw = None;
+        let mut to_string_kw = None;
         let mut ascii_case_insensitive_kw = None;
         for meta in self.get_metadata()? {
             match meta {
@@ -113,6 +125,14 @@ impl HasStrumVariantProperties for Variant {
 
                     default_kw = Some(kw);
                     output.default = Some(kw);
+                }
+                VariantMeta::DefaultWith { kw, value } => {
+                    if let Some(fst_kw) = default_with_kw {
+                        return Err(occurrence_error(fst_kw, kw, "default_with"));
+                    }
+
+                    default_with_kw = Some(kw);
+                    output.default_with = Some(value);
                 }
                 VariantMeta::AsciiCaseInsensitive { kw, value } => {
                     if let Some(fst_kw) = ascii_case_insensitive_kw {
