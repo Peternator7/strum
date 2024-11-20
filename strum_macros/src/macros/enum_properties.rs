@@ -57,6 +57,18 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     #(#arms),*
                 }
             }
+
+            #[inline]
+            fn get_int(&self, prop: &str) -> ::core::option::Option<i64> {
+                use std::str::FromStr;
+                self.get_str(prop).map(|val| i64::from_str(val).ok()).flatten()
+            }
+
+            #[inline]
+            fn get_bool(&self, prop: &str) -> ::core::option::Option<bool> {
+                use std::str::FromStr;
+                self.get_str(prop).map(|val| bool::from_str(val).ok()).flatten()
+            }
         }
     })
 }
