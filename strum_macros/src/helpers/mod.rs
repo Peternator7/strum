@@ -13,6 +13,13 @@ use proc_macro2::Span;
 use quote::ToTokens;
 use syn::spanned::Spanned;
 
+pub fn missing_parse_err_attr_error() -> syn::Error {
+    syn::Error::new(
+        Span::call_site(),
+        "`parse_err_ty` and `parse_err_fn` attribute is both required.",
+    )
+}
+
 pub fn non_enum_error() -> syn::Error {
     syn::Error::new(Span::call_site(), "This macro only supports enums.")
 }
