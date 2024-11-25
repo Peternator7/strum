@@ -11,7 +11,7 @@ pub trait HasTypeProperties {
     fn get_type_properties(&self) -> syn::Result<StrumTypeProperties>;
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct StrumTypeProperties {
     pub parse_err_ty: Option<Path>,
     pub parse_err_fn: Option<Path>,
