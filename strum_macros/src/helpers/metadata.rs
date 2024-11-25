@@ -16,6 +16,7 @@ pub mod kw {
 
     // enum metadata
     custom_keyword!(serialize_all);
+    custom_keyword!(const_into_str);
     custom_keyword!(use_phf);
     custom_keyword!(prefix);
     custom_keyword!(parse_err_ty);
@@ -61,6 +62,7 @@ pub enum EnumMeta {
         kw: kw::parse_err_fn,
         path: Path,
     },
+    ConstIntoStr(kw::const_into_str)
 }
 
 impl Parse for EnumMeta {
@@ -104,6 +106,8 @@ impl Parse for EnumMeta {
             let path_tokens = parse_str(&path_str.value())?;
             let path = parse2(path_tokens)?;
             Ok(EnumMeta::ParseErrFn { kw, path })
+        } else if lookahead.peek(kw::const_into_str) {
+            Ok(EnumMeta::ConstIntoStr(input.parse()?))
         } else {
             Err(lookahead.error())
         }
