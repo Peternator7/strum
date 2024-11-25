@@ -182,13 +182,8 @@ pub trait EnumMessage {
 /// ```
 pub trait EnumProperty {
     fn get_str(&self, prop: &str) -> Option<&'static str>;
-    fn get_int(&self, _prop: &str) -> Option<usize> {
-        Option::None
-    }
-
-    fn get_bool(&self, _prop: &str) -> Option<bool> {
-        Option::None
-    }
+    fn get_int(&self, _prop: &str) -> Option<i64>;
+    fn get_bool(&self, _prop: &str) -> Option<bool>;
 }
 
 /// A cheap reference-to-reference conversion. Used to convert a value to a
