@@ -47,3 +47,33 @@ pub fn occurrence_error<T: ToTokens>(fst: T, snd: T, attr: &str) -> syn::Error {
     e.combine(syn::Error::new_spanned(fst, "first one here"));
     e
 }
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum PropertyValue {
+    Str(syn::LitStr),
+    Num(syn::LitInt),
+    Bool(syn::LitBool),
+}
+
+impl syn::parse::Parse for PropertyValue {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let value = if input.peek(syn::LitBool) {
+            PropertyValue::Bool(input.parse()?)
+        } else if input.peek(syn::LitInt) {
+            PropertyValue::Num(input.parse()?)
+        } else {
+            PropertyValue::Str(input.parse()?)
+        };
+        Ok(value)
+    }
+}
+
+impl quote::ToTokens for PropertyValue {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        match self {
+            PropertyValue::Str(s) => s.to_tokens(tokens),
+            PropertyValue::Num(n) => n.to_tokens(tokens),
+            PropertyValue::Bool(b) => b.to_tokens(tokens),
+        }
+    }
+}
