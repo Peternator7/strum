@@ -182,7 +182,7 @@ pub trait EnumMessage {
 /// ```
 pub trait EnumProperty {
     fn get_str(&self, prop: &str) -> Option<&'static str>;
-    fn get_int(&self, _prop: &str) -> Option<usize> {
+    fn get_int(&self, _prop: &str) -> Option<i64> {
         Option::None
     }
 
