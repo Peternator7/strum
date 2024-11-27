@@ -1,16 +1,23 @@
+use std::collections::HashMap;
+
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, Fields, Lit};
 
 use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
 
+#[derive(Hash, PartialEq, Eq)]
 enum PropertyType {
-    String = 0,
-    Integer = 1,
-    Bool = 2,
+    String,
+    Integer,
+    Bool,
 }
 
-const PROPERTY_TYPES: usize = 3;
+const PROPERTY_TYPES: [PropertyType; 3] = [
+    PropertyType::String,
+    PropertyType::Integer,
+    PropertyType::Bool,
+];
 
 pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -22,12 +29,12 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let type_properties = ast.get_type_properties()?;
     let strum_module_path = type_properties.crate_module_path();
 
-    let mut built_arms: [Vec<TokenStream>; 3] = Default::default();
+    let mut built_arms: HashMap<_, _> = PROPERTY_TYPES.iter().map(|p| (p, Vec::new())).collect();
 
     for variant in variants {
         let ident = &variant.ident;
         let variant_properties = variant.get_variant_properties()?;
-        let mut arms: [Vec<_>; 3] = Default::default();
+        let mut arms: HashMap<_, _> = PROPERTY_TYPES.iter().map(|p| (p, Vec::new())).collect();
         // But you can disable the messages.
         if variant_properties.disabled.is_some() {
             continue;
@@ -47,14 +54,17 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 _ => todo!("TODO"),
             };
 
-            arms[property_type as usize]
+            arms.get_mut(&property_type)
+                .unwrap()
                 .push(quote! { #key => ::core::option::Option::Some( #value )});
         }
 
-        for i in 0..PROPERTY_TYPES {
-            arms[i].push(quote! { _ => ::core::option::Option::None });
-            let arms_as_string = &arms[i];
-            built_arms[i].push(quote! {
+        for property in &PROPERTY_TYPES {
+            arms.get_mut(&property)
+                .unwrap()
+                .push(quote! { _ => ::core::option::Option::None });
+            let arms_as_string = &arms[property];
+            built_arms.get_mut(&property).unwrap().push(quote! {
                 &#name::#ident #params => {
                     match prop {
                         #(#arms_as_string),*
@@ -64,16 +74,16 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
     }
 
-    for arms in built_arms.iter_mut() {
+    for (_, arms) in built_arms.iter_mut() {
         if arms.len() < variants.len() {
             arms.push(quote! { _ => ::core::option::Option::None });
         }
     }
 
     let (built_string_arms, built_int_arms, built_bool_arms) = (
-        &built_arms[PropertyType::String as usize],
-        &built_arms[PropertyType::Integer as usize],
-        &built_arms[PropertyType::Bool as usize],
+        &built_arms[&PropertyType::String],
+        &built_arms[&PropertyType::Integer],
+        &built_arms[&PropertyType::Bool],
     );
 
     Ok(quote! {
