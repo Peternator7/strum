@@ -204,7 +204,7 @@ pub enum VariantMeta {
     },
     Props {
         kw: kw::props,
-        props: Vec<(LitStr, LitStr)>,
+        props: Vec<(LitStr, Lit)>,
     },
 }
 
@@ -267,7 +267,7 @@ impl Parse for VariantMeta {
     }
 }
 
-struct Prop(Ident, LitStr);
+struct Prop(Ident, Lit);
 
 impl Parse for Prop {
     fn parse(input: ParseStream) -> syn::Result<Self> {

@@ -1,5 +1,5 @@
 use std::default::Default;
-use syn::{Ident, LitStr, Variant};
+use syn::{Ident, Lit, LitStr, Variant};
 
 use super::case_style::{CaseStyle, CaseStyleHelpers};
 use super::metadata::{kw, VariantExt, VariantMeta};
@@ -18,7 +18,7 @@ pub struct StrumVariantProperties {
     pub message: Option<LitStr>,
     pub detailed_message: Option<LitStr>,
     pub documentation: Vec<LitStr>,
-    pub string_props: Vec<(LitStr, LitStr)>,
+    pub props: Vec<(LitStr, Lit)>,
     serialize: Vec<LitStr>,
     pub to_string: Option<LitStr>,
     ident: Option<Ident>,
@@ -143,7 +143,7 @@ impl HasStrumVariantProperties for Variant {
                     output.ascii_case_insensitive = Some(value);
                 }
                 VariantMeta::Props { props, .. } => {
-                    output.string_props.extend(props);
+                    output.props.extend(props);
                 }
             }
         }

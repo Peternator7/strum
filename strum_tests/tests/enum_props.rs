@@ -47,3 +47,30 @@ fn crate_module_path_test() {
     let a = Test::A;
     assert_eq!("value", a.get_str("key").unwrap());
 }
+
+#[derive(Debug, EnumProperty)]
+enum TestGet {
+    #[strum(props(weight = 42, flat = true, big = false))]
+    A,
+    #[strum(props(weight = -42, flat = false))]
+    B,
+    C,
+}
+
+#[test]
+fn get_bool_test() {
+    const BOOL_KEY: &str = "flat";
+    assert_eq!(Some(true), TestGet::A.get_bool(BOOL_KEY));
+    assert_eq!(Some(false), TestGet::B.get_bool(BOOL_KEY));
+    assert_eq!(None, TestGet::C.get_bool(BOOL_KEY));
+    assert_eq!(None, TestGet::A.get_bool("weight"));
+}
+
+#[test]
+fn get_int_test() {
+    const INT_KEY: &str = "weight";
+    assert_eq!(Some(42), TestGet::A.get_int(INT_KEY));
+    assert_eq!(Some(-42), TestGet::B.get_int(INT_KEY));
+    assert_eq!(None, TestGet::C.get_int(INT_KEY));
+    assert_eq!(None, TestGet::A.get_int("flat"));
+}
