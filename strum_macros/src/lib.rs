@@ -237,7 +237,8 @@ pub fn variant_names_deprecated(input: proc_macro::TokenStream) -> proc_macro::T
 /// meaning that the variants must not have any data.
 ///
 /// ```
-/// use strum::VariantArray;
+/// use strum::VariantArray as _;
+/// use strum_macros::VariantArray;
 ///
 /// #[derive(VariantArray, Debug, PartialEq, Eq)]
 /// enum Op {
@@ -830,8 +831,8 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// ```
 /// // Bring trait into scope
 /// use std::str::FromStr;
-/// use strum::{IntoEnumIterator, EnumMessage};
-/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString};
+/// use strum::{IntoEnumIterator, EnumMessage as _};
+/// use strum_macros::{EnumDiscriminants, EnumIter, EnumString, EnumMessage};
 ///
 /// #[derive(Debug)]
 /// struct NonDefault;

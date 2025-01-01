@@ -5,4 +5,4 @@ members = [
     "strum_tests",
     "strum_nostd_tests"
 ]
- 
+resolver = "2"

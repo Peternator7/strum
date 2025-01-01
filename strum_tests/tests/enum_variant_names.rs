@@ -80,7 +80,7 @@ fn clap_and_structopt() {
         #[structopt(
             long = "color",
             default_value = "Color::Blue",
-            raw(possible_values = "Color::VARIANTS")
+            possible_values = Color::VARIANTS
         )]
         color: Color,
     }
@@ -99,11 +99,11 @@ fn clap_and_structopt() {
         &["red", "blue", "yellow", "rebecca-purple"]
     );
 
-    let _clap_example = clap::App::new("app").arg(
-        clap::Arg::with_name("color")
+    let _clap_example = clap::Command::new("app").arg(
+        clap::Arg::new("color")
             .long("color")
-            .possible_values(Color::VARIANTS)
-            .case_insensitive(true),
+            .value_names(Color::VARIANTS)
+            .ignore_case(true),
     );
 }
 
