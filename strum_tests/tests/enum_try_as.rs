@@ -5,6 +5,7 @@ enum Foo {
     Unnamed0(),
     Unnamed1(u128),
     Unnamed2(bool, String),
+    Unnamed3(#[allow(deprecated)] u128),
     #[strum(disabled)]
     #[allow(dead_code)]
     Disabled(u32),
@@ -33,6 +34,12 @@ fn unnamed_1() {
 fn unnamed_2() {
     let foo = Foo::Unnamed2(true, String::from("Hay"));
     assert_eq!(Some((true, String::from("Hay"))), foo.try_as_unnamed_2());
+}
+
+#[test]
+fn unnamed_3() {
+    let foo = Foo::Unnamed3(128);
+    assert_eq!(Some(&128), foo.try_as_unnamed_3_ref());
 }
 
 #[test]
