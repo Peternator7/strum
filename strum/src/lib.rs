@@ -155,9 +155,8 @@ pub trait EnumMessage {
 
 /// `EnumProperty` is a trait that makes it possible to store additional information
 /// with enum variants. This trait is designed to be used with the macro of the same
-/// name in the `strum_macros` crate. Currently, the only string literals are supported
-/// in attributes, the other methods will be implemented as additional attribute types
-/// become stabilized.
+/// name in the `strum_macros` crate. Currently, the string, integer and bool literals
+/// are supported in attributes.
 ///
 /// # Example
 ///
@@ -168,27 +167,24 @@ pub trait EnumMessage {
 ///
 /// #[derive(PartialEq, Eq, Debug, EnumProperty)]
 /// enum Class {
-///     #[strum(props(Teacher="Ms.Frizzle", Room="201"))]
+///     #[strum(props(Teacher="Ms.Frizzle", Room="201", students=16, mandatory=true))]
 ///     History,
 ///     #[strum(props(Teacher="Mr.Smith"))]
-///     #[strum(props(Room="103"))]
+///     #[strum(props(Room="103", students=10))]
 ///     Mathematics,
-///     #[strum(props(Time="2:30"))]
+///     #[strum(props(Time="2:30", mandatory=true))]
 ///     Science,
 /// }
 ///
 /// let history = Class::History;
 /// assert_eq!("Ms.Frizzle", history.get_str("Teacher").unwrap());
+/// assert_eq!(16, history.get_int("students").unwrap());
+/// assert!(history.get_bool("mandatory").unwrap());
 /// ```
 pub trait EnumProperty {
     fn get_str(&self, prop: &str) -> Option<&'static str>;
-    fn get_int(&self, _prop: &str) -> Option<usize> {
-        Option::None
-    }
-
-    fn get_bool(&self, _prop: &str) -> Option<bool> {
-        Option::None
-    }
+    fn get_int(&self, _prop: &str) -> Option<i64>;
+    fn get_bool(&self, _prop: &str) -> Option<bool>;
 }
 
 /// A cheap reference-to-reference conversion. Used to convert a value to a

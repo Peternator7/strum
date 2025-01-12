@@ -1,7 +1,7 @@
 [package]
 name = "strum_macros"
 version = "0.26.4"
-edition = "2018"
+edition = "2021"
 authors = ["Peter Glotfelty <peter.glotfelty@microsoft.com>"]
 license = "MIT"
 
@@ -13,6 +13,7 @@ documentation = "https://docs.rs/strum"
 homepage = "https://github.com/Peternator7/strum"
 repository = "https://github.com/Peternator7/strum"
 readme = "../README.md"
+rust-version = "1.66.1"
 
 [lib]
 proc-macro = true
