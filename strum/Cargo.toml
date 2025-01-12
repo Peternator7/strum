@@ -16,7 +16,7 @@ readme = "../README.md"
 
 [dependencies]
 strum_macros = { path = "../strum_macros", optional = true, version = "0.26.3" }
-phf = { version = "0.10", features = ["macros"], optional = true }
+phf = { version = "0.11", features = ["macros"], optional = true }
 
 [dev-dependencies]
 strum_macros = { path = "../strum_macros", version = "0.26" }
