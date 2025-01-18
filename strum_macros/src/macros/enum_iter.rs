@@ -23,9 +23,9 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let phantom_data = if gen.type_params().count() > 0 {
         let g = gen.type_params().map(|param| &param.ident);
-        quote! { < ( #(#g),* ) > }
+        quote! { < fn() -> ( #(#g),* ) > }
     } else {
-        quote! { < () > }
+        quote! { < fn() -> () > }
     };
 
     let variants = match &ast.data {
