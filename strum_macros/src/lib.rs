@@ -154,10 +154,13 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// let yellow = Color::Yellow;
 /// assert_eq!("Yellow", yellow.as_ref());
 /// // or for string formatting
-/// println!(
-///     "blue: {} green: {}",
-///     Color::Blue(10).as_ref(),
-///     Color::Green { range: 42 }.as_ref()
+/// assert_eq!(
+///    "blue: Blue green: Green",
+///    format!(
+///        "blue: {} green: {}",
+///        Color::Blue(10).as_ref(),
+///        Color::Green { range: 42 }.as_ref()
+///    )
 /// );
 ///
 /// // With prefix on all variants
@@ -412,10 +415,13 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// let yellow = Color::Yellow;
 /// assert_eq!(String::from("Yellow"), yellow.to_string());
 /// // or for string formatting
-/// println!(
-///     "blue: {} green: {}",
-///     Color::Blue(10),
-///     Color::Green { range: 42 }
+/// assert_eq!(
+///    "blue: Blue green: Green",
+///    format!(
+///        "blue: {} green: {}",
+///        Color::Blue(10).as_ref(),
+///        Color::Green { range: 42 }.as_ref()
+///    )
 /// );
 /// // you can also use named fields in message
 /// let purple = Color::Purple { sat: 10 };
