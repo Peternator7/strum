@@ -419,8 +419,8 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///    "blue: Blue green: Green",
 ///    format!(
 ///        "blue: {} green: {}",
-///        Color::Blue(10).as_ref(),
-///        Color::Green { range: 42 }.as_ref()
+///        Color::Blue(10),
+///        Color::Green { range: 42 }
 ///    )
 /// );
 /// // you can also use named fields in message
