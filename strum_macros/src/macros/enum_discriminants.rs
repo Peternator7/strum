@@ -36,7 +36,8 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let discriminants_name = type_properties.discriminant_name.unwrap_or(default_name);
     let discriminants_vis = type_properties
         .discriminant_vis
-        .unwrap_or_else(|| vis.clone());
+        .as_ref()
+        .unwrap_or_else(|| &vis);
 
     // Pass through all other attributes
     let pass_though_attributes = type_properties.discriminant_others;
@@ -159,6 +160,26 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
     };
 
+    // For now, only implement IntoDiscriminant if the user has not overriden the visibility.
+    let impl_into_discriminant = match type_properties.discriminant_vis {
+        // If the visibilty is unspecified or `pub` then we implement IntoDiscriminant
+        None | Some(syn::Visibility::Public(..)) => quote! {
+            impl #impl_generics #strum_module_path::IntoDiscriminant for #name #ty_generics #where_clause {
+                type Discriminant = #discriminants_name;
+
+                #[inline]
+                fn discriminant(&self) -> Self::Discriminant {
+                    <Self::Discriminant as ::core::convert::From<&Self>>::from(self)
+                }
+            }
+        },
+        // If it's something restricted such as `pub(super)` then we skip implementing the
+        // trait for now. There are certainly scenarios where they could be equivalent, but
+        // as a heuristic, if someone is overriding the visibility, it's because they want
+        // the discriminant type to be less visible than the original type.
+        _ => quote! {},
+    };
+
     Ok(quote! {
         /// Auto-generated discriminant enum variants
         #derives
@@ -168,15 +189,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             #(#discriminants),*
         }
 
-        impl #impl_generics #strum_module_path::IntoDiscriminant for #name #ty_generics #where_clause {
-            type Discriminant = #discriminants_name;
-
-            #[inline]
-            fn discriminant(&self) -> Self::Discriminant {
-                <Self::Discriminant as ::core::convert::From<&Self>>::from(self)
-            }
-        }
-
+        #impl_into_discriminant
         #impl_from
         #impl_from_ref
     })
