@@ -95,16 +95,12 @@ impl Parse for EnumMeta {
         } else if lookahead.peek(kw::parse_err_ty) {
             let kw = input.parse::<kw::parse_err_ty>()?;
             input.parse::<Token![=]>()?;
-            let path_str: LitStr = input.parse()?;
-            let path_tokens = parse_str(&path_str.value())?;
-            let path = parse2(path_tokens)?;
+            let path: Path = input.parse()?;
             Ok(EnumMeta::ParseErrTy { kw, path })
         } else if lookahead.peek(kw::parse_err_fn) {
             let kw = input.parse::<kw::parse_err_fn>()?;
             input.parse::<Token![=]>()?;
-            let path_str: LitStr = input.parse()?;
-            let path_tokens = parse_str(&path_str.value())?;
-            let path = parse2(path_tokens)?;
+            let path: Path = input.parse()?;
             Ok(EnumMeta::ParseErrFn { kw, path })
         } else if lookahead.peek(kw::const_into_str) {
             Ok(EnumMeta::ConstIntoStr(input.parse()?))
