@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.27.0
+
+### Highlights
+
+* [#407](https://github.com/Peternator7/strum/pull/407): `Display` is now correctly derived in `[no_std]` projects.
+* [#402](https://github.com/Peternator7/strum/pull/402): `EnumIter` now implements `Send + Sync`
+* [#400](https://github.com/Peternator7/strum/pull/400): `EnumTryAs` now handles attributes on variant fields correctly.
+* [#398](https://github.com/Peternator7/strum/pull/398): `strum` is now on rust 2021
+* [#391](https://github.com/Peternator7/strum/pull/391): `EnumProperties` correctly implements `get_bool` and `get_int`
+  finally. 🎉
+* [#380](https://github.com/Peternator7/strum/pull/380): `FromString` now supports 2 additional attributes, `parse_error_ty`
+  and `parse_error_fn` that can be added to use a custom error type rather than the default strum error message.
+  * [#410](https://github.com/Peternator7/strum/pull/410): These attributes accept a `Path` rather than a `String`
+    to improve behavior with rust-analyzer.
+
+### Breaking Changes
+
+* [#384](https://github.com/Peternator7/strum/pull/384): MSRV is now 1.66.1
+* [#391](https://github.com/Peternator7/strum/pull/391): `EnumProperties` doesn't provide default implementations anymore.
+  This would have required you to manually implement this trait which should be very uncommon.
+
 ## 0.26.4 (strum_macros)
 
 * [#360](https://github.com/Peternator7/strum/pull/360): Fixes bug introduced with new string interpolation feature where

@@ -1,6 +1,6 @@
 [package]
 name = "strum"
-version = "0.26.3"
+version = "0.27.0"
 edition = "2021"
 authors = ["Peter Glotfelty <peter.glotfelty@microsoft.com>"]
 license = "MIT"
@@ -16,11 +16,11 @@ readme = "../README.md"
 rust-version = "1.66.1"
 
 [dependencies]
-strum_macros = { path = "../strum_macros", optional = true, version = "0.26.3" }
+strum_macros = { path = "../strum_macros", optional = true, version = "0.27.0" }
 phf = { version = "0.11", features = ["macros"], optional = true }
 
 [dev-dependencies]
-strum_macros = { path = "../strum_macros", version = "0.26" }
+strum_macros = { path = "../strum_macros" }
 
 [badges]
 travis-ci = { repository = "Peternator7/strum" }

@@ -22,11 +22,11 @@ Cargo.toml. Strum_macros contains the macros needed to derive all the traits in 
 
 ```toml
 [dependencies]
-strum = "0.26"
-strum_macros = "0.26"
+strum = "0.27"
+strum_macros = "0.27"
 
 # You can also use the "derive" feature, and import the macros directly from "strum"
-# strum = { version = "0.26", features = ["derive"] }
+# strum = { version = "0.27", features = ["derive"] }
 ```
 
 # Strum Macros
