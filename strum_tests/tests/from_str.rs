@@ -232,8 +232,8 @@ fn color_default_with_white() {
 
 #[derive(Debug, EnumString)]
 #[strum(
-    parse_err_fn = "some_enum_not_found_err",
-    parse_err_ty = "CaseCustomParseErrorNotFoundError"
+    parse_err_fn = some_enum_not_found_err,
+    parse_err_ty = CaseCustomParseErrorNotFoundError
 )]
 enum CaseCustomParseErrorEnum {
     #[strum(serialize = "red")]
