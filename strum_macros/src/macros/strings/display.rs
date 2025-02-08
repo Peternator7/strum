@@ -94,7 +94,7 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
                         quote! {
                             #[allow(unused_variables)]
-                            #name::#ident #params => ::core::fmt::Display::fmt(&format!(#output, #args), f)
+                            #name::#ident #params => ::core::fmt::Display::fmt(&format_args!(#output, #args), f)
                         }
                     }
                 },
