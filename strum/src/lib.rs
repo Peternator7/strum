@@ -253,7 +253,7 @@ DocumentMacroRexports! {
     AsRefStr,
     Display,
     EnumCount,
-    IntoDiscriminant,
+    EnumDiscriminants,
     EnumIter,
     EnumMessage,
     EnumProperty,
