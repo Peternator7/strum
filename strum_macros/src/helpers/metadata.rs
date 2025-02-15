@@ -111,7 +111,7 @@ impl Parse for EnumMeta {
 }
 
 pub enum EnumDiscriminantsMeta {
-    Derive { kw: kw::derive, paths: Vec<Path> },
+    Derive { _kw: kw::derive, paths: Vec<Path> },
     Name { kw: kw::name, name: Ident },
     Vis { kw: kw::vis, vis: Visibility },
     Other { path: Path, nested: TokenStream },
@@ -120,12 +120,12 @@ pub enum EnumDiscriminantsMeta {
 impl Parse for EnumDiscriminantsMeta {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         if input.peek(kw::derive) {
-            let kw = input.parse()?;
+            let _kw = input.parse()?;
             let content;
             parenthesized!(content in input);
             let paths = content.parse_terminated(Path::parse, Token![,])?;
             Ok(EnumDiscriminantsMeta::Derive {
-                kw,
+                _kw,
                 paths: paths.into_iter().collect(),
             })
         } else if input.peek(kw::name) {
@@ -178,7 +178,7 @@ pub enum VariantMeta {
         value: LitStr,
     },
     Serialize {
-        kw: kw::serialize,
+        _kw: kw::serialize,
         value: LitStr,
     },
     Documentation {
@@ -199,7 +199,7 @@ pub enum VariantMeta {
         value: bool,
     },
     Props {
-        kw: kw::props,
+        _kw: kw::props,
         props: Vec<(LitStr, Lit)>,
     },
 }
@@ -218,10 +218,10 @@ impl Parse for VariantMeta {
             let value = input.parse()?;
             Ok(VariantMeta::DetailedMessage { kw, value })
         } else if lookahead.peek(kw::serialize) {
-            let kw = input.parse()?;
+            let _kw = input.parse()?;
             let _: Token![=] = input.parse()?;
             let value = input.parse()?;
-            Ok(VariantMeta::Serialize { kw, value })
+            Ok(VariantMeta::Serialize { _kw, value })
         } else if lookahead.peek(kw::to_string) {
             let kw = input.parse()?;
             let _: Token![=] = input.parse()?;
@@ -246,12 +246,12 @@ impl Parse for VariantMeta {
             };
             Ok(VariantMeta::AsciiCaseInsensitive { kw, value })
         } else if lookahead.peek(kw::props) {
-            let kw = input.parse()?;
+            let _kw = input.parse()?;
             let content;
             parenthesized!(content in input);
             let props = content.parse_terminated(Prop::parse, Token![,])?;
             Ok(VariantMeta::Props {
-                kw,
+                _kw,
                 props: props
                     .into_iter()
                     .map(|Prop(k, v)| (LitStr::new(&k.to_string(), k.span()), v))
