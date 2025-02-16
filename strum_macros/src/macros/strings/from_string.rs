@@ -53,8 +53,21 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 return Err(occurrence_error(fst_kw, kw, "default"));
             }
 
+            default_kw = Some(kw);
+            default_err_ty = quote! { #strum_module_path::ParseError };
+
             match &variant.fields {
-                Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {}
+                Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
+                    default = quote! {
+                        ::core::result::Result::Ok(#name::#ident(s.into()))
+                    };
+                }
+                Fields::Named(ref f) if f.named.len() == 1 => {
+                    let field_name = f.named.last().unwrap().ident.as_ref().unwrap();
+                    default = quote! {
+                        ::core::result::Result::Ok(#name::#ident { #field_name : s.into() } )
+                    };
+                }
                 _ => {
                     return Err(syn::Error::new_spanned(
                         variant,
@@ -62,11 +75,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     ))
                 }
             }
-            default_kw = Some(kw);
-            default_err_ty = quote! { #strum_module_path::ParseError };
-            default = quote! {
-                ::core::result::Result::Ok(#name::#ident(s.into()))
-            };
+
             continue;
         }
 
