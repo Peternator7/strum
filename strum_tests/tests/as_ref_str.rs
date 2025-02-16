@@ -122,6 +122,10 @@ enum Brightness {
     },
     #[strum(serialize = "Bright")]
     BrightWhite,
+    #[strum(transparent)]
+    Gray(&'static str),
+    #[strum(transparent)]
+    Grey { inner: &'static str }
 }
 
 #[test]
@@ -137,6 +141,8 @@ fn brightness_serialize_all() {
     assert_eq!("dark_black", <&'static str>::from(Brightness::DarkBlack));
     assert_eq!("dim", <&'static str>::from(Brightness::Dim { glow: 0 }));
     assert_eq!("Bright", <&'static str>::from(Brightness::BrightWhite));
+    assert_eq!("Gray", <&'static str>::from(Brightness::Gray("Gray")));
+    assert_eq!("Grey", <&'static str>::from(Brightness::Grey { inner: "Grey" }));
 }
 
 #[derive(IntoStaticStr)]
