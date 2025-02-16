@@ -12,6 +12,8 @@ enum Color {
     Yellow,
     #[strum(default)]
     Green(String),
+    #[strum(transparent)]
+    Other(String),
 }
 
 #[test]
@@ -32,4 +34,9 @@ fn as_yellow_str() {
 #[test]
 fn as_green_str() {
     assert_eq!("Green", (Color::Green(String::default())).as_ref());
+}
+
+#[test]
+fn as_other_str() {
+    assert_eq!("color", (Color::Other("color".to_owned())).as_ref());
 }

@@ -6,6 +6,19 @@ use strum::{AsRefStr, AsStaticRef, AsStaticStr, EnumString, IntoStaticStr};
 mod core {} // ensure macros call `::core`
 
 #[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
+enum InnerColor {
+    Purple,
+    Violet,
+    Fuchsia,
+}
+
+impl Default for InnerColor {
+    fn default() -> Self {
+        InnerColor::Purple
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
 enum Color {
     #[strum(to_string = "RedRed")]
     Red,
@@ -15,6 +28,8 @@ enum Color {
     Yellow,
     #[strum(default)]
     Green(String),
+    #[strum(transparent)]
+    Inner(InnerColor),
 }
 
 #[test]
@@ -39,6 +54,11 @@ fn as_yellow_str() {
 fn as_green_str() {
     assert_eq!("Green", (Color::Green(String::default())).as_ref());
     let _: &'static str = (Color::Green(String::default())).as_static();
+}
+
+#[test]
+fn as_fuchsia_str() {
+    assert_eq!("Purple", (Color::Inner(InnerColor::Purple)).as_ref());
 }
 
 #[derive(IntoStaticStr)]
@@ -73,6 +93,10 @@ fn test_into_static_str() {
     assert_eq!("RedRed", <&'static str>::from(&Color::Red));
     assert_eq!("blue", <&'static str>::from(&Color::Blue { hue: 0 }));
     assert_eq!("yellow", <&'static str>::from(&Color::Yellow));
+    assert_eq!(
+        "Purple",
+        <&'static str>::from(&Color::Inner(InnerColor::Purple))
+    );
 
     assert_eq!("A", <&'static str>::from(Foo::A));
     assert_eq!("C", <&'static str>::from(Foo::C(&17)));
@@ -115,8 +139,8 @@ fn brightness_serialize_all() {
 #[derive(IntoStaticStr)]
 #[strum(const_into_str)]
 enum Bar<'a, T>
-    where
-        T: AsRef<str>,
+where
+    T: AsRef<str>,
 {
     A(T),
     B,
@@ -126,7 +150,9 @@ enum Bar<'a, T>
     #[strum(to_string = "Green")]
     G,
     #[strum(serialize = "b", to_string = "blue")]
-    Blue { hue: usize },
+    Blue {
+        hue: usize,
+    },
     #[strum(serialize = "y", serialize = "yellow")]
     Yellow,
 }
@@ -152,7 +178,6 @@ enum BrightnessConst {
 
 #[test]
 fn test_const_into_static_str() {
-
     const A: &'static str = Bar::A("foo").into_str();
     assert_eq!("A", A);
     const B: &'static str = Bar::B::<&str>.into_str();
@@ -166,7 +191,7 @@ fn test_const_into_static_str() {
     const G: &'static str = Bar::G::<&str>.into_str();
     assert_eq!("Green", G);
 
-    const BLUE: &'static str = Bar::Blue::<&str>{ hue: 2 }.into_str();
+    const BLUE: &'static str = Bar::Blue::<&str> { hue: 2 }.into_str();
     assert_eq!("blue", BLUE);
 
     const YELLOW: &'static str = Bar::Yellow::<&str>.into_str();
@@ -180,7 +205,7 @@ fn test_const_into_static_str() {
 
     const DARK_BLACK: &'static str = BrightnessConst::DarkBlack.into_str();
     assert_eq!("dark_black", DARK_BLACK);
-    const DIM: &'static str = BrightnessConst::Dim {glow:1}.into_str();
+    const DIM: &'static str = BrightnessConst::Dim { glow: 1 }.into_str();
     assert_eq!("dim", DIM);
     const BRIGHT_WHITE: &'static str = BrightnessConst::BrightWhite.into_str();
     assert_eq!("Bright", BRIGHT_WHITE);

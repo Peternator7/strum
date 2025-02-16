@@ -32,6 +32,7 @@ pub mod kw {
     custom_keyword!(detailed_message);
     custom_keyword!(serialize);
     custom_keyword!(to_string);
+    custom_keyword!(transparent);
     custom_keyword!(disabled);
     custom_keyword!(default);
     custom_keyword!(default_with);
@@ -62,7 +63,7 @@ pub enum EnumMeta {
         kw: kw::parse_err_fn,
         path: Path,
     },
-    ConstIntoStr(kw::const_into_str)
+    ConstIntoStr(kw::const_into_str),
 }
 
 impl Parse for EnumMeta {
@@ -188,6 +189,7 @@ pub enum VariantMeta {
         kw: kw::to_string,
         value: LitStr,
     },
+    Transparent(kw::transparent),
     Disabled(kw::disabled),
     Default(kw::default),
     DefaultWith {
@@ -227,6 +229,8 @@ impl Parse for VariantMeta {
             let _: Token![=] = input.parse()?;
             let value = input.parse()?;
             Ok(VariantMeta::ToString { kw, value })
+        } else if lookahead.peek(kw::transparent) {
+            Ok(VariantMeta::Transparent(input.parse()?))
         } else if lookahead.peek(kw::disabled) {
             Ok(VariantMeta::Disabled(input.parse()?))
         } else if lookahead.peek(kw::default) {
