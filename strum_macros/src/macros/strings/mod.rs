@@ -21,15 +21,26 @@ where
 
     let pattern_and_return = match &variant.fields {
         Fields::Unnamed(f) if f.unnamed.len() == 1 => {
-            let pat = &quote! { field0 };
-            let ret_val = return_val_fn(pat);
-            quote! { (ref #pat) => #ret_val }
+            let ident = &quote! { field0 };
+            let ref_kw = match f.unnamed.last().unwrap().ty {
+                syn::Type::Reference(..) => quote! { },
+                _ => quote! { ref },
+            };
+
+            let ret_val = return_val_fn(ident);
+            quote! { (#ref_kw #ident) => #ret_val }
         }
         Fields::Named(f) if f.named.len() == 1 => {
-            let ident = f.named.last().unwrap().ident.as_ref().unwrap();
+            let field = f.named.last().unwrap();
+            let ref_kw = match field.ty {
+                syn::Type::Reference(..) => quote! { },
+                _ => quote! { ref },
+            };
+
+            let ident = field.ident.as_ref().unwrap();
             let ident = &quote! { #ident };
             let ret_val = return_val_fn(ident);
-            quote! { {ref #ident} => #ret_val }
+            quote! { { #ref_kw #ident} => #ret_val }
         }
         _ => return Err(NonSingleFieldEnum),
     };
