@@ -64,6 +64,7 @@ fn as_fuchsia_str() {
 #[derive(IntoStaticStr)]
 enum Foo<'a> {
     A,
+    #[allow(dead_code)]
     C(&'a i32),
 }
 
@@ -71,6 +72,7 @@ enum Foo<'a> {
 enum Boo<'a, T> {
     A(T),
     B,
+    #[allow(dead_code)]
     C(&'a i32),
 }
 
@@ -81,6 +83,7 @@ where
 {
     A(T),
     B,
+    #[allow(dead_code)]
     C(&'a i32),
 }
 
@@ -144,6 +147,7 @@ where
 {
     A(T),
     B,
+    #[allow(dead_code)]
     C(&'a i32),
     #[strum(serialize = "Dark")]
     D,
@@ -151,6 +155,7 @@ where
     G,
     #[strum(serialize = "b", to_string = "blue")]
     Blue {
+        #[allow(dead_code)]
         hue: usize,
     },
     #[strum(serialize = "y", serialize = "yellow")]
@@ -161,6 +166,7 @@ where
 #[strum(const_into_str)]
 enum Baz<'a, T> {
     A(T),
+    #[allow(dead_code)]
     C(&'a i32),
 }
 
@@ -170,6 +176,7 @@ enum Baz<'a, T> {
 enum BrightnessConst {
     DarkBlack,
     Dim {
+        #[allow(dead_code)]
         glow: usize,
     },
     #[strum(serialize = "Bright")]

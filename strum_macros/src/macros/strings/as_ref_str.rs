@@ -93,7 +93,7 @@ pub fn as_static_str_inner(
 ) -> syn::Result<TokenStream> {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
-    let arms = get_arms(ast, |tok| {
+    let arms = &get_arms(ast, |tok| {
         quote! { ::core::convert::From::from(#tok) }
     })?;
 
@@ -107,8 +107,6 @@ pub fn as_static_str_inner(
             parse_quote!('_derivative_strum),
         )));
     let (impl_generics2, _, _) = generics.split_for_impl();
-    let arms2 = arms.clone();
-    let arms3 = arms.clone();
 
     Ok(match trait_variant {
         GenerateTraitVariant::AsStaticStr => quote! {
@@ -126,7 +124,7 @@ pub fn as_static_str_inner(
                 #[inline]
                 fn from(x: #name #ty_generics) -> &'static str {
                     match x {
-                        #(#arms2),*
+                        #(#arms),*
                     }
                 }
             }
@@ -134,7 +132,7 @@ pub fn as_static_str_inner(
                 #[inline]
                 fn from(x: &'_derivative_strum #name #ty_generics) -> &'static str {
                     match *x {
-                        #(#arms3),*
+                        #(#arms),*
                     }
                 }
             }
@@ -143,7 +141,7 @@ pub fn as_static_str_inner(
             impl #impl_generics #name #ty_generics #where_clause {
                 pub const fn into_str(&self) -> &'static str {
                     match self {
-                        #(#arms3),*
+                        #(#arms),*
                     }
                 }
             }
@@ -151,7 +149,7 @@ pub fn as_static_str_inner(
             impl #impl_generics ::core::convert::From<#name #ty_generics> for &'static str #where_clause {
                 fn from(x: #name #ty_generics) -> &'static str {
                     match x {
-                        #(#arms2),*
+                        #(#arms),*
                     }
                 }
             }

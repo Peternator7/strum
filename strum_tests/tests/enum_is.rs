@@ -3,11 +3,13 @@ use strum::EnumIs;
 
 mod core {} // ensure macros call `::core`
 #[derive(EnumIs)]
+#[allow(dead_code)]
 enum LifeTimeTest<'a> {
     One(Cow<'a, str>),
     Two(&'a str),
 }
 #[derive(EnumIs)]
+#[allow(dead_code)]
 enum Foo {
     Unit,
     Named0 {},
