@@ -2,7 +2,9 @@ use proc_macro2::{Ident, TokenStream};
 use quote::quote;
 use syn::{punctuated::Punctuated, Data, DeriveInput, Fields, LitStr, Token};
 
-use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypeProperties};
+use crate::helpers::{
+    non_enum_error, non_single_field_variant_error, HasStrumVariantProperties, HasTypeProperties,
+};
 
 pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
@@ -20,6 +22,22 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let variant_properties = variant.get_variant_properties()?;
 
         if variant_properties.disabled.is_some() {
+            continue;
+        }
+
+        if variant_properties.transparent.is_some() {
+            let arm_end = match &variant.fields {
+                Fields::Unnamed(f) if f.unnamed.len() == 1 => {
+                    quote! { (ref v) => ::core::fmt::Display::fmt(v, f)}
+                }
+                Fields::Named(f) if f.named.len() == 1 => {
+                    let ident = f.named.last().unwrap().ident.as_ref().unwrap();
+                    quote! { {ref #ident} => ::core::fmt::Display::fmt(#ident, f) }
+                }
+                _ => return Err(non_single_field_variant_error("transparent")),
+            };
+
+            arms.push(quote! { #name::#ident #arm_end });
             continue;
         }
 

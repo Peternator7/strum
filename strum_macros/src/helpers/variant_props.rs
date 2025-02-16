@@ -11,6 +11,7 @@ pub trait HasStrumVariantProperties {
 
 #[derive(Clone, Default)]
 pub struct StrumVariantProperties {
+    pub transparent: Option<kw::transparent>,
     pub disabled: Option<kw::disabled>,
     pub default: Option<kw::default>,
     pub default_with: Option<LitStr>,
@@ -73,6 +74,7 @@ impl HasStrumVariantProperties for Variant {
 
         let mut message_kw = None;
         let mut detailed_message_kw = None;
+        let mut transparent_kw = None;
         let mut disabled_kw = None;
         let mut default_kw = None;
         let mut default_with_kw = None;
@@ -109,6 +111,14 @@ impl HasStrumVariantProperties for Variant {
 
                     to_string_kw = Some(kw);
                     output.to_string = Some(value);
+                }
+                VariantMeta::Transparent(kw) => {
+                    if let Some(fst_kw) = transparent_kw {
+                        return Err(occurrence_error(fst_kw, kw, "transparent"));
+                    }
+
+                    transparent_kw = Some(kw);
+                    output.transparent = Some(kw);
                 }
                 VariantMeta::Disabled(kw) => {
                     if let Some(fst_kw) = disabled_kw {
