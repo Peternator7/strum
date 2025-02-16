@@ -56,7 +56,7 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 ///
 /// The default error type is `strum::ParseError`. This can be overriden by applying both the
 /// `parse_err_ty` and `parse_err_fn` attributes at the type level.  `parse_error_fn` should be a
-/// function that accepts an `&str` and returns the type `parse_error_ty`. See 
+/// function that accepts an `&str` and returns the type `parse_error_ty`. See
 /// [this test case](https://github.com/Peternator7/strum/blob/9db3c4dc9b6f585aeb9f5f15f9cc18b6cf4fd780/strum_tests/tests/from_str.rs#L233)
 /// for an example.
 ///

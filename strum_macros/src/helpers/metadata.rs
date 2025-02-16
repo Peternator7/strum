@@ -63,7 +63,7 @@ pub enum EnumMeta {
         kw: kw::parse_err_fn,
         path: Path,
     },
-    ConstIntoStr(kw::const_into_str)
+    ConstIntoStr(kw::const_into_str),
 }
 
 impl Parse for EnumMeta {
