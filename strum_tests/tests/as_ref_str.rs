@@ -30,6 +30,8 @@ enum Color {
     Green(String),
     #[strum(transparent)]
     Inner(InnerColor),
+    #[strum(transparent)]
+    InnerField { inner: InnerColor },
 }
 
 #[test]
@@ -59,6 +61,7 @@ fn as_green_str() {
 #[test]
 fn as_fuchsia_str() {
     assert_eq!("Purple", (Color::Inner(InnerColor::Purple)).as_ref());
+    assert_eq!("Purple", (Color::InnerField { inner: InnerColor::Purple }).as_ref());
 }
 
 #[derive(IntoStaticStr)]

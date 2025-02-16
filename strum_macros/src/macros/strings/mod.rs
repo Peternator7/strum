@@ -26,7 +26,8 @@ where
             quote! { (ref #pat) => #ret_val }
         }
         Fields::Named(f) if f.named.len() == 1 => {
-            let ident = &quote! { f.named.last().unwrap().ident.as_ref().unwrap() };
+            let ident = f.named.last().unwrap().ident.as_ref().unwrap();
+            let ident = &quote! { #ident };
             let ret_val = return_val_fn(ident);
             quote! { {ref #ident} => #ret_val }
         }
