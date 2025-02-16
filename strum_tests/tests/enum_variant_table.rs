@@ -1,6 +1,7 @@
 use strum::EnumTable;
 
 #[derive(EnumTable)]
+#[allow(dead_code)]
 enum Color {
     Red,
     Yellow,
@@ -15,6 +16,7 @@ enum Color {
 // even though this isn't used, it needs to be a test
 // because if it doesn't compile, enum variants that conflict with keywords won't work
 #[derive(EnumTable)]
+#[allow(dead_code)]
 enum Keyword {
     Const,
 }
