@@ -30,6 +30,13 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         #[derive(Clone, Copy, Debug, PartialEq, Eq, #(#derives),*)]
     };
 
+    // Create #[doc] attrs for new generated type.
+    let docs = type_properties.discriminant_docs;
+
+    let docs = quote! {
+        #(#[doc = #docs])*
+    };
+
     // Work out the name
     let default_name = syn::Ident::new(&format!("{}Discriminants", name), Span::call_site());
 
@@ -181,7 +188,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     };
 
     Ok(quote! {
-        /// Auto-generated discriminant enum variants
+        #docs
         #derives
         #repr
         #(#[ #pass_though_attributes ])*
