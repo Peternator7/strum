@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.27.1
+
+* [#414](https://github.com/Peternator7/strum/pull/414): Fix docrs build error.
+* [#417](https://github.com/Peternator7/strum/pull/417): Mention `parse_error_ty` and `parse_error_fn` that had been
+  left out of the docs accidentally.
+* [#421](https://github.com/Peternator7/strum/pull/421)[#331](https://github.com/Peternator7/strum/pull/331): Implement
+  `#[strum(transparent)]` attribute on `IntoStaticStr`, `Display` and `AsRefStr` that forwards the implmenentation to
+  the inner value. Note that for static strings, the inner value must be convertible to an `&'static str`. 
+
+  ```rust
+  #[derive(strum::Display)]
+  enum SurveyResponse {
+    Yes,
+    No,
+    #[strum(transparent)]
+    Other(String)
+  }
+
+  fn main() {
+    let response = SurveyResponse::Other("It was good".into());
+    println!("Question: Did you have fun?");
+    println!("Answer: {}", response);
+    // prints: Answer: It was good
+  }
+  ```
+
 ## 0.27.0
 
 ### Highlights
