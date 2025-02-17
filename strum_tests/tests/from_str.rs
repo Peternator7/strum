@@ -28,6 +28,12 @@ enum Color {
     White(String),
 }
 
+#[derive(Debug, Eq, PartialEq, EnumString, strum::Display)]
+enum Color2 {
+    #[strum(default)]
+    Purple { inner: String }
+}
+
 #[rustversion::since(1.34)]
 fn assert_from_str<'a, T>(a: T, from: &'a str)
 where
@@ -72,6 +78,12 @@ fn color_to_string() {
 #[test]
 fn color_default() {
     assert_from_str(Color::Green(String::from("not found")), "not found");
+}
+
+#[test]
+fn color2_default() {
+    assert_from_str(Color2::Purple { inner: String::from("test") }, "test");
+    assert_eq!(String::from("test"), Color2::Purple { inner: String::from("test") }.to_string());
 }
 
 #[test]

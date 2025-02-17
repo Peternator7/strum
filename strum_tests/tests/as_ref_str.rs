@@ -30,6 +30,8 @@ enum Color {
     Green(String),
     #[strum(transparent)]
     Inner(InnerColor),
+    #[strum(transparent)]
+    InnerField { inner: InnerColor },
 }
 
 #[test]
@@ -59,6 +61,7 @@ fn as_green_str() {
 #[test]
 fn as_fuchsia_str() {
     assert_eq!("Purple", (Color::Inner(InnerColor::Purple)).as_ref());
+    assert_eq!("Purple", (Color::InnerField { inner: InnerColor::Purple }).as_ref());
 }
 
 #[derive(IntoStaticStr)]
@@ -122,6 +125,10 @@ enum Brightness {
     },
     #[strum(serialize = "Bright")]
     BrightWhite,
+    #[strum(transparent)]
+    Gray(&'static str),
+    #[strum(transparent)]
+    Grey { inner: &'static str }
 }
 
 #[test]
@@ -137,6 +144,8 @@ fn brightness_serialize_all() {
     assert_eq!("dark_black", <&'static str>::from(Brightness::DarkBlack));
     assert_eq!("dim", <&'static str>::from(Brightness::Dim { glow: 0 }));
     assert_eq!("Bright", <&'static str>::from(Brightness::BrightWhite));
+    assert_eq!("Gray", <&'static str>::from(Brightness::Gray("Gray")));
+    assert_eq!("Grey", <&'static str>::from(Brightness::Grey { inner: "Grey" }));
 }
 
 #[derive(IntoStaticStr)]

@@ -157,6 +157,9 @@ fn non_string_default_to_string() {
 enum TransparentString {
     #[strum(transparent)]
     Something(String),
+
+    #[strum(transparent)]
+    SomethingNamed { my_field: String },
 }
 
 #[test]
@@ -166,6 +169,19 @@ fn transparent_string() {
         format!(
             "{}",
             TransparentString::Something("string in here".to_owned())
+        )
+    );
+}
+
+#[test]
+fn transparent_string_named_field() {
+    assert_eq!(
+        String::from("string in here"),
+        format!(
+            "{}",
+            TransparentString::SomethingNamed {
+                my_field: String::from("string in here")
+            }
         )
     );
 }

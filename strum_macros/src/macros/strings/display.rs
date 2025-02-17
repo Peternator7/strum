@@ -27,7 +27,7 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         if let Some(..) = variant_properties.transparent {
             let arm = super::extract_single_field_variant_and_then(name, variant, |tok| {
-                quote! { ::core::fmt::Display::fmt(#tok, f)}
+                quote! { ::core::fmt::Display::fmt(#tok, f) }
             })
             .map_err(|_| non_single_field_variant_error("transparent"))?;
 

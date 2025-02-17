@@ -76,7 +76,9 @@
 //!
 //! - `transparent`: Signals that the inner field's implementation should be used, instead of generating
 //!    one for this variant. Only applicable to enum variants with a single field. Compatible with the
-//!    `AsRefStr`, `Display` and `IntoStaticStr` derive macros.
+//!    `AsRefStr`, `Display` and `IntoStaticStr` derive macros. Note that `IntoStaticStr` has a few restrictions,
+//!    the value must be `'static` and `const_into_str` is not supported in combination with `transparent` b/c
+//!    transparent relies on a call on `From::from(variant)`.
 //!
 //! - `disabled`: removes variant from generated code.
 //!
