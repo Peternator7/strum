@@ -26,6 +26,7 @@ pub struct StrumTypeProperties {
     pub prefix: Option<LitStr>,
     pub enum_repr: Option<TokenStream>,
     pub const_into_str: bool,
+    pub discriminant_docs: Vec<LitStr>,
 }
 
 impl HasTypeProperties for DeriveInput {
@@ -138,6 +139,9 @@ impl HasTypeProperties for DeriveInput {
 
                     vis_kw = Some(kw);
                     output.discriminant_vis = Some(vis);
+                }
+                EnumDiscriminantsMeta::Doc { doc, .. } => {
+                    output.discriminant_docs.push(doc);
                 }
                 EnumDiscriminantsMeta::Other { path, nested } => {
                     output.discriminant_others.push(quote! { #path(#nested) });

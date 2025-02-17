@@ -853,6 +853,7 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// # #[allow(dead_code)]
 /// #[derive(Debug, EnumDiscriminants)]
 /// #[strum_discriminants(derive(EnumString, EnumMessage))]
+/// #[strum_discriminants(doc = "This is the docstring on the generated type.")]
 /// enum MyEnum {
 ///     #[strum_discriminants(strum(message = "Variant zero"))]
 ///     Variant0(NonDefault),
