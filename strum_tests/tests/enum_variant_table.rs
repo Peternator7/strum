@@ -15,6 +15,7 @@ enum Color {
 
 // even though this isn't used, it needs to be a test
 // because if it doesn't compile, enum variants that conflict with keywords won't work
+#[allow(dead_code)]
 #[derive(EnumTable)]
 #[allow(dead_code)]
 enum Keyword {
@@ -70,6 +71,13 @@ fn index_mut() {
     map[Color::Red] *= 4;
     assert_eq!(map[Color::Green], 5);
     assert_eq!(map[Color::Red], 72);
+}
+
+#[test]
+#[should_panic]
+fn index_disabled_panics() {
+    let map = ColorTable::filled(0);
+    println!("Returned: {}", map[Color::Teal]);
 }
 
 #[test]
