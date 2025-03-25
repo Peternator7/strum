@@ -39,6 +39,7 @@ pub mod kw {
     custom_keyword!(default_with);
     custom_keyword!(props);
     custom_keyword!(ascii_case_insensitive);
+    custom_keyword!(flatten);
 }
 
 pub enum EnumMeta {
@@ -211,6 +212,7 @@ pub enum VariantMeta {
         _kw: kw::props,
         props: Vec<(LitStr, Lit)>,
     },
+    Flatten(kw::flatten),
 }
 
 impl Parse for VariantMeta {
@@ -268,6 +270,8 @@ impl Parse for VariantMeta {
                     .map(|Prop(k, v)| (LitStr::new(&k.to_string(), k.span()), v))
                     .collect(),
             })
+        } else if lookahead.peek(kw::flatten) {
+            Ok(VariantMeta::Flatten(input.parse()?))
         } else {
             Err(lookahead.error())
         }

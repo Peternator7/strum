@@ -224,3 +224,163 @@ fn enum_iter_option() {
 
     assert_eq!(expected, results);
 }
+
+#[derive(Debug, Eq, PartialEq, EnumIter)]
+enum Shade {
+    Light,
+    Normal,
+    Dark,
+}
+
+#[derive(Debug, Eq, PartialEq, EnumIter)]
+enum Color {
+    White,
+    #[strum(flatten)]
+    Red(Shade),
+    #[strum(flatten)]
+    Green(Shade),
+    #[strum(flatten)]
+    Blue(Shade),
+    Black,
+}
+
+impl Color {
+    fn simple_iter() -> impl DoubleEndedIterator<Item=Color> {
+        vec![Color::White]
+            .into_iter()
+            .chain(Shade::iter().map(Color::Red))
+            .chain(Shade::iter().map(Color::Green))
+            .chain(Shade::iter().map(Color::Blue))
+            .chain(vec![Color::Black])
+    }
+}
+
+#[test]
+fn enum_iter_flatten() {
+    let results = Color::iter().collect::<Vec<_>>();
+    let expected = vec![
+        Color::White,
+        Color::Red(Shade::Light),
+        Color::Red(Shade::Normal),
+        Color::Red(Shade::Dark),
+        Color::Green(Shade::Light),
+        Color::Green(Shade::Normal),
+        Color::Green(Shade::Dark),
+        Color::Blue(Shade::Light),
+        Color::Blue(Shade::Normal),
+        Color::Blue(Shade::Dark),
+        Color::Black,
+    ];
+
+    assert_eq!(results, expected);
+}
+
+#[test]
+fn enum_iter_flatten_back() {
+    let result = Color::iter().rev().collect::<Vec<_>>();
+    let expected = vec![
+        Color::Black,
+        Color::Blue(Shade::Dark),
+        Color::Blue(Shade::Normal),
+        Color::Blue(Shade::Light),
+        Color::Green(Shade::Dark),
+        Color::Green(Shade::Normal),
+        Color::Green(Shade::Light),
+        Color::Red(Shade::Dark),
+        Color::Red(Shade::Normal),
+        Color::Red(Shade::Light),
+        Color::White,
+    ];
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn enum_iter_mixed_next_and_next_back() {
+    let mut iter = Color::iter();
+
+    assert_eq!(iter.next(), Some(Color::White));
+    assert_eq!(iter.next_back(), Some(Color::Black));
+
+    assert_eq!(iter.next(), Some(Color::Red(Shade::Light)));
+    assert_eq!(iter.next_back(), Some(Color::Blue(Shade::Dark)));
+
+    assert_eq!(iter.next(), Some(Color::Red(Shade::Normal)));
+    assert_eq!(iter.next_back(), Some(Color::Blue(Shade::Normal)));
+
+    assert_eq!(iter.next(), Some(Color::Red(Shade::Dark)));
+    assert_eq!(iter.next_back(), Some(Color::Blue(Shade::Light)));
+
+    assert_eq!(iter.next(), Some(Color::Green(Shade::Light)));
+    assert_eq!(iter.next_back(), Some(Color::Green(Shade::Dark)));
+
+    assert_eq!(iter.next(), Some(Color::Green(Shade::Normal)));
+    assert_eq!(iter.next_back(), None);
+}
+
+#[test]
+fn enum_iter_quickcheck() {
+    use rand::Rng;
+
+    let mut rng = rand::rng();
+    for _ in 0..1000 {
+        let mut iter = Color::iter();
+        let mut simple_iter = Color::simple_iter();
+
+        let mut results = vec![];
+        let mut expected = vec![];
+        for _ in 0..20 {
+            if rng.random_bool(0.5) {
+                results.push(iter.next());
+                expected.push(simple_iter.next());
+            } else {
+                results.push(iter.next_back());
+                expected.push(simple_iter.next_back());
+            }
+        }
+        assert_eq!(results, expected);
+    }
+}
+
+#[test]
+fn enum_iter_quickcheck_sizehint() {
+    use rand::Rng;
+
+    let mut rng = rand::rng();
+    for _ in 0..1000 {
+        let mut iter = Color::iter();
+        let mut simple_iter = Color::simple_iter();
+
+        assert_eq!(iter.size_hint(), simple_iter.size_hint());
+        for _ in 0..500 {
+            if rng.random_bool(0.5) {
+                _ = iter.next();
+                _ = simple_iter.next();
+            } else {
+                _ = iter.next_back();
+                _ = simple_iter.next_back();
+            }
+            assert_eq!(dbg!(iter.size_hint()), simple_iter.size_hint());
+        }
+    }
+}
+
+#[test]
+fn enum_iter_quickcheck_len() {
+    use rand::Rng;
+
+    let mut rng = rand::rng();
+    for _ in 0..1000 {
+        let mut iter = Color::iter();
+        const MAX: usize = 11;
+
+        assert_eq!(iter.len(), MAX);
+        for i in 1..=MAX {
+            if rng.random_bool(0.5) {
+                _ = iter.next();
+            } else {
+                _ = iter.next_back();
+            }
+            assert_eq!(iter.len(), MAX - i);
+        }
+    }
+}
