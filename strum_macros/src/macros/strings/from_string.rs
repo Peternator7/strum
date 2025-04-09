@@ -3,8 +3,9 @@ use quote::quote;
 use syn::{parse_quote, Data, DeriveInput, Fields, Path};
 
 use crate::helpers::{
-    missing_parse_err_attr_error, non_enum_error, occurrence_error, HasInnerVariantProperties,
-    HasStrumVariantProperties, HasTypeProperties,
+    incompatible_parse_attribute_error, missing_default_attr_error, missing_parse_err_attr_error,
+    non_enum_error, occurrence_error, HasInnerVariantProperties, HasStrumVariantProperties,
+    HasTypeProperties,
 };
 
 pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
@@ -28,6 +29,9 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             quote! { return ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) },
         ),
         (Some(ty), Some(f)) => {
+            if type_properties.parse_infallible {
+                return Err(incompatible_parse_attribute_error());
+            }
             let ty_path: Path = parse_quote!(#ty);
             let fn_path: Path = parse_quote!(#f);
 
@@ -170,6 +174,37 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
     };
 
+    if type_properties.parse_infallible {
+        if default_kw.is_none() {
+            return Err(missing_default_attr_error());
+        }
+
+        // Derive From<&str>, which produces a blanket impl of Into which in rust 1.34 and later
+        // produces an infallible TryFrom. Also derive FromStr as a thin wrapper around From<&str>.
+        let from = quote! {
+            impl #impl_generics ::core::convert::From<&str> for #name #ty_generics #where_clause {
+                #[inline]
+                fn from(s: &str) -> #name #ty_generics {
+                    #phf_body
+                }
+            }
+        };
+        let from_str = quote! {
+            #[allow(clippy::use_self)]
+            impl #impl_generics ::core::str::FromStr for #name #ty_generics #where_clause {
+                type Err = ::core::convert::Infallible;
+
+                #[inline]
+                fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
+                    ::core::result::Result::Ok(::core::convert::From::from(s))
+                }
+            }
+        };
+        return Ok(quote! {
+            #from
+            #from_str
+        });
+    }
 
     let from_str = quote! {
         #[allow(clippy::use_self)]

@@ -19,6 +19,7 @@ pub mod kw {
     custom_keyword!(const_into_str);
     custom_keyword!(use_phf);
     custom_keyword!(prefix);
+    custom_keyword!(parse_infallible);
     custom_keyword!(parse_err_ty);
     custom_keyword!(parse_err_fn);
 
@@ -64,6 +65,7 @@ pub enum EnumMeta {
         kw: kw::parse_err_fn,
         path: Path,
     },
+    ParseInfallible(kw::parse_infallible),
     ConstIntoStr(kw::const_into_str),
 }
 
@@ -104,6 +106,8 @@ impl Parse for EnumMeta {
             input.parse::<Token![=]>()?;
             let path: Path = input.parse()?;
             Ok(EnumMeta::ParseErrFn { kw, path })
+        } else if lookahead.peek(kw::parse_infallible) {
+            Ok(EnumMeta::ParseInfallible(input.parse()?))
         } else if lookahead.peek(kw::const_into_str) {
             Ok(EnumMeta::ConstIntoStr(input.parse()?))
         } else {
