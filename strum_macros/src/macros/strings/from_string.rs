@@ -19,13 +19,13 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let strum_module_path = type_properties.crate_module_path();
 
     let mut default_kw = None;
-    let (mut default_err_ty, mut default) = match (
+    let (mut default_err_ty, mut default_match_arm) = match (
         type_properties.parse_err_ty,
         type_properties.parse_err_fn,
     ) {
         (None, None) => (
             quote! { #strum_module_path::ParseError },
-            quote! { ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) },
+            quote! { return ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) },
         ),
         (Some(ty), Some(f)) => {
             let ty_path: Path = parse_quote!(#ty);
@@ -33,7 +33,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             (
                 quote! { #ty_path },
-                quote! { ::core::result::Result::Err(#fn_path(s)) },
+                quote! { return ::core::result::Result::Err(#fn_path(s)) },
             )
         }
         _ => return Err(missing_parse_err_attr_error()),
@@ -58,14 +58,14 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             match &variant.fields {
                 Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
-                    default = quote! {
-                        ::core::result::Result::Ok(#name::#ident(s.into()))
+                    default_match_arm = quote! {
+                        #name::#ident(s.into())
                     };
                 }
                 Fields::Named(ref f) if f.named.len() == 1 => {
                     let field_name = f.named.last().unwrap().ident.as_ref().unwrap();
-                    default = quote! {
-                        ::core::result::Result::Ok(#name::#ident { #field_name : s.into() } )
+                    default_match_arm = quote! {
+                        #name::#ident { #field_name : s.into() }
                     };
                 }
                 _ => {
@@ -144,30 +144,32 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
     }
 
+    let standard_match_body = if standard_match_arms.is_empty() {
+        default_match_arm
+    } else {
+        quote! {
+            match s {
+                #(#standard_match_arms)*
+                _ => #default_match_arm,
+            }
+        }
+    };
+
     let phf_body = if phf_exact_match_arms.is_empty() {
-        quote!()
+        standard_match_body
     } else {
         quote! {
             use #strum_module_path::_private_phf_reexport_for_macro_if_phf_feature as phf;
             static PHF: phf::Map<&'static str, #name> = phf::phf_map! {
                 #(#phf_exact_match_arms)*
             };
-            if let Some(value) = PHF.get(s).cloned() {
-                return ::core::result::Result::Ok(value);
+            match PHF.get(s).cloned() {
+                Some(v) => v,
+                None => #standard_match_body,
             }
         }
     };
 
-    let standard_match_body = if standard_match_arms.is_empty() {
-        default
-    } else {
-        quote! {
-            ::core::result::Result::Ok(match s {
-                #(#standard_match_arms)*
-                _ => return #default,
-            })
-        }
-    };
 
     let from_str = quote! {
         #[allow(clippy::use_self)]
@@ -176,8 +178,8 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             #[inline]
             fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
-                #phf_body
-                #standard_match_body
+                let value = { #phf_body };
+                ::core::result::Result::Ok(value)
             }
         }
     };
