@@ -242,6 +242,33 @@ fn color_default_with_white() {
     }
 }
 
+#[derive(Debug, EnumString, Eq, PartialEq)]
+#[strum(parse_infallible)]
+enum CaseInfallibleParsingWithDefaultEnum {
+    #[strum(serialize = "foo")]
+    Foo,
+    #[strum(serialize = "bar")]
+    Bar,
+    #[strum(default)]
+    Unknown(String),
+}
+
+#[test]
+fn case_infallible_parsing_with_default() {
+    assert_eq!(
+        CaseInfallibleParsingWithDefaultEnum::from("yellow"),
+        CaseInfallibleParsingWithDefaultEnum::Unknown("yellow".to_string()),
+    );
+    let r = match "yellow".parse::<CaseInfallibleParsingWithDefaultEnum>() {
+        Ok(r) => r,
+        Err(never) => match never {},
+    };
+    assert_eq!(
+        CaseInfallibleParsingWithDefaultEnum::Unknown("yellow".to_string()),
+        r
+    );
+}
+
 #[derive(Debug, EnumString)]
 #[strum(
     parse_err_fn = some_enum_not_found_err,

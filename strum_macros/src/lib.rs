@@ -41,8 +41,11 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// Multiple deserializations can be added to the same variant. If the variant contains additional data,
 /// they will be set to their default values upon deserialization.
 ///
-/// The `default` attribute can be applied to a tuple variant with a single data parameter. When a match isn't
-/// found, the given variant will be returned and the input string will be captured in the parameter.
+/// The `default` attribute can be applied to a tuple variant with a single data parameter. When a
+/// match isn't found, the given variant will be returned and the input string will be captured in
+/// the parameter. In such cases, applying the `parse_infallible` attribute at type level
+/// additionally derives `std::convert::From<&str>` and also changes the error type of
+/// `std::str::FromStr` to `std::convert::Infallible`.
 ///
 /// Note that the implementation of `FromStr` by default only matches on the name of the
 /// variant. There is an option to match on different case conversions through the
@@ -117,6 +120,52 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// println!("{:?}", Color::Yellow);
 /// let color_variant = Color::from_str("bLACk").unwrap();
 /// assert_eq!(Color::Black, color_variant);
+/// ```
+///
+/// # Example how to use infallible `EnumString` for an enum with default variant
+/// ```
+/// use std::str::FromStr;
+/// use strum_macros::EnumString;
+///
+/// #[derive(Debug, PartialEq, EnumString)]
+/// #[strum(parse_infallible)]
+/// enum InfallibleEnum {
+///     Foo,
+///     Bar,
+///     #[strum(default)]
+///     Unknown(String),
+/// }
+///
+/// /*
+/// //The generated code will look like:
+/// impl std::str::From<&str> for InfallibleEnum {
+///     fn from(s: &str) -> InfallibleEnum {
+///         match s {
+///             "foo" => InfallibleEnum::Foo,
+///             "bar" => InfallibleEnum::Bar,
+///             _ => InfallibleEnum::Unknown(s.into()),
+///         }
+///     }
+/// }
+/// */
+///
+/// // simple from string
+/// let variant = InfallibleEnum::from("Foo");
+/// assert_eq!(InfallibleEnum::Foo, variant);
+/// let variant = InfallibleEnum::from("Bar");
+/// assert_eq!(InfallibleEnum::Bar, variant);
+///
+/// // unknown variants work too
+/// let variant = InfallibleEnum::from("Baz");
+/// assert_eq!(InfallibleEnum::Unknown("Baz".to_string()), variant);
+/// let variant = InfallibleEnum::from("Boom");
+/// assert_eq!(InfallibleEnum::Unknown("Boom".to_string()), variant);
+///
+/// // parsing still works as well
+/// let variant = InfallibleEnum::from_str("Foo").unwrap();
+/// assert_eq!(InfallibleEnum::Foo, variant);
+/// let variant = InfallibleEnum::from_str("Baz").unwrap();
+/// assert_eq!(InfallibleEnum::Unknown("Baz".to_string()), variant);
 /// ```
 #[proc_macro_derive(EnumString, attributes(strum))]
 pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

@@ -3,8 +3,9 @@ use quote::quote;
 use syn::{parse_quote, Data, DeriveInput, Fields, Path};
 
 use crate::helpers::{
-    missing_parse_err_attr_error, non_enum_error, occurrence_error, HasInnerVariantProperties,
-    HasStrumVariantProperties, HasTypeProperties,
+    incompatible_parse_attribute_error, missing_default_attr_error, missing_parse_err_attr_error,
+    non_enum_error, occurrence_error, HasInnerVariantProperties, HasStrumVariantProperties,
+    HasTypeProperties,
 };
 
 pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
@@ -19,21 +20,24 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let strum_module_path = type_properties.crate_module_path();
 
     let mut default_kw = None;
-    let (mut default_err_ty, mut default) = match (
+    let (mut default_err_ty, mut default_match_arm) = match (
         type_properties.parse_err_ty,
         type_properties.parse_err_fn,
     ) {
         (None, None) => (
             quote! { #strum_module_path::ParseError },
-            quote! { ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) },
+            quote! { return ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) },
         ),
         (Some(ty), Some(f)) => {
+            if type_properties.parse_infallible {
+                return Err(incompatible_parse_attribute_error());
+            }
             let ty_path: Path = parse_quote!(#ty);
             let fn_path: Path = parse_quote!(#f);
 
             (
                 quote! { #ty_path },
-                quote! { ::core::result::Result::Err(#fn_path(s)) },
+                quote! { return ::core::result::Result::Err(#fn_path(s)) },
             )
         }
         _ => return Err(missing_parse_err_attr_error()),
@@ -58,14 +62,14 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             match &variant.fields {
                 Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
-                    default = quote! {
-                        ::core::result::Result::Ok(#name::#ident(s.into()))
+                    default_match_arm = quote! {
+                        #name::#ident(s.into())
                     };
                 }
                 Fields::Named(ref f) if f.named.len() == 1 => {
                     let field_name = f.named.last().unwrap().ident.as_ref().unwrap();
-                    default = quote! {
-                        ::core::result::Result::Ok(#name::#ident { #field_name : s.into() } )
+                    default_match_arm = quote! {
+                        #name::#ident { #field_name : s.into() }
                     };
                 }
                 _ => {
@@ -144,30 +148,63 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
     }
 
+    let standard_match_body = if standard_match_arms.is_empty() {
+        default_match_arm
+    } else {
+        quote! {
+            match s {
+                #(#standard_match_arms)*
+                _ => #default_match_arm,
+            }
+        }
+    };
+
     let phf_body = if phf_exact_match_arms.is_empty() {
-        quote!()
+        standard_match_body
     } else {
         quote! {
             use #strum_module_path::_private_phf_reexport_for_macro_if_phf_feature as phf;
             static PHF: phf::Map<&'static str, #name> = phf::phf_map! {
                 #(#phf_exact_match_arms)*
             };
-            if let Some(value) = PHF.get(s).cloned() {
-                return ::core::result::Result::Ok(value);
+            match PHF.get(s).cloned() {
+                Some(v) => v,
+                None => #standard_match_body,
             }
         }
     };
 
-    let standard_match_body = if standard_match_arms.is_empty() {
-        default
-    } else {
-        quote! {
-            ::core::result::Result::Ok(match s {
-                #(#standard_match_arms)*
-                _ => return #default,
-            })
+    if type_properties.parse_infallible {
+        if default_kw.is_none() {
+            return Err(missing_default_attr_error());
         }
-    };
+
+        // Derive From<&str>, which produces a blanket impl of Into which in rust 1.34 and later
+        // produces an infallible TryFrom. Also derive FromStr as a thin wrapper around From<&str>.
+        let from = quote! {
+            impl #impl_generics ::core::convert::From<&str> for #name #ty_generics #where_clause {
+                #[inline]
+                fn from(s: &str) -> #name #ty_generics {
+                    #phf_body
+                }
+            }
+        };
+        let from_str = quote! {
+            #[allow(clippy::use_self)]
+            impl #impl_generics ::core::str::FromStr for #name #ty_generics #where_clause {
+                type Err = ::core::convert::Infallible;
+
+                #[inline]
+                fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
+                    ::core::result::Result::Ok(::core::convert::From::from(s))
+                }
+            }
+        };
+        return Ok(quote! {
+            #from
+            #from_str
+        });
+    }
 
     let from_str = quote! {
         #[allow(clippy::use_self)]
@@ -176,8 +213,8 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             #[inline]
             fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
-                #phf_body
-                #standard_match_body
+                let value = { #phf_body };
+                ::core::result::Result::Ok(value)
             }
         }
     };

@@ -33,3 +33,22 @@ fn from_str_with_phf_big() {
     }
     assert_eq!("vAr2".parse::<Enum>().unwrap(), Enum::Var2);
 }
+
+#[cfg(feature = "test_phf")]
+#[test]
+fn infallible_from_str_with_phf() {
+    // This tests PHF with infallible parsing
+    #[derive(Debug, PartialEq, Eq, Clone, strum::EnumString)]
+    #[strum(use_phf, parse_infallible)]
+    enum InfallibleColor {
+        #[strum(ascii_case_insensitive)]
+        Blue,
+        Red,
+        #[strum(default)]
+        Unknown(String),
+    }
+    assert_eq!(InfallibleColor::from("Red"), InfallibleColor::Red);
+    assert_eq!(InfallibleColor::from("bLuE"), InfallibleColor::Blue);
+    assert_eq!("Red".parse(), Ok(InfallibleColor::Red));
+    assert_eq!("bLuE".parse(), Ok(InfallibleColor::Blue));
+}

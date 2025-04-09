@@ -15,6 +15,7 @@ pub trait HasTypeProperties {
 pub struct StrumTypeProperties {
     pub parse_err_ty: Option<Path>,
     pub parse_err_fn: Option<Path>,
+    pub parse_infallible: bool,
     pub case_style: Option<CaseStyle>,
     pub ascii_case_insensitive: bool,
     pub crate_module_path: Option<Path>,
@@ -38,6 +39,7 @@ impl HasTypeProperties for DeriveInput {
 
         let mut parse_err_ty_kw = None;
         let mut parse_err_fn_kw = None;
+        let mut parse_infallible_kw = None;
         let mut serialize_all_kw = None;
         let mut ascii_case_insensitive_kw = None;
         let mut use_phf_kw = None;
@@ -105,6 +107,14 @@ impl HasTypeProperties for DeriveInput {
 
                     parse_err_fn_kw = Some(kw);
                     output.parse_err_fn = Some(path);
+                }
+                EnumMeta::ParseInfallible(kw) => {
+                    if let Some(fst_kw) = parse_infallible_kw {
+                        return Err(occurrence_error(fst_kw, kw, "parse_infallible"));
+                    }
+
+                    parse_infallible_kw = Some(kw);
+                    output.parse_infallible = true;
                 }
                 EnumMeta::ConstIntoStr(kw) => {
                     if let Some(fst_kw) = const_into_str {

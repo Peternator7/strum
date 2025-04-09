@@ -20,6 +20,20 @@ pub fn missing_parse_err_attr_error() -> syn::Error {
     )
 }
 
+pub fn missing_default_attr_error() -> syn::Error {
+    syn::Error::new(
+        Span::call_site(),
+        "`parse_infallible` requires a default enum variant.",
+    )
+}
+
+pub fn incompatible_parse_attribute_error() -> syn::Error {
+    syn::Error::new(
+        Span::call_site(),
+        "`parse_err_ty` and `parse_err_fn` attributes are incompatible with `parse_infallible`.",
+    )
+}
+
 pub fn non_enum_error() -> syn::Error {
     syn::Error::new(Span::call_site(), "This macro only supports enums.")
 }
