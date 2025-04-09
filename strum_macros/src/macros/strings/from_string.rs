@@ -19,7 +19,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let strum_module_path = type_properties.crate_module_path();
 
     let mut default_kw = None;
-    let (default_err_ty, mut default_match_body) = match (
+    let (default_err_ty, mut default_match_arm) = match (
         type_properties.parse_err_ty,
         type_properties.parse_err_fn,
     ) {
@@ -57,13 +57,13 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             match &variant.fields {
                 Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
-                    default_match_body = quote! {
+                    default_match_arm = quote! {
                         ::core::result::Result::Ok(#name::#ident(s.into()))
                     };
                 }
                 Fields::Named(ref f) if f.named.len() == 1 => {
                     let field_name = f.named.last().unwrap().ident.as_ref().unwrap();
-                    default_match_body = quote! {
+                    default_match_arm = quote! {
                         ::core::result::Result::Ok(#name::#ident { #field_name : s.into() } )
                     };
                 }
@@ -158,12 +158,12 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     };
 
     let standard_match_body = if standard_match_arms.is_empty() {
-        default_match_body
+        default_match_arm
     } else {
         quote! {
             ::core::result::Result::Ok(match s {
                 #(#standard_match_arms)*
-                _ => return #default_match_body,
+                _ => return #default_match_arm,
             })
         }
     };
