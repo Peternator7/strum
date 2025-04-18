@@ -3,6 +3,7 @@ use std::mem::{align_of, size_of};
 use enum_variant_type::EnumVariantType;
 use strum::{
     Display, EnumDiscriminants, EnumIter, EnumMessage, EnumString, FromRepr, IntoEnumIterator,
+    VariantArray,
 };
 
 mod core {} // ensure macros call `::core`
@@ -362,4 +363,17 @@ fn with_explicit_discriminant_value() {
         142,
         WithExplicitDicriminantValueDiscriminants::Variant0 as u8
     );
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Eq, PartialEq, EnumIter, EnumDiscriminants)]
+#[strum_discriminants(derive(EnumIter, VariantArray))]
+enum Empty {}
+
+#[test]
+fn empty_test() {
+    let discriminants = Empty::iter().map(|i| i.into()).collect::<Vec<_>>();
+    let expected: Vec<_> = EmptyDiscriminants::VARIANTS.to_vec();
+
+    assert_eq!(expected, discriminants);
 }
