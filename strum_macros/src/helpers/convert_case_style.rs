@@ -122,12 +122,7 @@ pub trait CaseStyleHelpers {
 
 impl CaseStyleHelpers for Ident {
     fn convert_case(&self, case_style: Option<CaseStyle>) -> String {
-        let ident_string = self.to_string();
-        if let Some(case_style) = case_style {
-            ident_string.to_case(*case_style)
-        } else {
-            ident_string
-        }
+        case_style.map_or_else(|| self.to_string(), |case| self.to_string().to_case(*case))
     }
 }
 
