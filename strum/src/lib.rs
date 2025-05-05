@@ -234,14 +234,14 @@ pub trait VariantArray: ::core::marker::Sized + 'static {
     const VARIANTS: &'static [Self];
 }
 
-#[cfg(feature = "derive")]
+#[cfg(any(feature = "derive", feature = "derive-convert-case"))]
 pub use strum_macros::*;
 
 macro_rules! DocumentMacroRexports {
     ($($export:ident),+) => {
         $(
-            #[cfg(all(docsrs, feature = "derive"))]
-            #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+            #[cfg(all(docsrs, any(feature = "derive", feature = "derive-convert-case")))]
+            #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "derive-convert-case"))))]
             pub use strum_macros::$export;
         )+
     };
