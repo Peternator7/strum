@@ -16,7 +16,7 @@ readme = "../README.md"
 rust-version = "1.66.1"
 
 [dependencies]
-strum_macros = { path = "../strum_macros", optional = true, version = "0.27.1" }
+strum_macros = { path = "../strum_macros", optional = true, version = "0.27.1", default-features = false }
 phf = { version = "0.11", features = ["macros"], optional = true }
 
 [dev-dependencies]
@@ -27,7 +27,8 @@ travis-ci = { repository = "Peternator7/strum" }
 
 [features]
 default = ["std"]
-derive = ["strum_macros"]
+derive = ["strum_macros", "strum_macros/heck"]
+convert_case = ["strum_macros/convert_case"]
 std = []
 
 [package.metadata.docs.rs]

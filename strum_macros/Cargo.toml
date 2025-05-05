@@ -19,8 +19,15 @@ rust-version = "1.66.1"
 proc-macro = true
 name = "strum_macros"
 
+[features]
+# default = ["convert_case"]
+default = ["heck"]
+convert_case = ["dep:convert_case"]
+heck = ["dep:heck"]
+
 [dependencies]
-heck = "0.5.0"
+heck = { version = "0.5.0", optional = true }
+convert_case = { version = "0.8.0", optional = true }
 proc-macro2 = "1.0"
 quote = "1.0"
 rustversion = "1.0"
