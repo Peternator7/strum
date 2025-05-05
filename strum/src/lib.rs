@@ -21,6 +21,8 @@
 //!
 //! # You can also access strum_macros exports directly through strum using the "derive" feature
 //! strum = { version = "0.27", features = ["derive"] }
+//! # or "derive-convert-case" if you want to use [`convert_case`](https://github.com/rutrum/convert-case)
+//! strum = { version = "0.27", features = ["derive-convert-case"] }
 //! ```
 //!
 

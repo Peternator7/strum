@@ -46,6 +46,8 @@
 //!       Brightness::BrightWhite.to_string().as_ref()
 //!   );
 //!   ```
+//!   You can also use the `derive-convert-case` feature to use the cases of
+//!   [`convert_case`](https://github.com/rutrum/convert-case) instead of `heck`.
 //!
 //! - You can also apply the `#[strum(ascii_case_insensitive)]` attribute to the enum,
 //!   and this has the same effect of applying it to every variant.
