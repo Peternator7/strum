@@ -1,52 +1,18 @@
 use convert_case::{Case, Casing};
-use std::{borrow::Cow, str::FromStr};
+use std::{borrow::Cow, ops::Deref, str::FromStr};
 use syn::{
     parse::{Parse, ParseStream},
     Ident, LitStr,
 };
 
 
-#[allow(clippy::enum_variant_names)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum CaseStyle {
-    SnakeCase,
-    UpperSnakeCase,
-    AdaCase,
-    KebabCase,
-    UpperKebabCase,
-    TrainCase,
-    FlatCase,
-    UpperFlatCase,
-    CamelCase,
-    PascalCase,
-    LowerCase,
-    UpperCase,
-    TitleCase,
-    SentenceCase,
-    AlternatingCase,
-    ToggleCase,
-}
+pub struct CaseStyle(Case<'static>);
 
-impl From<CaseStyle> for Case<'_> {
-    fn from(value: CaseStyle) -> Self {
-        match value {
-            CaseStyle::SnakeCase => Case::Snake,
-            CaseStyle::UpperSnakeCase => Case::UpperSnake,
-            CaseStyle::AdaCase => Case::Ada,
-            CaseStyle::KebabCase => Case::Kebab,
-            CaseStyle::UpperKebabCase => Case::UpperKebab,
-            CaseStyle::TrainCase => Case::Train,
-            CaseStyle::FlatCase => Case::Flat,
-            CaseStyle::UpperFlatCase => Case::UpperFlat,
-            CaseStyle::CamelCase => Case::Camel,
-            CaseStyle::LowerCase => Case::Lower,
-            CaseStyle::UpperCase => Case::Upper,
-            CaseStyle::TitleCase => Case::Title,
-            CaseStyle::SentenceCase => Case::Sentence,
-            CaseStyle::AlternatingCase => Case::Alternating,
-            CaseStyle::ToggleCase => Case::Toggle,
-            CaseStyle::PascalCase => Case::Pascal,
-        }
+impl Deref for CaseStyle {
+    type Target = Case<'static>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -105,48 +71,48 @@ impl FromStr for CaseStyle {
     type Err = CaseFromStrErr;
 
     fn from_str(text: &str) -> Result<Self, Self::Err> {
-        Ok(match text {
+        Ok(CaseStyle(match text {
             // Uniform case
             "snake" | "snek" |
             // Cased
-            "snake_case" | "snek_case" => CaseStyle::SnakeCase,
+            "snake_case" | "snek_case" => Case::Snake,
 
             // Uniform Case
             "upper_snek" | "upper_snake" | "screaming_snake" | "screaming_snek" |
             // Case
             "UPPER_SNEK_CASE" | "UPPER_SNAKE_CASE" | "SCREAMING_SNAKE_CASE" | "SCREAMING_SNEK_CASE" => {
-                CaseStyle::UpperSnakeCase
+                Case::UpperSnake
             }
 
-            "ada" | "Ada_Case" => Self::AdaCase,
-            "kebab" | "kebab-case" => Self::KebabCase,
+            "ada" | "Ada_Case" => Case::Ada,
+            "kebab" | "kebab-case" => Case::Kebab,
 
             // Uniform case
             "upper_kebab" | "screaming_kebab" |
             // Cased
-            "UPPER-KEBAB-CASE" | "SCREAMING-KEBAB-CASE" => Self::UpperKebabCase,
+            "UPPER-KEBAB-CASE" | "SCREAMING-KEBAB-CASE" => Case::UpperKebab,
 
-            "train" | "Train-Case" => Self::TrainCase,
-            "flat" | "flatcase" => Self::FlatCase,
+            "train" | "Train-Case" => Case::Train,
+            "flat" | "flatcase" => Case::Flat,
             
             // Uniform case
             "upper_flat" | "screaming_flat" |
             // Cased
-            "UPPERFLATCASE" | "SCREAMINGFLATCASE" => Self::UpperFlatCase,
+            "UPPERFLATCASE" | "SCREAMINGFLATCASE" => Case::UpperFlat,
 
-            "camel" | "camelCase" => Self::CamelCase,
-            "pascal" | "PascalCase" => Self::PascalCase,
-            "lower" | "lower case" => Self::LowerCase,
-            "upper" | "UPPER CASE" => Self::UpperCase,
-            "title" | "Title Case" => Self::TitleCase,
-            "sentence" | "Sentence case" => Self::SentenceCase,
-            "alternating" | "aLtErNaTiNg CaSe" => Self::AlternatingCase,
-            "toggle" | "tOGGLE cASE" => Self::ToggleCase,
+            "camel" | "camelCase" => Case::Camel,
+            "pascal" | "PascalCase" => Case::Pascal,
+            "lower" | "lower case" => Case::Lower,
+            "upper" | "UPPER CASE" => Case::Upper,
+            "title" | "Title Case" => Case::Title,
+            "sentence" | "Sentence case" => Case::Sentence,
+            "alternating" | "aLtErNaTiNg CaSe" => Case::Alternating,
+            "toggle" | "tOGGLE cASE" => Case::Toggle,
 
             "lowercase" => return Err(CaseFromStrErr::InvalidLower),
             "UPPERCASE" => return Err(CaseFromStrErr::InvalidUpper),
             _invalid_str => return Err(CaseFromStrErr::UnknownVariant),
-        })
+        }))
     }
 }
 
@@ -158,7 +124,7 @@ impl CaseStyleHelpers for Ident {
     fn convert_case(&self, case_style: Option<CaseStyle>) -> String {
         let ident_string = self.to_string();
         if let Some(case_style) = case_style {
-            ident_string.to_case(case_style.into())
+            ident_string.to_case(*case_style)
         } else {
             ident_string
         }
