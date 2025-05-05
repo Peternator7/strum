@@ -28,7 +28,7 @@ travis-ci = { repository = "Peternator7/strum" }
 [features]
 default = ["std"]
 derive = ["strum_macros", "strum_macros/heck"]
-convert_case = ["strum_macros/convert_case"]
+derive-convert-case = ["strum_macros", "strum_macros/convert_case"]
 std = []
 
 [package.metadata.docs.rs]
