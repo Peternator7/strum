@@ -3,7 +3,18 @@ pub use self::inner_variant_props::HasInnerVariantProperties;
 pub use self::type_props::HasTypeProperties;
 pub use self::variant_props::HasStrumVariantProperties;
 
+// This basically means:
+// ```
+// [convert_case] | [convert_case, heck] => "convert_case_style.rs",
+// [heck] => "convert_case_style.rs",
+// ````
+#[cfg_attr(
+    all(feature = "heck", not(feature = "convert_case")),
+    path = "heck_case_style.rs"
+)]
+#[cfg_attr(feature = "convert_case", path = "convert_case_style.rs")]
 pub mod case_style;
+
 pub mod inner_variant_props;
 mod metadata;
 pub mod type_props;

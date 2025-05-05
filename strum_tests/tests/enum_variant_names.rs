@@ -39,7 +39,8 @@ fn variant_names_trait() {
 fn plain_kebab() {
     #[allow(dead_code)]
     #[derive(VariantNames)]
-    #[strum(serialize_all = "kebab_case")]
+    #[cfg_attr(not(feature = "convert_case"), strum(serialize_all = "kebab_case"))]
+    #[cfg_attr(feature = "convert_case", strum(serialize_all = "kebab"))]
     enum Color {
         Red,
         Blue,
@@ -57,7 +58,8 @@ fn plain_kebab() {
 fn non_plain_camel() {
     #[allow(dead_code)]
     #[derive(VariantNames)]
-    #[strum(serialize_all = "kebab_case")]
+    #[cfg_attr(not(feature = "convert_case"), strum(serialize_all = "kebab_case"))]
+    #[cfg_attr(feature = "convert_case", strum(serialize_all = "kebab"))]
     enum Color {
         DeepPink,
         GreenYellow,
@@ -86,7 +88,8 @@ fn clap_and_structopt() {
     }
 
     #[derive(Debug, EnumString, VariantNames)]
-    #[strum(serialize_all = "kebab_case")]
+    #[cfg_attr(not(feature = "convert_case"), strum(serialize_all = "kebab_case"))]
+    #[cfg_attr(feature = "convert_case", strum(serialize_all = "kebab"))]
     enum Color {
         Red,
         Blue,

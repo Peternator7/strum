@@ -21,6 +21,8 @@
 //!
 //! # You can also access strum_macros exports directly through strum using the "derive" feature
 //! strum = { version = "0.27", features = ["derive"] }
+//! # or "derive-convert-case" if you want to use [`convert_case`](https://github.com/rutrum/convert-case)
+//! strum = { version = "0.27", features = ["derive-convert-case"] }
 //! ```
 //!
 
@@ -232,14 +234,14 @@ pub trait VariantArray: ::core::marker::Sized + 'static {
     const VARIANTS: &'static [Self];
 }
 
-#[cfg(feature = "derive")]
+#[cfg(any(feature = "derive", feature = "derive-convert-case"))]
 pub use strum_macros::*;
 
 macro_rules! DocumentMacroRexports {
     ($($export:ident),+) => {
         $(
-            #[cfg(all(docsrs, feature = "derive"))]
-            #[cfg_attr(docsrs, doc(cfg(feature = "derive")))]
+            #[cfg(all(docsrs, any(feature = "derive", feature = "derive-convert-case")))]
+            #[cfg_attr(docsrs, doc(cfg(any(feature = "derive", feature = "derive-convert-case"))))]
             pub use strum_macros::$export;
         )+
     };

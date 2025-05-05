@@ -6,7 +6,8 @@ use strum::{Display, EnumString, IntoStaticStr};
 mod core {} // ensure macros call `::core`
 
 #[derive(Debug, Eq, PartialEq, EnumString, Display, IntoStaticStr)]
-#[strum(serialize_all = "title_case")]
+#[cfg_attr(not(feature = "convert_case"), strum(serialize_all = "title_case"))]
+#[cfg_attr(feature = "convert_case", strum(serialize_all = "title"))]
 enum Foo1 {
     DarkBlack,
     Dim { glow: usize },
@@ -21,7 +22,8 @@ fn test_serialize_all_title_case() {
 }
 
 #[derive(Debug, Eq, PartialEq, EnumString, Display, IntoStaticStr)]
-#[strum(serialize_all = "UPPERCASE")]
+#[cfg_attr(not(feature = "convert_case"), strum(serialize_all = "UPPERCASE"))]
+#[cfg_attr(feature = "convert_case", strum(serialize_all = "UPPERFLATCASE"))]
 enum Foo2 {
     DarkBlack,
     Dim { glow: usize },
@@ -37,7 +39,8 @@ fn test_serialize_all_upper_case() {
 
 // This is a soft-deprecated behavior. Use `camelCase` instead.
 #[derive(Debug, Eq, PartialEq, EnumString, Display, IntoStaticStr)]
-#[strum(serialize_all = "camel_case")]
+#[cfg_attr(not(feature = "convert_case"), strum(serialize_all = "camel_case"))]
+#[cfg_attr(feature = "convert_case", strum(serialize_all = "PascalCase"))]
 enum Foo3 {
     CamelCase,
 }

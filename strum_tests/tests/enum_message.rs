@@ -80,7 +80,8 @@ fn disabled_message() {
 }
 
 #[derive(Debug, Eq, PartialEq, EnumMessage)]
-#[strum(serialize_all = "kebab_case")]
+#[cfg_attr(not(feature = "convert_case"), strum(serialize_all = "kebab_case"))]
+#[cfg_attr(feature = "convert_case", strum(serialize_all = "kebab"))]
 enum Brightness {
     DarkBlack,
     Dim {

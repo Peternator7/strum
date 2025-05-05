@@ -8,6 +8,7 @@ rust-version = "1.66.1"
 [features]
 default = []
 test_phf = ["strum/phf"]
+convert_case = ["strum/derive-convert-case", "strum_macros/convert_case"]
 
 [dependencies]
 strum = { path = "../strum", features = ["derive"] }
