@@ -20,7 +20,6 @@ proc-macro = true
 name = "strum_macros"
 
 [features]
-# default = ["convert_case"]
 default = ["heck"]
 convert_case = ["dep:convert_case"]
 heck = ["dep:heck"]
