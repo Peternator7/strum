@@ -36,8 +36,11 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         // Look at all the serialize attributes.
-        let output = variant_properties
-            .get_preferred_name(type_properties.case_style, type_properties.prefix.as_ref());
+        let output = variant_properties.get_preferred_name(
+            type_properties.case_style,
+            type_properties.prefix.as_ref(),
+            type_properties.suffix.as_ref(),
+        );
 
         let params = match variant.fields {
             Fields::Unit => quote! {},
