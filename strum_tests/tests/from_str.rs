@@ -31,7 +31,7 @@ enum Color {
 #[derive(Debug, Eq, PartialEq, EnumString, strum::Display)]
 enum Color2 {
     #[strum(default)]
-    Purple { inner: String }
+    Purple { inner: String },
 }
 
 #[rustversion::since(1.34)]
@@ -82,8 +82,19 @@ fn color_default() {
 
 #[test]
 fn color2_default() {
-    assert_from_str(Color2::Purple { inner: String::from("test") }, "test");
-    assert_eq!(String::from("test"), Color2::Purple { inner: String::from("test") }.to_string());
+    assert_from_str(
+        Color2::Purple {
+            inner: String::from("test"),
+        },
+        "test",
+    );
+    assert_eq!(
+        String::from("test"),
+        Color2::Purple {
+            inner: String::from("test")
+        }
+        .to_string()
+    );
 }
 
 #[test]
