@@ -180,6 +180,18 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// assert_eq!("/redred", ColorWithPrefix::Red.as_ref());
 /// assert_eq!("/Green", ColorWithPrefix::Green.as_ref());
+///
+/// // With suffix on all variants
+/// #[derive(AsRefStr, Debug)]
+/// #[strum(suffix = ".rs")]
+/// enum ColorWithSuffix {
+///     #[strum(serialize = "redred")]
+///     Red,
+///     Green,
+/// }
+///
+/// assert_eq!("redred.rs", ColorWithSuffix::Red.as_ref());
+/// assert_eq!("Green.rs", ColorWithSuffix::Green.as_ref());
 /// ```
 #[proc_macro_derive(AsRefStr, attributes(strum))]
 pub fn as_ref_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -381,7 +393,9 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// 3. The name of the variant will be used if there are no `serialize` or `to_string` attributes.
 /// 4. If the enum has a `strum(prefix = "some_value_")`, every variant will have that prefix prepended
 ///    to the serialization.
-/// 5. Enums with fields support string interpolation.
+/// 5. If the enum has a `strum(suffix = "_another_value")`, every variant will have that suffix appended
+///    to the serialization.
+/// 6. Enums with fields support string interpolation.
 ///    Note this means the variant will not "round trip" if you then deserialize the string.
 ///
 ///    ```rust
