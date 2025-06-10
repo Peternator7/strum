@@ -140,6 +140,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let impl_from = quote! {
+        #[automatically_derived]
         impl #impl_generics ::core::convert::From< #name #ty_generics > for #discriminants_name #where_clause {
             #[inline]
             fn from(val: #name #ty_generics) -> #discriminants_name {
@@ -158,6 +159,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         let (impl_generics, _, _) = generics.split_for_impl();
 
         quote! {
+            #[automatically_derived]
             impl #impl_generics ::core::convert::From< #enum_life #name #ty_generics > for #discriminants_name #where_clause {
                 #[inline]
                 fn from(val: #enum_life #name #ty_generics) -> #discriminants_name {
@@ -171,6 +173,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let impl_into_discriminant = match type_properties.discriminant_vis {
         // If the visibilty is unspecified or `pub` then we implement IntoDiscriminant
         None | Some(syn::Visibility::Public(..)) => quote! {
+            #[automatically_derived]
             impl #impl_generics #strum_module_path::IntoDiscriminant for #name #ty_generics #where_clause {
                 type Discriminant = #discriminants_name;
 
