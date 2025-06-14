@@ -25,7 +25,6 @@ fn simple_test() {
     assert_eq!(Week::from_repr(9), None);
 }
 
-#[rustversion::since(1.46)]
 #[test]
 fn const_test() {
     // This is to test that it works in a const fn

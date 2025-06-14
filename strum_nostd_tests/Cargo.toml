@@ -7,6 +7,3 @@ rust-version = "1.66.1"
 [dependencies]
 strum = { path = "../strum", features = ["derive"] }
 strum_macros = { path = "../strum_macros", features = [] }
-
-[dev-dependencies]
-rustversion = "1.0"
