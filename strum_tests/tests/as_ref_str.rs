@@ -1,7 +1,7 @@
 #![allow(deprecated)]
 
 use std::str::FromStr;
-use strum::{AsRefStr, AsStaticRef, AsStaticStr, EnumString, IntoStaticStr};
+use strum::{AsRefStr, AsStaticRef, AsStaticStr, Display, EnumString, IntoStaticStr};
 
 mod core {} // ensure macros call `::core`
 
@@ -61,7 +61,13 @@ fn as_green_str() {
 #[test]
 fn as_fuchsia_str() {
     assert_eq!("Purple", (Color::Inner(InnerColor::Purple)).as_ref());
-    assert_eq!("Purple", (Color::InnerField { inner: InnerColor::Purple }).as_ref());
+    assert_eq!(
+        "Purple",
+        (Color::InnerField {
+            inner: InnerColor::Purple
+        })
+        .as_ref()
+    );
 }
 
 #[derive(IntoStaticStr)]
@@ -128,7 +134,9 @@ enum Brightness {
     #[strum(transparent)]
     Gray(&'static str),
     #[strum(transparent)]
-    Grey { inner: &'static str }
+    Grey {
+        inner: &'static str,
+    },
 }
 
 #[test]
@@ -145,7 +153,10 @@ fn brightness_serialize_all() {
     assert_eq!("dim", <&'static str>::from(Brightness::Dim { glow: 0 }));
     assert_eq!("Bright", <&'static str>::from(Brightness::BrightWhite));
     assert_eq!("Gray", <&'static str>::from(Brightness::Gray("Gray")));
-    assert_eq!("Grey", <&'static str>::from(Brightness::Grey { inner: "Grey" }));
+    assert_eq!(
+        "Grey",
+        <&'static str>::from(Brightness::Grey { inner: "Grey" })
+    );
 }
 
 #[derive(IntoStaticStr)]
@@ -225,4 +236,39 @@ fn test_const_into_static_str() {
     assert_eq!("dim", DIM);
     const BRIGHT_WHITE: &'static str = BrightnessConst::BrightWhite.into_str();
     assert_eq!("Bright", BRIGHT_WHITE);
+}
+
+#[derive(AsRefStr, Display, EnumString)]
+#[strum(prefix = "/etc/data/assets/", suffix = ".json")]
+enum Asset {
+    #[strum(serialize = "cfg", serialize = "configuration", to_string = "config")]
+    Config,
+    #[strum(serialize = "params")]
+    Params,
+    #[strum(default)]
+    Generic(String),
+}
+
+#[test]
+fn test_prefix_and_suffix() {
+    assert_eq!(
+        String::from("/etc/data/assets/config.json"),
+        (Asset::Config).to_string()
+    );
+    assert_eq!("/etc/data/assets/config.json", (Asset::Config).as_ref(),);
+
+    assert_eq!(
+        String::from("/etc/data/assets/params.json"),
+        (Asset::Params).to_string()
+    );
+    assert_eq!("/etc/data/assets/params.json", (Asset::Params).as_ref());
+
+    assert_eq!(
+        String::from("some-file"),
+        (Asset::Generic("some-file".into()).to_string()),
+    );
+    assert_eq!(
+        "/etc/data/assets/Generic.json",
+        (Asset::Generic("()".into()).as_ref()),
+    )
 }

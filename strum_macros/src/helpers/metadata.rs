@@ -19,6 +19,7 @@ pub mod kw {
     custom_keyword!(const_into_str);
     custom_keyword!(use_phf);
     custom_keyword!(prefix);
+    custom_keyword!(suffix);
     custom_keyword!(parse_err_ty);
     custom_keyword!(parse_err_fn);
 
@@ -55,6 +56,10 @@ pub enum EnumMeta {
     Prefix {
         kw: kw::prefix,
         prefix: LitStr,
+    },
+    Suffix {
+        kw: kw::suffix,
+        suffix: LitStr,
     },
     ParseErrTy {
         kw: kw::parse_err_ty,
@@ -94,6 +99,11 @@ impl Parse for EnumMeta {
             input.parse::<Token![=]>()?;
             let prefix = input.parse()?;
             Ok(EnumMeta::Prefix { kw, prefix })
+        } else if lookahead.peek(kw::suffix) {
+            let kw = input.parse::<kw::suffix>()?;
+            input.parse::<Token![=]>()?;
+            let suffix = input.parse()?;
+            Ok(EnumMeta::Suffix { kw, suffix })
         } else if lookahead.peek(kw::parse_err_ty) {
             let kw = input.parse::<kw::parse_err_ty>()?;
             input.parse::<Token![=]>()?;
