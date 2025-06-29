@@ -47,7 +47,6 @@ Strum has implemented the following macros:
 | [EnumCount] | Add a constant `usize` equal to the number of variants. |
 | [VariantArray] | Adds an associated `VARIANTS` constant which is an array of all enum discriminants |
 | [VariantNames] | Adds an associated `VARIANTS` constant which is an array of discriminant names |
-| [EnumTable] | *Experimental*, creates a new type that stores an item of a specified type for each variant of the enum. |
 
 # Contributing
 
@@ -85,4 +84,3 @@ Strumming is also a very whimsical motion, much like writing Rust code.
 [FromRepr]: https://docs.rs/strum_macros/latest/strum_macros/derive.FromRepr.html
 [VariantArray]: https://docs.rs/strum_macros/latest/strum_macros/derive.VariantArray.html
 [VariantNames]: https://docs.rs/strum_macros/latest/strum_macros/derive.VariantNames.html
-[EnumTable]: https://docs.rs/strum_macros/latest/strum_macros/derive.EnumTable.html
