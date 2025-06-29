@@ -57,6 +57,7 @@ pub fn to_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     Ok(quote! {
         #[allow(clippy::use_self)]
+        #[automatically_derived]
         impl #impl_generics ::std::string::ToString for #name #ty_generics #where_clause {
             fn to_string(&self) -> ::std::string::String {
                 match *self {
