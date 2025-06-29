@@ -136,7 +136,12 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         })
         .collect::<Vec<_>>();
 
-    let from_fn_body = quote! { match val { #(#arms),* } };
+    let from_fn_body = if variants.is_empty() {
+        //this method on empty enum is impossible to be called. it is therefor left empty
+        quote! { unreachable!()}
+    } else {
+        quote! { match val { #(#arms),* } }
+    };
 
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let impl_from = quote! {
