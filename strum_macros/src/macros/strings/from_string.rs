@@ -195,18 +195,6 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     })
 }
 
-#[rustversion::before(1.34)]
-fn try_from_str(
-    _name: &proc_macro2::Ident,
-    _impl_generics: &syn::ImplGenerics,
-    _ty_generics: &syn::TypeGenerics,
-    _where_clause: Option<&syn::WhereClause>,
-    _strum_module_path: &syn::Path,
-) -> TokenStream {
-    Default::default()
-}
-
-#[rustversion::since(1.34)]
 fn try_from_str(
     name: &proc_macro2::Ident,
     impl_generics: &syn::ImplGenerics,

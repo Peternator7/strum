@@ -25,13 +25,8 @@ mod tests {
     }
 
     #[test]
-    #[rustversion::since(1.34)]
     fn try_from_str_no_std() {
         use core::convert::TryFrom;
         assert_eq!(Color::Yellow, Color::try_from("yellow").unwrap());
     }
-
-    #[test]
-    #[rustversion::before(1.34)]
-    fn try_from_str_no_std() {}
 }

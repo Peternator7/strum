@@ -97,16 +97,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let const_if_possible = if has_additional_data {
         quote! {}
     } else {
-        #[rustversion::before(1.46)]
-        fn filter_by_rust_version(_: TokenStream) -> TokenStream {
-            quote! {}
-        }
-
-        #[rustversion::since(1.46)]
-        fn filter_by_rust_version(s: TokenStream) -> TokenStream {
-            s
-        }
-        filter_by_rust_version(quote! { const })
+        quote! { const }
     };
 
     Ok(quote! {

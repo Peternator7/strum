@@ -15,6 +15,3 @@ strum_macros = { path = "../strum_macros", features = [] }
 clap = "=4.2.7"
 enum_variant_type = "=0.2.0"
 structopt = "=0.3.26"
-
-[dev-dependencies]
-rustversion = "1.0"
