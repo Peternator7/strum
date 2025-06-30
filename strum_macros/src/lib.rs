@@ -51,8 +51,11 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// See the [Additional Attributes](https://docs.rs/strum/latest/strum/additional_attributes/index.html)
 /// Section for more information on using this feature.
 ///
-/// If you have a large enum, you may want to consider using the `use_phf` attribute here. It leverages
-/// perfect hash functions to parse much quicker than a standard `match`. (MSRV 1.46)
+/// If you have a large enum, you may want to consider using the `use_phf` attribute here.
+/// PHF (Perfect Hash Functions) use a hash lookup instead of a linear search that may perform faster 
+/// for large enums. Note: as with all optimizations, you should test this for your specific usecase
+/// rather than just assume it will be faster. With SIMD + pipelining, linear string search (aka memcmp)
+/// can be very fast for enums with a surprisingly large number of enum variants.
 ///
 /// The default error type is `strum::ParseError`. This can be overriden by applying both the
 /// `parse_err_ty` and `parse_err_fn` attributes at the type level.  `parse_error_fn` should be a
