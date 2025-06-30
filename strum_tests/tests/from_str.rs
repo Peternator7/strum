@@ -274,3 +274,29 @@ fn case_custom_parse_error() {
         r.unwrap_err()
     );
 }
+
+#[derive(Debug, EnumString, Eq, PartialEq)]
+#[strum(
+    parse_err_fn = not_needed_parsing_is_infallible,
+    parse_err_ty = std::convert::Infallible
+)]
+enum CaseCustomInfallibleParsingWithDefaultEnum {
+    #[strum(serialize = "foo")]
+    Foo,
+    #[strum(serialize = "bar")]
+    Bar,
+    #[strum(default)]
+    Unknown(String),
+}
+
+#[test]
+fn case_custom_infallible_parsing_with_default() {
+    let r = match "yellow".parse::<CaseCustomInfallibleParsingWithDefaultEnum>() {
+        Ok(r) => r,
+        Err(never) => match never {},
+    };
+    assert_eq!(
+        CaseCustomInfallibleParsingWithDefaultEnum::Unknown("yellow".to_string()),
+        r
+    );
+}
