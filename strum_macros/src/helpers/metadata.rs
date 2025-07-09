@@ -25,7 +25,6 @@ pub mod kw {
 
     // enum discriminant metadata
     custom_keyword!(derive);
-    custom_keyword!(name);
     custom_keyword!(vis);
     custom_keyword!(doc);
 
@@ -40,6 +39,9 @@ pub mod kw {
     custom_keyword!(default_with);
     custom_keyword!(props);
     custom_keyword!(ascii_case_insensitive);
+
+    // enum discriminant metadata and variant metadata
+    custom_keyword!(name);
 }
 
 pub enum EnumMeta {
@@ -221,6 +223,10 @@ pub enum VariantMeta {
         _kw: kw::props,
         props: Vec<(LitStr, Lit)>,
     },
+    Name {
+        kw: kw::name,
+        value: LitStr,
+    },
 }
 
 impl Parse for VariantMeta {
@@ -278,6 +284,11 @@ impl Parse for VariantMeta {
                     .map(|Prop(k, v)| (LitStr::new(&k.to_string(), k.span()), v))
                     .collect(),
             })
+        } else if lookahead.peek(kw::name) {
+            let kw = input.parse()?;
+            let _: Token![=] = input.parse()?;
+            let value = input.parse()?;
+            Ok(VariantMeta::Name { kw, value })
         } else {
             Err(lookahead.error())
         }
