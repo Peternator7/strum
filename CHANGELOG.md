@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.27.2
+
+* [#141](https://github.com/Peternator7/strum/pull/141): Adding support for doc comments on `EnumDiscriminants` generated type.
+  * The doc comment will be copied from the variant on the type itself.
+* [#435](https://github.com/Peternator7/strum/pull/435):allow discriminants on empty enum.
+* [#443](https://github.com/Peternator7/strum/pull/443): Change enum table callbacks to FnMut.
+* [#444](https://github.com/Peternator7/strum/pull/444): Add `#[automatically_derived]` to the `impl`s by @dandedotdev in https://github.com/Peternator7/strum/pull/444
+  * This should make the linter less noisy with warnings in generated code.
+* [#440](https://github.com/Peternator7/strum/pull/440): Implement a `suffix` attribute for serialization of enum variants.
+
+  ```rust
+  #[derive(strum::Display)]
+  #[strum(suffix=".json")]
+  #[strum(serialize_all="snake_case")]
+  enum StorageConfiguration {
+    PostgresProvider,
+    S3StorageProvider,
+    AzureStorageProvider,
+  }
+
+  fn main() {
+    let response = SurveyResponse::Other("It was good".into());
+    println!("Loading configuration from: {}", StorageConfiguration::PostgresProvider);
+    // prints: Loaded Configuration from: postgres_provider.json
+  }
+  ```
+
+* [#446](https://github.com/Peternator7/strum/pull/446): Drop needless `rustversion` dependency.
+
 ## 0.27.1
 
 * [#414](https://github.com/Peternator7/strum/pull/414): Fix docrs build error.

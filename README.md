@@ -1,7 +1,6 @@
 # Strum
 
-[![Build Status](https://travis-ci.com/Peternator7/strum.svg?branch=master)](https://travis-ci.com/Peternator7/strum)
-[![Build status](https://ci.appveyor.com/api/projects/status/ji4f6n2m5lvu11xt?svg=true)](https://ci.appveyor.com/project/Peternator7/strum)
+[![Rust](https://github.com/Peternator7/strum/actions/workflows/ci.yml/badge.svg)](https://github.com/Peternator7/strum/actions/workflows/ci.yml)
 [![Latest Version](https://img.shields.io/crates/v/strum.svg)](https://crates.io/crates/strum)
 [![Rust Documentation](https://docs.rs/strum/badge.svg)](https://docs.rs/strum)
 ![Crates.io](https://img.shields.io/crates/l/strum)
