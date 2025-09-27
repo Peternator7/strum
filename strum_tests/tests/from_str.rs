@@ -274,3 +274,20 @@ fn case_custom_parse_error() {
         r.unwrap_err()
     );
 }
+
+#[derive(strum::EnumString, Debug, PartialEq)]
+enum CurlyBraces {
+    #[strum(serialize = "{")]
+    OpenBrace,
+    #[strum(serialize = "}")]
+    CloseBrace,
+    #[strum(serialize = "{}")]
+    OpenCloseBrace,
+}
+
+#[test]
+fn unit_variant_curly_braces() {
+    assert_eq!(CurlyBraces::from_str("{"), Ok(CurlyBraces::OpenBrace));
+    assert_eq!(CurlyBraces::from_str("}"), Ok(CurlyBraces::CloseBrace));
+    assert_eq!(CurlyBraces::from_str("{}"), Ok(CurlyBraces::OpenCloseBrace));
+}

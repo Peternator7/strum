@@ -185,3 +185,20 @@ fn transparent_string_named_field() {
         )
     );
 }
+
+#[derive(strum::Display)]
+enum CurlyBraces {
+    #[strum(to_string = "{")]
+    OpenBrace,
+    #[strum(to_string = "}")]
+    CloseBrace,
+    #[strum(to_string = "{}")]
+    OpenCloseBrace,
+}
+
+#[test]
+fn unit_variant_display_braces() {
+    assert_eq!(String::from("{"), CurlyBraces::OpenBrace.to_string());
+    assert_eq!(String::from("}"), CurlyBraces::CloseBrace.to_string());
+    assert_eq!(String::from("{}"), CurlyBraces::OpenCloseBrace.to_string());
+}
