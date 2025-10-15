@@ -61,7 +61,7 @@
 //!    this specifies what text to use when calling `variant.to_string()` with the `Display` derivation, or when calling `variant.as_ref()` with `AsRefStr`.
 //!
 //! - `default`: Applied to a single variant of an enum. The variant must be a Tuple-like
-//!    variant with a single piece of data that can be create from a `&str` i.e. `T: From<&str>`.
+//!    variant with a single piece of data that can be created from a `&str` i.e. `T: From<&str>`.
 //!    The generated code will now return the variant with the input string captured as shown below
 //!    instead of failing.
 //!
