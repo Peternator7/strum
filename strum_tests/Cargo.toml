@@ -3,7 +3,7 @@ name = "strum_tests"
 version = "0.27.1"
 edition = "2021"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
-rust-version = "1.66.1"
+rust-version = "1.71"
 
 [features]
 default = []

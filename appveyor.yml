@@ -38,10 +38,10 @@ environment:
 ### MSVC Toolchains ###
 
   # MSRC 64-bit MSVC
-    - channel: 1.66.1
+    - channel: 1.71.1
       target: x86_64-pc-windows-msvc
   # MSRC 32-bit MSVC
-    - channel: 1.66.1
+    - channel: 1.71.1
       target: i686-pc-windows-msvc
   # Stable 64-bit MSVC
     - channel: stable
@@ -106,7 +106,7 @@ test_script:
 for:
 - matrix:
     only:
-      - channel: 1.66.1
+      - channel: 1.71.1
 
   test_script:
   - cargo test --verbose %cargoflags%

@@ -2,7 +2,7 @@
 name = "strum_nostd_tests"
 version = "0.27.1"
 edition = "2021"
-rust-version = "1.66.1"
+rust-version = "1.71"
 
 [dependencies]
 strum = { path = "../strum", features = ["derive"] }

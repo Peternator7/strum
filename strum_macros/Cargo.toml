@@ -13,7 +13,7 @@ documentation = "https://docs.rs/strum"
 homepage = "https://github.com/Peternator7/strum"
 repository = "https://github.com/Peternator7/strum"
 readme = "../README.md"
-rust-version = "1.66.1"
+rust-version = "1.71"
 
 [lib]
 proc-macro = true
