@@ -115,7 +115,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         #[automatically_derived]
-        impl #impl_generics Iterator for #iter_name #ty_generics #where_clause {
+        impl #impl_generics ::core::iter::Iterator for #iter_name #ty_generics #where_clause {
             type Item = #name #ty_generics;
 
             #[inline]
@@ -126,7 +126,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             #[inline]
             fn size_hint(&self) -> (usize, ::core::option::Option<usize>) {
                 let t = if self.idx + self.back_idx >= #variant_count { 0 } else { #variant_count - self.idx - self.back_idx };
-                (t, Some(t))
+                (t, ::core::option::Option::Some(t))
             }
 
             #[inline]
@@ -146,7 +146,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         #[automatically_derived]
-        impl #impl_generics ExactSizeIterator for #iter_name #ty_generics #where_clause {
+        impl #impl_generics ::core::iter::ExactSizeIterator for #iter_name #ty_generics #where_clause {
             #[inline]
             fn len(&self) -> usize {
                 self.size_hint().0
@@ -154,7 +154,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
 
         #[automatically_derived]
-        impl #impl_generics DoubleEndedIterator for #iter_name #ty_generics #where_clause {
+        impl #impl_generics ::core::iter::DoubleEndedIterator for #iter_name #ty_generics #where_clause {
             #[inline]
             fn next_back(&mut self) -> ::core::option::Option<<Self as Iterator>::Item> {
                 let back_idx = self.back_idx + 1;
@@ -176,7 +176,7 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         impl #impl_generics ::core::iter::FusedIterator for #iter_name #ty_generics #where_clause { }
 
         #[automatically_derived]
-        impl #impl_generics Clone for #iter_name #ty_generics #where_clause {
+        impl #impl_generics ::core::clone::Clone for #iter_name #ty_generics #where_clause {
             #[inline]
             fn clone(&self) -> #iter_name #ty_generics {
                 #iter_name {
