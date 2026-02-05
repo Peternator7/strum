@@ -123,11 +123,26 @@ impl Parse for EnumMeta {
 }
 
 pub enum EnumDiscriminantsMeta {
-    Derive { _kw: kw::derive, paths: Vec<Path> },
-    Name { kw: kw::name, name: Ident },
-    Vis { kw: kw::vis, vis: Visibility },
-    Doc { _kw: kw::doc, doc: LitStr },
-    Other { path: Path, nested: TokenStream },
+    Derive {
+        _kw: kw::derive,
+        paths: Vec<Path>,
+    },
+    Name {
+        kw: kw::name,
+        name: Ident,
+    },
+    Vis {
+        kw: kw::vis,
+        vis: Visibility,
+    },
+    Doc {
+        _kw: kw::doc,
+        doc: LitStr,
+    },
+    Other {
+        path: Path,
+        nested: Option<TokenStream>,
+    },
 }
 
 impl Parse for EnumDiscriminantsMeta {
@@ -160,10 +175,14 @@ impl Parse for EnumDiscriminantsMeta {
             Ok(EnumDiscriminantsMeta::Doc { _kw, doc })
         } else {
             let path = input.parse()?;
-            let content;
-            parenthesized!(content in input);
-            let nested = content.parse()?;
-            Ok(EnumDiscriminantsMeta::Other { path, nested })
+            if input.peek(syn::token::Paren) {
+                let content;
+                parenthesized!(content in input);
+                let nested = Some(content.parse()?);
+                return Ok(EnumDiscriminantsMeta::Other { path, nested });
+            } else {
+                return Ok(EnumDiscriminantsMeta::Other { path, nested: None });
+            }
         }
     }
 }

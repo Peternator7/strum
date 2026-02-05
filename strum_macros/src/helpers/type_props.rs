@@ -153,8 +153,14 @@ impl HasTypeProperties for DeriveInput {
                 EnumDiscriminantsMeta::Doc { doc, .. } => {
                     output.discriminant_docs.push(doc);
                 }
-                EnumDiscriminantsMeta::Other { path, nested } => {
+                EnumDiscriminantsMeta::Other {
+                    path,
+                    nested: Some(nested),
+                } => {
                     output.discriminant_others.push(quote! { #path(#nested) });
+                }
+                EnumDiscriminantsMeta::Other { path, nested: None } => {
+                    output.discriminant_others.push(quote! { #path });
                 }
             }
         }

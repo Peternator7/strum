@@ -10,7 +10,7 @@ mod core {} // ensure macros call `::core`
 
 #[allow(dead_code)]
 #[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(derive(EnumIter))]
+#[strum_discriminants(derive(EnumIter), non_exhaustive)]
 enum Simple {
     Variant0,
     Variant1,
