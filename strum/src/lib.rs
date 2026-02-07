@@ -31,6 +31,7 @@
 pub mod additional_attributes;
 
 use core::iter::FusedIterator;
+use core::prelude::rust_2024::derive;
 
 #[cfg(feature = "phf")]
 #[doc(hidden)]
