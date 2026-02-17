@@ -34,10 +34,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let default_name = syn::Ident::new(&format!("{}Discriminants", name), Span::call_site());
 
     let discriminants_name = type_properties.discriminant_name.unwrap_or(default_name);
-    let discriminants_vis = type_properties
-        .discriminant_vis
-        .as_ref()
-        .unwrap_or_else(|| &vis);
+    let discriminants_vis = type_properties.discriminant_vis.as_ref().unwrap_or(vis);
 
     // Pass through all other attributes and add doc if there is none
     let pass_through_attributes = type_properties.discriminant_others;

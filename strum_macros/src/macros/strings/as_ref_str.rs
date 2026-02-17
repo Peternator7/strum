@@ -27,7 +27,7 @@ where
             continue;
         }
 
-        if let Some(..) = variant_properties.transparent {
+        if variant_properties.transparent.is_some() {
             let arm = super::extract_single_field_variant_and_then(name, variant, |tok| {
                 transparent_fn(tok)
             })

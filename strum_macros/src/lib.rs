@@ -52,7 +52,7 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// Section for more information on using this feature.
 ///
 /// If you have a large enum, you may want to consider using the `use_phf` attribute here.
-/// PHF (Perfect Hash Functions) use a hash lookup instead of a linear search that may perform faster 
+/// PHF (Perfect Hash Functions) use a hash lookup instead of a linear search that may perform faster
 /// for large enums. Note: as with all optimizations, you should test this for your specific usecase
 /// rather than just assume it will be faster. With SIMD + pipelining, linear string search (aka memcmp)
 /// can be very fast for enums with a surprisingly large number of enum variants.
@@ -824,7 +824,6 @@ pub fn enum_messages(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// );
 /// assert_eq!("My color is Red. It\'s RGB is 255,0,0", &display);
 /// ```
-
 #[proc_macro_derive(EnumProperty, attributes(strum))]
 pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);

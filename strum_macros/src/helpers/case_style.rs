@@ -166,7 +166,7 @@ pub fn snakify(s: &str) -> String {
     let mut output: Vec<char> = s.to_string().to_snake_case().chars().collect();
     let mut num_starts = vec![];
     for (pos, c) in output.iter().enumerate() {
-        if c.is_digit(10) && pos != 0 && !output[pos - 1].is_digit(10) {
+        if c.is_ascii_digit() && pos != 0 && !output[pos - 1].is_ascii_digit() {
             num_starts.push(pos);
         }
     }
