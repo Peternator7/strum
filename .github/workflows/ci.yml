@@ -16,6 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: rustup update stable && rustup default stable
+    - run: rustup component add rustfmt
     - name: Check formatting
       run: cargo fmt --all -- --check
 
@@ -25,6 +26,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: rustup update stable && rustup default stable
+    - run: rustup component add clippy
     - name: Run clippy
       run: cargo clippy --all-targets --all-features -- -D warnings
 
