@@ -24,7 +24,80 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let type_properties = ast.get_type_properties()?;
     let strum_module_path = type_properties.crate_module_path();
 
-    let derives = type_properties.discriminant_derives;
+    let mut derives = type_properties.discriminant_derives;
+    let mut discriminants = Vec::new();
+
+    // Add the variants without fields, but exclude the `strum` meta item.
+    // Also track whether any variant has #[default] so we can auto-propagate
+    // Default to the discriminant enum after the loop.
+    let mut has_default_variant = false;
+    for variant in variants {
+        let ident = &variant.ident;
+        let mut has_default = false;
+
+        let discriminant = variant
+            .discriminant
+            .as_ref()
+            .map(|(_, expr)| quote!( = #expr));
+
+        // Don't copy across the "strum" meta attribute. Only passthrough the whitelisted
+        // attributes and proxy `#[strum_discriminants(...)]` attributes
+        let mut attrs = Vec::new();
+        for attr in &variant.attrs {
+            if attr.path().is_ident("default") {
+                has_default = true;
+                has_default_variant = true;
+            }
+
+            if !ATTRIBUTES_TO_COPY
+                .iter()
+                .any(|whitelisted| attr.path().is_ident(whitelisted))
+            {
+                continue;
+            }
+
+            if attr.path().is_ident("strum_discriminants") {
+                let mut ts = attr.meta.require_list()?.to_token_stream().into_iter();
+
+                // Discard strum_discriminants(...)
+                let _ = ts.next();
+
+                let passthrough_group = ts
+                    .next()
+                    .ok_or_else(|| strum_discriminants_passthrough_error(attr))?;
+
+                let passthrough_attribute = match passthrough_group {
+                    TokenTree::Group(ref group) => group.stream(),
+                    _ => {
+                        return Err(strum_discriminants_passthrough_error(&passthrough_group));
+                    }
+                };
+                if passthrough_attribute.is_empty() {
+                    return Err(strum_discriminants_passthrough_error(&passthrough_group));
+                }
+
+                attrs.push(quote! { #[#passthrough_attribute] });
+                continue;
+            }
+
+            // Just copy the attribute to the new enum.
+            attrs.push(attr.to_token_stream());
+        }
+
+        let default_attr = if has_default {
+            quote! { #[default] }
+        } else {
+            quote! {}
+        };
+
+        discriminants.push(quote! { #default_attr #(#attrs)* #ident #discriminant });
+    }
+
+    // If any variant has #[default] and the user hasn't manually handled Default,
+    // auto-propagate Default to the discriminant enum.
+    if has_default_variant {
+        derives.push(parse_quote!(::core::default::Default));
+    }
 
     let derives = quote! {
         #[derive(Clone, Copy, Debug, PartialEq, Eq, #(#derives),*)]
@@ -52,54 +125,6 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     }
 
     let repr = type_properties.enum_repr.map(|repr| quote!(#[repr(#repr)]));
-
-    // Add the variants without fields, but exclude the `strum` meta item
-    let mut discriminants = Vec::new();
-    for variant in variants {
-        let ident = &variant.ident;
-        let discriminant = variant
-            .discriminant
-            .as_ref()
-            .map(|(_, expr)| quote!( = #expr));
-
-        // Don't copy across the "strum" meta attribute. Only passthrough the whitelisted
-        // attributes and proxy `#[strum_discriminants(...)]` attributes
-        let attrs = variant
-            .attrs
-            .iter()
-            .filter(|attr| {
-                ATTRIBUTES_TO_COPY
-                    .iter()
-                    .any(|attr_whitelisted| attr.path().is_ident(attr_whitelisted))
-            })
-            .map(|attr| {
-                if attr.path().is_ident("strum_discriminants") {
-                    let mut ts = attr.meta.require_list()?.to_token_stream().into_iter();
-
-                    // Discard strum_discriminants(...)
-                    let _ = ts.next();
-
-                    let passthrough_group = ts
-                        .next()
-                        .ok_or_else(|| strum_discriminants_passthrough_error(attr))?;
-                    let passthrough_attribute = match passthrough_group {
-                        TokenTree::Group(ref group) => group.stream(),
-                        _ => {
-                            return Err(strum_discriminants_passthrough_error(&passthrough_group));
-                        }
-                    };
-                    if passthrough_attribute.is_empty() {
-                        return Err(strum_discriminants_passthrough_error(&passthrough_group));
-                    }
-                    Ok(quote! { #[#passthrough_attribute] })
-                } else {
-                    Ok(attr.to_token_stream())
-                }
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-
-        discriminants.push(quote! { #(#attrs)* #ident #discriminant});
-    }
 
     // Ideally:
     //
