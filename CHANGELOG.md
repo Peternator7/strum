@@ -9,11 +9,24 @@
 * [#462](https://github.com/Peternator7/strum/pull/462): Add missing `#[automatically_derived]` to generated impls not
   covered by [#444](https://github.com/Peternator7/strum/pull/444).
 * [#466](https://github.com/Peternator7/strum/pull/466): Bump MSRV to 1.71, required to keep up with updated `syn` and
-  `windows-sys` dependencies.
+  `windows-sys` dependencies. This is a breaking change if you're on an old version of rust.
 * [#469](https://github.com/Peternator7/strum/pull/469): Use absolute paths in generated proc macro code to avoid
   potential name conflicts.
 * [#465](https://github.com/Peternator7/strum/pull/465): Upgrade `phf` dependency to v0.13.
 * [#473](https://github.com/Peternator7/strum/pull/473): Fix `cargo fmt` / `clippy` issues and add GitHub Actions CI.
+* [#474](https://github.com/Peternator7/strum/pull/474): EnumDiscriminants will now copy `default` over from the
+  original enum to the Discriminant enum.
+
+  ```rust
+  #[derive(Debug, Default, EnumDiscriminants)]
+  #[strum_discriminants(derive(Default))] // <- Remove this in 0.28.
+  enum MyEnum {
+      #[default] // <- Will be the #[default] on the MyEnumDiscriminant
+      #[strum_discriminants(default)] // <- Remove this in 0.28
+      Variant0,
+      Variant1 { a: NonDefault },
+  }
+  ```
 
 ## 0.27.2
 

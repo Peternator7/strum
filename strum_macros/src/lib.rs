@@ -843,8 +843,9 @@ pub fn enum_properties(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 /// `MyEnumDiscriminants`.
 ///
 /// By default, the generated enum has the following derives: `Clone, Copy, Debug, PartialEq, Eq`.
-/// You can add additional derives using the `#[strum_discriminants(derive(AdditionalDerive))]`
-/// attribute.
+/// If your enum derives `Default` and has a `#[default]` variant, that will also be copied onto
+/// the discriminant enum. You can add additional derives using the
+/// `#[strum_discriminants(derive(AdditionalDerive))]` attribute.
 ///
 /// Note, the variant attributes passed to the discriminant enum are filtered to avoid compilation
 /// errors due to the derives mismatches, thus only `#[doc]`, `#[cfg]`, `#[allow]`, and `#[deny]`
