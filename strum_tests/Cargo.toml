@@ -1,6 +1,6 @@
 [package]
 name = "strum_tests"
-version = "0.27.1"
+version = "0.28.0"
 edition = "2021"
 authors = ["Peter Glotfelty <peglotfe@microsoft.com>"]
 rust-version = "1.71"

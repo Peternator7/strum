@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.28.0
+
+* [#461](https://github.com/Peternator7/strum/pull/461): Allow any kind of passthrough attributes on `EnumDiscriminants`.
+  * Previously only list-style attributes (e.g. `#[strum_discriminants(derive(...))]`) were supported. Now path-only
+    (e.g. `#[strum_discriminants(non_exhaustive)]`) and name/value (e.g. `#[strum_discriminants(doc = "foo")]`)
+    attributes are also supported.
+* [#462](https://github.com/Peternator7/strum/pull/462): Add missing `#[automatically_derived]` to generated impls not
+  covered by [#444](https://github.com/Peternator7/strum/pull/444).
+* [#466](https://github.com/Peternator7/strum/pull/466): Bump MSRV to 1.71, required to keep up with updated `syn` and
+  `windows-sys` dependencies.
+* [#469](https://github.com/Peternator7/strum/pull/469): Use absolute paths in generated proc macro code to avoid
+  potential name conflicts.
+* [#465](https://github.com/Peternator7/strum/pull/465): Upgrade `phf` dependency to v0.13.
+* [#473](https://github.com/Peternator7/strum/pull/473): Fix `cargo fmt` / `clippy` issues and add GitHub Actions CI.
+
 ## 0.27.2
 
 * [#141](https://github.com/Peternator7/strum/pull/141): Adding support for doc comments on `EnumDiscriminants` generated type.

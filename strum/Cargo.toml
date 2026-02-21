@@ -1,6 +1,6 @@
 [package]
 name = "strum"
-version = "0.27.2"
+version = "0.28.0"
 edition = "2021"
 authors = ["Peter Glotfelty <peter.glotfelty@microsoft.com>"]
 license = "MIT"
@@ -16,7 +16,7 @@ readme = "../README.md"
 rust-version = "1.71"
 
 [dependencies]
-strum_macros = { path = "../strum_macros", optional = true, version = "0.27" }
+strum_macros = { path = "../strum_macros", optional = true, version = "0.28" }
 phf = { version = "0.13", features = ["macros"], optional = true }
 
 [dev-dependencies]
