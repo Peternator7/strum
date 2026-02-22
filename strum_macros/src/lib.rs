@@ -34,15 +34,15 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 
 /// Converts strings to enum variants based on their name.
 ///
-/// auto-derives `std::str::FromStr` on the enum (for Rust 1.34 and above, `std::convert::TryFrom<&str>`
-/// will be derived as well). Each variant of the enum will match on it's own name.
-/// This can be overridden using `serialize="DifferentName"` or `to_string="DifferentName"`
+/// auto-derives `std::str::FromStr` on the enum. Each variant of the enum will match on its own
+/// name. This can be overridden using `serialize="DifferentName"` or `to_string="DifferentName"`
 /// on the attribute as shown below.
-/// Multiple deserializations can be added to the same variant. If the variant contains additional data,
-/// they will be set to their default values upon deserialization.
+/// Multiple deserializations can be added to the same variant. If the variant contains additional
+/// data, they will be set to their default values upon deserialization.
 ///
-/// The `default` attribute can be applied to a tuple variant with a single data parameter. When a match isn't
-/// found, the given variant will be returned and the input string will be captured in the parameter.
+/// The `default` attribute can be applied to a tuple variant with a single data parameter. When a
+/// match isn't found, the given variant will be returned and the input string will be captured in
+/// the parameter.
 ///
 /// Note that the implementation of `FromStr` by default only matches on the name of the
 /// variant. There is an option to match on different case conversions through the
@@ -57,15 +57,20 @@ fn debug_print_generated(ast: &DeriveInput, toks: &TokenStream) {
 /// rather than just assume it will be faster. With SIMD + pipelining, linear string search (aka memcmp)
 /// can be very fast for enums with a surprisingly large number of enum variants.
 ///
-/// The default error type is `strum::ParseError`. This can be overriden by applying both the
-/// `parse_err_ty` and `parse_err_fn` attributes at the type level.  `parse_err_fn` should be a
+/// # Infallible Parsing
+///
+/// If the enum has a `#[strum(default)]` variant and no `parse_err_ty` is set, parsing is
+/// infallible: `From<&str>` is derived instead of `TryFrom<&str>`, which allows calling
+/// `MyEnum::from("string")` directly.
+///
+/// # Custom Error Types
+///
+/// The default error type is `strum::ParseError`. This can be overridden by applying both the
+/// `parse_err_ty` and `parse_err_fn` attributes at the type level. `parse_err_fn` should be a
 /// function that accepts an `&str` and returns the type `parse_err_ty`. See [this test
 /// case](https://github.com/Peternator7/strum/blob/9db3c4dc9b6f585aeb9f5f15f9cc18b6cf4fd780/strum_tests/tests/from_str.rs#L233)
-/// for an example.
-///
-/// If the enum has a default variant (annotated with `#[strum(default)]`), then parsing is
-/// infallible. In that case, `parse_err_fn` need not exist (it will never be called) and
-/// `parse_err_ty` can be safely set to [`std::convert::Infallible`].
+/// for an example. When `parse_err_ty` is set, `TryFrom<&str>` is always derived, even if the
+/// enum has a `#[strum(default)]` variant.
 ///
 /// # Example how to use `EnumString`
 /// ```
