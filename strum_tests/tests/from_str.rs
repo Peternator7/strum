@@ -1,3 +1,5 @@
+#![allow(clippy::infallible_try_from)]
+
 use std::{convert::Infallible, str::FromStr};
 use strum::EnumString;
 
@@ -71,11 +73,13 @@ fn color_default() {
 }
 
 #[test]
+#[allow(clippy::unnecessary_fallible_conversions)]
 fn color2_infallible() {
     let r: Result<Color2, Infallible> = Color2::from_str("infallible");
     assert!(r.is_ok());
     let r: Result<Color2, Infallible> = Color2::try_from("infallible");
     assert!(r.is_ok());
+    let _ = Color2::from("infallible");
 }
 
 #[test]
