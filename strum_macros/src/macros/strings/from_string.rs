@@ -46,14 +46,14 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             match &variant.fields {
                 Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
                     default_match_arm = Some(quote! {
-                        ::core::result::Result::Ok(#name::#ident(s.into()))
+                        #name::#ident(s.into())
                     });
                 }
                 Fields::Named(ref f) if f.named.len() == 1 => {
                     let field_name = f.named.last().unwrap().ident.as_ref().unwrap();
-                    default_match_arm = Some(quote! {
-                        ::core::result::Result::Ok(#name::#ident { #field_name : s.into() } )
-                    });
+                    default_match_arm = Some(
+                        quote! { #name::#ident { #field_name : s.into() } },
+                    );
                 }
                 _ => {
                     return Err(syn::Error::new_spanned(
@@ -131,11 +131,11 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     // Determine the error type on FromStr and TryFrom based on what the user
     // has configured and whether there is a default variant.
-    let mut has_custom_err_ty = false;
+    let is_infallible = default_match_arm.is_some();
+    let has_custom_err_ty = type_properties.parse_err_ty.is_some();
     let err_ty = if let Some(ty) = type_properties.parse_err_ty {
-        has_custom_err_ty = true;
         quote! { #ty }
-    } else if default_match_arm.is_some() {
+    } else if is_infallible {
         quote! { ::core::convert::Infallible }
     } else {
         quote! { #strum_module_path::ParseError }
@@ -146,42 +146,70 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let default_match_arm = if let Some(default_match_arm) = default_match_arm {
         default_match_arm
     } else if let Some(f) = type_properties.parse_err_fn {
-        quote! { ::core::result::Result::Err(#f(s)) }
+        quote! { return ::core::result::Result::Err(#f(s)) }
     } else if has_custom_err_ty {
-        // The user defined a custom error type, but not a
-        // custom error function. This is an error if the
-        // method isn't infallible.
+        // The user defined a custom error type, but not a custom error function. This is an error
+        // if the method isn't infallible.
         return Err(missing_parse_err_attr_error());
     } else {
-        quote! { ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) }
+        quote! { return ::core::result::Result::Err(#strum_module_path::ParseError::VariantNotFound) }
     };
 
-    let phf_body = if phf_exact_match_arms.is_empty() {
-        quote!()
+    let mut match_expression = if standard_match_arms.is_empty() {
+        default_match_arm
     } else {
         quote! {
-            use #strum_module_path::_private_phf_reexport_for_macro_if_phf_feature as phf;
-            static PHF: phf::Map<&'static str, #name> = phf::phf_map! {
-                #(#phf_exact_match_arms)*
-            };
-            if let Some(value) = PHF.get(s).cloned() {
-                return ::core::result::Result::Ok(value);
+            match s {
+                #(#standard_match_arms)*
+                _ => #default_match_arm,
             }
         }
     };
 
-    let standard_match_body = if standard_match_arms.is_empty() {
-        default_match_arm
+    if phf_exact_match_arms.len() > 0 {
+        match_expression = quote! {
+            use #strum_module_path::_private_phf_reexport_for_macro_if_phf_feature as phf;
+            static PHF: phf::Map<&'static str, #name> = phf::phf_map! {
+                #(#phf_exact_match_arms)*
+            };
+
+            if let Some(value) = PHF.get(s).cloned() {
+                value
+            } else {
+                #match_expression
+            }
+        }
+    }
+
+    let from_impl = if is_infallible && !has_custom_err_ty {
+        quote! {
+            #[allow(clippy::use_self)]
+            #[automatically_derived]
+            impl #impl_generics ::core::convert::From<&str> for #name #ty_generics #where_clause {
+                #[inline]
+                fn from(s: &str) -> #name #ty_generics {
+                    #match_expression
+                }
+            }
+        }
     } else {
         quote! {
-            ::core::result::Result::Ok(match s {
-                #(#standard_match_arms)*
-                _ => return #default_match_arm,
-            })
+            #[allow(clippy::use_self)]
+            #[automatically_derived]
+            impl #impl_generics ::core::convert::TryFrom<&str> for #name #ty_generics #where_clause {
+                type Error = #err_ty;
+
+                #[inline]
+                fn try_from(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<&str>>::Error> {
+                    Ok({
+                        #match_expression
+                    })
+                }
+            }
         }
     };
 
-    Ok(quote! {
+    let from_str = quote! {
         #[allow(clippy::use_self)]
         #[automatically_derived]
         impl #impl_generics ::core::str::FromStr for #name #ty_generics #where_clause {
@@ -189,20 +217,13 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             #[inline]
             fn from_str(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
-                #phf_body
-                #standard_match_body
+                <Self as ::core::convert::TryFrom<&str>>::try_from(s)
             }
         }
+    };
 
-        #[allow(clippy::use_self)]
-        #[automatically_derived]
-        impl #impl_generics ::core::convert::TryFrom<&str> for #name #ty_generics #where_clause {
-            type Error = #err_ty;
-
-            #[inline]
-            fn try_from(s: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<&str>>::Error> {
-                ::core::str::FromStr::from_str(s)
-            }
-        }
+    Ok(quote! {
+        #from_str
+        #from_impl
     })
 }
