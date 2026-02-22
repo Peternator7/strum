@@ -14,6 +14,30 @@
   potential name conflicts.
 * [#465](https://github.com/Peternator7/strum/pull/465): Upgrade `phf` dependency to v0.13.
 * [#473](https://github.com/Peternator7/strum/pull/473): Fix `cargo fmt` / `clippy` issues and add GitHub Actions CI.
+* [#477](https://github.com/Peternator7/strum/pull/477): `strum::ParseError` now implements `core::fmt::Display` instead
+  `std::fmt::Display` to make it `#[no_std]` compatible. Note the `Error` trait wasn't available in core until `1.81`
+  so `strum::ParseError` still only implements that in std.
+* [#476](https://github.com/Peternator7/strum/pull/476): **Breaking Change** - `EnumString` now implements `From<&str>`
+  (infallible) instead of `TryFrom<&str>` when the enum has a `#[strum(default)]` variant. This more accurately
+  reflects that parsing cannot fail in that case. If you need the old `TryFrom` behavior, you can opt back in using
+  `parse_error_ty` and `parse_error_fn`:
+
+  ```rust
+  #[derive(EnumString)]
+  #[strum(parse_error_ty = strum::ParseError, parse_error_fn = make_error)]
+  pub enum Color {
+      Red,
+      #[strum(default)]
+      Other(String),
+  }
+
+  fn make_error(x: &str) -> strum::ParseError {
+      strum::ParseError::VariantNotFound
+  }
+  ```
+
+* [#431](https://github.com/Peternator7/strum/pull/431): Fix bug where `EnumString` ignored the `parse_err_ty`
+  attribute when the enum had a `#[strum(default)]` variant.
 * [#474](https://github.com/Peternator7/strum/pull/474): EnumDiscriminants will now copy `default` over from the
   original enum to the Discriminant enum.
 
