@@ -12,6 +12,8 @@ pub enum Color {
     Yellow,
     #[strum(disabled)]
     Green(String),
+    #[strum(default)]
+    Purple(String),
 }
 
 /// A bunch of errors

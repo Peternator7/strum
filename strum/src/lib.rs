@@ -43,9 +43,8 @@ pub enum ParseError {
     VariantNotFound,
 }
 
-#[cfg(feature = "std")]
-impl std::fmt::Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for ParseError {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
         // We could use our macro here, but this way we don't take a dependency on the
         // macros crate.
         match self {
