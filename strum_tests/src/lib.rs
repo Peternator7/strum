@@ -13,7 +13,7 @@ pub enum Color {
     #[strum(disabled)]
     Green(String),
     #[strum(default)]
-    Purple(String)
+    Purple(String),
 }
 
 /// A bunch of errors

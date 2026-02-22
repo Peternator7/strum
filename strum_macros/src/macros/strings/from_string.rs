@@ -51,9 +51,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 }
                 Fields::Named(ref f) if f.named.len() == 1 => {
                     let field_name = f.named.last().unwrap().ident.as_ref().unwrap();
-                    default_match_arm = Some(
-                        quote! { #name::#ident { #field_name : s.into() } },
-                    );
+                    default_match_arm = Some(quote! { #name::#ident { #field_name : s.into() } });
                 }
                 _ => {
                     return Err(syn::Error::new_spanned(
@@ -166,7 +164,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
     };
 
-    if phf_exact_match_arms.len() > 0 {
+    if !phf_exact_match_arms.is_empty() {
         match_expression = quote! {
             use #strum_module_path::_private_phf_reexport_for_macro_if_phf_feature as phf;
             static PHF: phf::Map<&'static str, #name> = phf::phf_map! {
