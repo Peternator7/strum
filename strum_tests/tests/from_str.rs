@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{convert::Infallible, str::FromStr};
 use strum::EnumString;
 
 mod core {} // ensure macros call `::core`
@@ -68,6 +68,14 @@ fn color_to_string() {
 #[test]
 fn color_default() {
     assert_from_str(Color::Green(String::from("not found")), "not found");
+}
+
+#[test]
+fn color2_infallible() {
+    let r: Result<Color2, Infallible> = Color2::from_str("infallible");
+    assert!(r.is_ok());
+    let r: Result<Color2, Infallible> = Color2::try_from("infallible");
+    assert!(r.is_ok());
 }
 
 #[test]
@@ -299,4 +307,27 @@ fn case_custom_infallible_parsing_with_default() {
         CaseCustomInfallibleParsingWithDefaultEnum::Unknown("yellow".to_string()),
         r
     );
+}
+
+enum Never {}
+
+#[derive(Debug, EnumString, Eq, PartialEq)]
+#[strum(
+    parse_err_ty = Never
+)]
+enum CustomErrorTyWithNoErrorFn {
+    #[strum(serialize = "foo")]
+    Foo,
+    #[strum(serialize = "bar")]
+    Bar,
+    #[strum(default)]
+    Unknown(String),
+}
+
+#[test]
+fn case_custom_infallible_parsing_with_default_no_err_fn() {
+    let r: Result<CustomErrorTyWithNoErrorFn, Never> =
+        "yellow".parse::<CustomErrorTyWithNoErrorFn>();
+
+    assert!(r.is_ok());
 }
