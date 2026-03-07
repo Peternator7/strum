@@ -1,10 +1,11 @@
 {
-    "extensions": [
-        "rust-lang.rust",
-        "webfreak.debug",
-        "matklad.rust-analyzer"
-    ],
-    "workspaceFolder": "strum",
-    "postCreateCommand": "curl --proto '=https' --tlsv1.2 -sSf -o ~/rustup.sh https://sh.rustup.rs && /bin/bash ~/rustup.sh -y",
-    "image":"docker.io/library/rust:1-buster"
+    "name": "strum",
+    "image": "mcr.microsoft.com/devcontainers/rust:2-1-trixie",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rust-lang.rust-analyzer"
+            ]
+        }
+    }
 }
