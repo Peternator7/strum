@@ -5,17 +5,12 @@ use strum::{AsRefStr, AsStaticRef, AsStaticStr, Display, EnumString, IntoStaticS
 
 mod core {} // ensure macros call `::core`
 
-#[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
+#[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr, Default)]
 enum InnerColor {
+    #[default]
     Purple,
     Violet,
     Fuchsia,
-}
-
-impl Default for InnerColor {
-    fn default() -> Self {
-        InnerColor::Purple
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, EnumString, AsRefStr, AsStaticStr, IntoStaticStr)]
@@ -205,36 +200,36 @@ enum BrightnessConst {
 
 #[test]
 fn test_const_into_static_str() {
-    const A: &'static str = Bar::A("foo").into_str();
+    const A: &str = Bar::A("foo").into_str();
     assert_eq!("A", A);
-    const B: &'static str = Bar::B::<&str>.into_str();
+    const B: &str = Bar::B::<&str>.into_str();
     assert_eq!("B", B);
-    const C: &'static str = Bar::C::<&str>(&12).into_str();
+    const C: &str = Bar::C::<&str>(&12).into_str();
     assert_eq!("C", C);
 
-    const D: &'static str = Bar::D::<&str>.into_str();
+    const D: &str = Bar::D::<&str>.into_str();
     assert_eq!("Dark", D);
 
-    const G: &'static str = Bar::G::<&str>.into_str();
+    const G: &str = Bar::G::<&str>.into_str();
     assert_eq!("Green", G);
 
-    const BLUE: &'static str = Bar::Blue::<&str> { hue: 2 }.into_str();
+    const BLUE: &str = Bar::Blue::<&str> { hue: 2 }.into_str();
     assert_eq!("blue", BLUE);
 
-    const YELLOW: &'static str = Bar::Yellow::<&str>.into_str();
+    const YELLOW: &str = Bar::Yellow::<&str>.into_str();
     assert_eq!("yellow", YELLOW);
 
-    const BAZ_A: &'static str = Baz::A("foo").into_str();
+    const BAZ_A: &str = Baz::A("foo").into_str();
     assert_eq!("A", BAZ_A);
 
-    const BAZ_C: &'static str = Baz::C::<&str>(&6).into_str();
+    const BAZ_C: &str = Baz::C::<&str>(&6).into_str();
     assert_eq!("C", BAZ_C);
 
-    const DARK_BLACK: &'static str = BrightnessConst::DarkBlack.into_str();
+    const DARK_BLACK: &str = BrightnessConst::DarkBlack.into_str();
     assert_eq!("dark_black", DARK_BLACK);
-    const DIM: &'static str = BrightnessConst::Dim { glow: 1 }.into_str();
+    const DIM: &str = BrightnessConst::Dim { glow: 1 }.into_str();
     assert_eq!("dim", DIM);
-    const BRIGHT_WHITE: &'static str = BrightnessConst::BrightWhite.into_str();
+    const BRIGHT_WHITE: &str = BrightnessConst::BrightWhite.into_str();
     assert_eq!("Bright", BRIGHT_WHITE);
 }
 

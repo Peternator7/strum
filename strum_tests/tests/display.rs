@@ -2,16 +2,11 @@ use strum::EnumString;
 
 mod core {} // ensure macros call `::core`
 
-#[derive(Debug, Eq, PartialEq, EnumString, strum::Display)]
+#[derive(Debug, Eq, PartialEq, EnumString, strum::Display, Default)]
 enum InnerColor {
+    #[default]
     Violet,
     Fuchsia,
-}
-
-impl Default for InnerColor {
-    fn default() -> Self {
-        InnerColor::Violet
-    }
 }
 
 #[derive(Debug, Eq, PartialEq, EnumString, strum::Display)]

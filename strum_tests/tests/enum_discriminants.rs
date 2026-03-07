@@ -10,9 +10,10 @@ use strum_tests::{Errors, ErrorsDiscriminants};
 mod core {} // ensure macros call `::core`
 
 #[allow(dead_code)]
-#[derive(Debug, Eq, PartialEq, EnumDiscriminants)]
+#[derive(Debug, Eq, PartialEq, EnumDiscriminants, Default)]
 #[strum_discriminants(derive(EnumIter))]
 enum Simple {
+    #[default]
     Variant0,
     Variant1,
 }
@@ -364,4 +365,23 @@ fn empty_test() {
     let expected: Vec<_> = EmptyDiscriminants::VARIANTS.to_vec();
 
     assert_eq!(expected, discriminants);
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Default, EnumDiscriminants)]
+enum EnumWithDefault {
+    #[default]
+    A,
+    B,
+    C(String),
+}
+
+#[test]
+fn derive_default_is_copied() {
+    // Verify that the discriminant enum also derives Default
+    let _default_discriminant = EnumWithDefaultDiscriminants::default();
+    assert_eq!(
+        EnumWithDefaultDiscriminants::default(),
+        EnumWithDefaultDiscriminants::A
+    );
 }

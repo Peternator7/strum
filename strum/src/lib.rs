@@ -16,11 +16,11 @@
 //!
 //! ```toml
 //! [dependencies]
-//! strum = "0.27"
-//! strum_macros = "0.27"
+//! strum = "0.28"
+//! strum_macros = "0.28"
 //!
 //! # You can also access strum_macros exports directly through strum using the "derive" feature
-//! strum = { version = "0.27", features = ["derive"] }
+//! strum = { version = "0.28", features = ["derive"] }
 //! ```
 //!
 
@@ -43,9 +43,8 @@ pub enum ParseError {
     VariantNotFound,
 }
 
-#[cfg(feature = "std")]
-impl std::fmt::Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for ParseError {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
         // We could use our macro here, but this way we don't take a dependency on the
         // macros crate.
         match self {

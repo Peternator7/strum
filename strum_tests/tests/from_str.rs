@@ -1,4 +1,6 @@
-use std::str::FromStr;
+#![allow(clippy::infallible_try_from)]
+
+use std::{convert::Infallible, str::FromStr};
 use strum::EnumString;
 
 mod core {} // ensure macros call `::core`
@@ -68,6 +70,16 @@ fn color_to_string() {
 #[test]
 fn color_default() {
     assert_from_str(Color::Green(String::from("not found")), "not found");
+}
+
+#[test]
+#[allow(clippy::unnecessary_fallible_conversions)]
+fn color2_infallible() {
+    let r: Result<Color2, Infallible> = Color2::from_str("infallible");
+    assert!(r.is_ok());
+    let r: Result<Color2, Infallible> = Color2::try_from("infallible");
+    assert!(r.is_ok());
+    let _ = Color2::from("infallible");
 }
 
 #[test]
@@ -273,4 +285,53 @@ fn case_custom_parse_error() {
         CaseCustomParseErrorNotFoundError("yellow".to_string()),
         r.unwrap_err()
     );
+}
+
+#[derive(Debug, EnumString, Eq, PartialEq)]
+#[strum(
+    parse_err_fn = not_needed_parsing_is_infallible,
+    parse_err_ty = std::convert::Infallible
+)]
+enum CaseCustomInfallibleParsingWithDefaultEnum {
+    #[strum(serialize = "foo")]
+    Foo,
+    #[strum(serialize = "bar")]
+    Bar,
+    #[strum(default)]
+    Unknown(String),
+}
+
+#[test]
+fn case_custom_infallible_parsing_with_default() {
+    let r = match "yellow".parse::<CaseCustomInfallibleParsingWithDefaultEnum>() {
+        Ok(r) => r,
+        Err(never) => match never {},
+    };
+    assert_eq!(
+        CaseCustomInfallibleParsingWithDefaultEnum::Unknown("yellow".to_string()),
+        r
+    );
+}
+
+enum Never {}
+
+#[derive(Debug, EnumString, Eq, PartialEq)]
+#[strum(
+    parse_err_ty = Never
+)]
+enum CustomErrorTyWithNoErrorFn {
+    #[strum(serialize = "foo")]
+    Foo,
+    #[strum(serialize = "bar")]
+    Bar,
+    #[strum(default)]
+    Unknown(String),
+}
+
+#[test]
+fn case_custom_infallible_parsing_with_default_no_err_fn() {
+    let r: Result<CustomErrorTyWithNoErrorFn, Never> =
+        "yellow".parse::<CustomErrorTyWithNoErrorFn>();
+
+    assert!(r.is_ok());
 }
