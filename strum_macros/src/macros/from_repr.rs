@@ -102,6 +102,8 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
     Ok(quote! {
         #[allow(clippy::use_self)]
+        #[allow(deprecated)] // omit warnings on deprecated fields/variants
+        #[allow(unreachable_code)] // omit warnings for `!` and other unreachable types
         #[automatically_derived]
         impl #impl_generics #name #ty_generics #where_clause {
             #[doc = "Try to create [Self] from the raw representation"]
