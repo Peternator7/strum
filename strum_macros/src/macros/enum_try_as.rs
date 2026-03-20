@@ -76,6 +76,8 @@ pub fn enum_try_as_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         .collect();
 
     Ok(quote! {
+        #[allow(deprecated)]
+        #[allow(unreachable_code)]
         #[automatically_derived]
         impl #impl_generics #enum_name #ty_generics #where_clause {
             #(#variants)*

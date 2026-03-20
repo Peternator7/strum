@@ -91,6 +91,8 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
+        #[allow(deprecated)]
+        #[allow(unreachable_code)]
         #[automatically_derived]
         impl #impl_generics #iter_name #ty_generics #where_clause {
             fn get(&self, idx: usize) -> ::core::option::Option<#name #ty_generics> {
