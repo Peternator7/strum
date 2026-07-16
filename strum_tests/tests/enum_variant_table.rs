@@ -101,3 +101,18 @@ fn transform() {
     let all_two = ColorTable::filled(2);
     assert_eq!(all_two.transform(|_, n| *n * 2), ColorTable::filled(4));
 }
+
+// 8+ variants would exceed clippy's too_many_arguments threshold on the generated `new`
+// if the macro didn't allow the lint
+#[derive(EnumTable)]
+#[allow(dead_code)]
+enum Wide {
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+}
