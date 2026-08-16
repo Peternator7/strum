@@ -35,6 +35,7 @@ Strum has implemented the following macros:
 | Macro | Description |
 | --- | ----------- |
 | [EnumString] | Converts strings to enum variants based on their name. |
+| [EnumStringConst] | Adds a `const fn` that converts strings to enum variants based on their name. |
 | [Display] | Converts enum variants to strings |
 | [FromRepr] | Convert from an integer to an enum. |
 | [AsRefStr] | Implement `AsRef<str>` for `MyEnum` |
@@ -71,6 +72,7 @@ information through strings.
 Strumming is also a very whimsical motion, much like writing Rust code.
 
 [EnumString]: https://docs.rs/strum_macros/latest/strum_macros/derive.EnumString.html
+[EnumStringConst]: https://docs.rs/strum_macros/latest/strum_macros/derive.EnumStringConst.html
 [Display]: https://docs.rs/strum_macros/latest/strum_macros/derive.Display.html
 [AsRefStr]: https://docs.rs/strum_macros/latest/strum_macros/derive.AsRefStr.html
 [IntoStaticStr]: https://docs.rs/strum_macros/latest/strum_macros/derive.IntoStaticStr.html
