@@ -257,6 +257,7 @@ DocumentMacroRexports! {
     EnumMessage,
     EnumProperty,
     EnumString,
+    EnumStringConst,
     VariantNames,
     FromRepr,
     IntoStaticStr,

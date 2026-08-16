@@ -38,6 +38,26 @@
 
 * [#431](https://github.com/Peternator7/strum/pull/431): Fix bug where `EnumString` ignored the `parse_err_ty`
   attribute when the enum had a `#[strum(default)]` variant.
+* [#489](https://github.com/Peternator7/strum/pull/489): Add a new derive, `EnumStringConst`, the const counterpart to
+  [`EnumString`](https://docs.rs/strum_macros/latest/strum_macros/derive.EnumString.html).
+
+  Trait impls can't be `const` yet, so it generates an inherent `const fn from_str_const` instead of implementing
+  `FromStr`, allowing enum variants to be parsed from strings in const contexts. Only enums where every variant is a
+  unit variant are supported.
+
+  ```rust
+  #[derive(EnumStringConst)]
+  enum Currency {
+      USD,
+      EUR,
+  }
+
+  const USD: Currency = match Currency::from_str_const("USD") {
+      Ok(c) => c,
+      Err(_) => panic!("invalid currency"),
+  };
+  ```
+
 * [#474](https://github.com/Peternator7/strum/pull/474): EnumDiscriminants will now copy `default` over from the
   original enum to the Discriminant enum.
 
