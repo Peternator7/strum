@@ -1,6 +1,6 @@
 use proc_macro2::{Span, TokenStream, TokenTree};
 use quote::{quote, ToTokens};
-use syn::parse_quote;
+use syn::{parse_quote, MetaList};
 use syn::{Data, DeriveInput, Fields};
 
 use crate::helpers::{non_enum_error, strum_discriminants_passthrough_error, HasTypeProperties};
@@ -20,8 +20,23 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         _ => return Err(non_enum_error()),
     };
 
-    // Derives for the generated enum
     let type_properties = ast.get_type_properties()?;
+
+    // Attributes for the generated enum
+    let attributes: &Vec<MetaList> = &type_properties.discriminant_attributes;
+
+    let attributes: Vec<_> = attributes
+        .iter()
+        .map(|a| {
+            quote! {
+                #[#a]
+            }
+        })
+        .collect();
+
+    let attributes = quote! {#(#attributes)*};
+
+    // Derives for the generated enum
     let strum_module_path = type_properties.crate_module_path();
 
     let mut derives = type_properties.discriminant_derives;
@@ -223,6 +238,7 @@ pub fn enum_discriminants_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     };
 
     Ok(quote! {
+        #attributes
         #derives
         #repr
         #(#[ #pass_through_attributes ])*

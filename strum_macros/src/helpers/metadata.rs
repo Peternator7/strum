@@ -3,8 +3,8 @@ use syn::{
     parse::{Parse, ParseStream},
     parse2, parse_str,
     punctuated::Punctuated,
-    Attribute, DeriveInput, Expr, ExprLit, Field, Ident, Lit, LitBool, LitStr, Meta, MetaNameValue,
-    Path, Token, Variant, Visibility,
+    Attribute, DeriveInput, Expr, ExprLit, Field, Ident, Lit, LitBool, LitStr, Meta, MetaList,
+    MetaNameValue, Path, Token, Variant, Visibility,
 };
 
 use super::case_style::CaseStyle;
@@ -27,6 +27,7 @@ pub mod kw {
     custom_keyword!(name);
     custom_keyword!(vis);
     custom_keyword!(doc);
+    custom_keyword!(attributes);
 
     // variant metadata
     custom_keyword!(message);
@@ -125,6 +126,7 @@ pub enum EnumDiscriminantsMeta {
     Derive { _kw: kw::derive, paths: Vec<Path> },
     Name { kw: kw::name, name: Ident },
     Vis { kw: kw::vis, vis: Visibility },
+    Attributes { _kw: kw::attributes, attributes: Vec<MetaList> },
     Other { passthrough_meta: Meta },
 }
 
@@ -151,6 +153,15 @@ impl Parse for EnumDiscriminantsMeta {
             parenthesized!(content in input);
             let vis = content.parse()?;
             Ok(EnumDiscriminantsMeta::Vis { kw, vis })
+        } else if input.peek(kw::attributes) {
+            let _kw = input.parse()?;
+            let content;
+            parenthesized!(content in input);
+            let attributes = content.parse_terminated(MetaList::parse, Token![,])?;
+            Ok(EnumDiscriminantsMeta::Attributes {
+                _kw,
+                attributes: attributes.into_iter().collect(),
+            })
         } else {
             let passthrough_meta = input.parse()?;
             Ok(EnumDiscriminantsMeta::Other { passthrough_meta })
