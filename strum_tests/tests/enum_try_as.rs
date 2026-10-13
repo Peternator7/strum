@@ -1,5 +1,31 @@
 use strum::EnumTryAs;
 
+/// Tests that generated methods can be used in fully documented public APIs.
+#[forbid(missing_docs)]
+pub mod documented {
+    /// A value with an optional payload.
+    #[derive(strum::EnumTryAs)]
+    pub enum Value {
+        /// A numeric payload.
+        Number(u32),
+        /// No payload.
+        Empty,
+    }
+}
+
+#[test]
+fn documented_public_enum() {
+    let mut value = documented::Value::Number(1);
+    assert_eq!(value.try_as_number_ref(), Some(&1));
+    *value.try_as_number_mut().unwrap() = 2;
+    assert_eq!(value.try_as_number(), Some(2));
+
+    let mut empty = documented::Value::Empty;
+    assert_eq!(empty.try_as_number_ref(), None);
+    assert_eq!(empty.try_as_number_mut(), None);
+    assert_eq!(empty.try_as_number(), None);
+}
+
 #[derive(EnumTryAs)]
 enum Foo {
     Unnamed0(),

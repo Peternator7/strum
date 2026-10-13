@@ -34,8 +34,12 @@ pub fn enum_try_as_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     let move_fn_name = format_ident!("try_as_{}", snakify(&variant_name.to_string()));
                     let ref_fn_name = format_ident!("try_as_{}_ref", snakify(&variant_name.to_string()));
                     let mut_fn_name = format_ident!("try_as_{}_mut", snakify(&variant_name.to_string()));
+                    let move_doc = format!("Returns the fields of [`Self::{variant_name}`] if this value is that variant, or `None` otherwise.");
+                    let ref_doc = format!("Returns shared references to the fields of [`Self::{variant_name}`] if this value is that variant, or `None` otherwise.");
+                    let mut_doc = format!("Returns mutable references to the fields of [`Self::{variant_name}`] if this value is that variant, or `None` otherwise.");
 
                     Some(quote! {
+                        #[doc = #move_doc]
                         #[automatically_derived]
                         #[must_use]
                         #[inline]
@@ -46,6 +50,7 @@ pub fn enum_try_as_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                             }
                         }
 
+                        #[doc = #ref_doc]
                         #[automatically_derived]
                         #[must_use]
                         #[inline]
@@ -56,6 +61,7 @@ pub fn enum_try_as_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                             }
                         }
 
+                        #[doc = #mut_doc]
                         #[automatically_derived]
                         #[must_use]
                         #[inline]
