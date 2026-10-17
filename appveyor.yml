@@ -86,8 +86,11 @@ matrix:
 # default-toolchain and default-host manually here.
 install:
   - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
-  - rustup-init -yv --default-toolchain %channel% --default-host %target%
+  - if "%channel%"=="1.71.1" rustup-init -yv --default-toolchain stable --default-host %target%
   - set PATH=%PATH%;%USERPROFILE%\.cargo\bin
+  - if "%channel%"=="1.71.1" set CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback
+  - if "%channel%"=="1.71.1" cargo +stable generate-lockfile
+  - rustup-init -yv --default-toolchain %channel% --default-host %target%
   - rustc -vV
   - cargo -vV
 
