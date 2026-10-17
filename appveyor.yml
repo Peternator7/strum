@@ -84,13 +84,15 @@ matrix:
 #
 # For simple configurations, instead of using the build matrix, you can simply set the
 # default-toolchain and default-host manually here.
+# Use a 64-bit compiler host; newer Rust channels provide i686 as a target only.
 install:
   - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
-  - if "%channel%"=="1.71.1" rustup-init -yv --default-toolchain stable --default-host %target%
+  - if "%channel%"=="1.71.1" rustup-init -yv --default-toolchain stable --default-host x86_64-pc-windows-msvc
   - set PATH=%PATH%;%USERPROFILE%\.cargo\bin
   - if "%channel%"=="1.71.1" set CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback
   - if "%channel%"=="1.71.1" cargo +stable generate-lockfile
-  - rustup-init -yv --default-toolchain %channel% --default-host %target%
+  - rustup-init -yv --default-toolchain %channel% --default-host x86_64-pc-windows-msvc
+  - rustup target add %target%
   - rustc -vV
   - cargo -vV
 
@@ -104,7 +106,7 @@ build: false
 #directly or perform other testing commands. Rust will automatically be placed in the PATH
 # environment variable.
 test_script:
-  - cargo test --verbose --features strum_tests/test_phf %cargoflags%
+  - cargo test --verbose --target %target% --features strum_tests/test_phf %cargoflags%
 
 for:
 - matrix:
@@ -112,4 +114,4 @@ for:
       - channel: 1.71.1
 
   test_script:
-  - cargo test --verbose %cargoflags%
+  - cargo test --verbose --target %target% %cargoflags%
