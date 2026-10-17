@@ -102,10 +102,14 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             .ascii_case_insensitive
             .unwrap_or(type_properties.ascii_case_insensitive);
 
+        let mut phf_keys = std::collections::HashSet::new();
+
         // If we don't have any custom variants, add the default serialized name.
         for serialization in variant_properties.get_serializations(type_properties.case_style) {
             if type_properties.use_phf {
-                phf_exact_match_arms.push(quote! { #serialization => #name::#ident #params, });
+                if phf_keys.insert(serialization.value()) {
+                    phf_exact_match_arms.push(quote! { #serialization => #name::#ident #params, });
+                }
 
                 if is_ascii_case_insensitive {
                     // Store the lowercase and UPPERCASE variants in the phf map to capture
@@ -115,8 +119,11 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                         syn::LitStr::new(&ser_string.to_ascii_lowercase(), serialization.span());
                     let upper =
                         syn::LitStr::new(&ser_string.to_ascii_uppercase(), serialization.span());
-                    phf_exact_match_arms.push(quote! { #lower => #name::#ident #params, });
-                    phf_exact_match_arms.push(quote! { #upper => #name::#ident #params, });
+                    for case in [lower, upper] {
+                        if phf_keys.insert(case.value()) {
+                            phf_exact_match_arms.push(quote! { #case => #name::#ident #params, });
+                        }
+                    }
                     standard_match_arms.push(quote! { s if s.eq_ignore_ascii_case(#serialization) => #name::#ident #params, });
                 }
             } else if !is_ascii_case_insensitive {
