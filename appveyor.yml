@@ -91,7 +91,10 @@ install:
   - set PATH=%PATH%;%USERPROFILE%\.cargo\bin
   - if "%channel%"=="1.71.1" set CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback
   - if "%channel%"=="1.71.1" cargo +stable generate-lockfile
-  - rustup-init -yv --default-toolchain %channel% --default-host x86_64-pc-windows-msvc
+  - set compiler_host=x86_64-pc-windows-msvc
+  # Cargo 1.71 needs a native host to retain doctest coverage.
+  - if "%channel%"=="1.71.1" set compiler_host=%target%
+  - rustup-init -yv --default-toolchain %channel% --default-host %compiler_host%
   - rustup target add %target%
   - rustc -vV
   - cargo -vV
@@ -114,4 +117,4 @@ for:
       - channel: 1.71.1
 
   test_script:
-  - cargo test --verbose --target %target% %cargoflags%
+  - cargo test --verbose %cargoflags%
