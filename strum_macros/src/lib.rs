@@ -640,9 +640,6 @@ pub fn enum_table(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// to allow `match` statements in `const fn`. The no additional data requirement is due to the
 /// inability to use `Default::default()` in a `const fn`.
 ///
-/// You cannot derive `FromRepr` on any type with a lifetime bound (`<'a>`) because the function would surely
-/// create [unbounded lifetimes](https://doc.rust-lang.org/nightly/nomicon/unbounded-lifetimes.html).
-///
 /// ```
 ///
 /// use strum_macros::FromRepr;
