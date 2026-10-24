@@ -136,6 +136,7 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         impl<T> #table_name<T> {
             #[doc = #doc_new]
             #[inline]
+            #[allow(clippy::too_many_arguments)]
             #vis fn new(
                 #(#snake_idents: T,)*
             ) -> #table_name<T> {
