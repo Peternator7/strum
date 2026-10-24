@@ -42,6 +42,12 @@ jobs:
           - nightly
     steps:
     - uses: actions/checkout@v4
+    - name: Lock MSRV-compatible dependencies
+      if: matrix.toolchain == '1.71.1'
+      env:
+        CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS: fallback
+      # Note that this uses the runner's pre-installed stable cargo
+      run: cargo generate-lockfile
     - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
     - name: Build
       run: cargo build --verbose
