@@ -74,7 +74,7 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         }
     }
 
-    for (_, arms) in built_arms.iter_mut() {
+    for arms in built_arms.values_mut() {
         if arms.len() < variants.len() {
             arms.push(quote! { _ => ::core::option::Option::None });
         }
