@@ -70,13 +70,13 @@ fn crate_module_path_test() {
 enum Data<'a> {
     Version1,
     Version2,
-    Data(&'a str),
+    Payload(&'a str),
 }
 
 #[test]
 fn lifetime_test() {
     assert_eq!(Data::from_repr(0), Some(Data::Version1));
     assert_eq!(Data::from_repr(1), Some(Data::Version2));
-    assert_eq!(Data::from_repr(2), Some(Data::Data("")));
+    assert_eq!(Data::from_repr(2), Some(Data::Payload("")));
     assert_eq!(Data::from_repr(3), None);
 }
