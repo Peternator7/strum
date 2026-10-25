@@ -46,13 +46,13 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             match &variant.fields {
                 Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
                     default_match_arm = Some(quote! {
-                        #name::#ident(__strum_input.into())
+                        #name::#ident(__input.into())
                     });
                 }
                 Fields::Named(ref f) if f.named.len() == 1 => {
                     let field_name = f.named.last().unwrap().ident.as_ref().unwrap();
                     default_match_arm =
-                        Some(quote! { #name::#ident { #field_name : __strum_input.into() } });
+                        Some(quote! { #name::#ident { #field_name : __input.into() } });
                 }
                 _ => {
                     return Err(syn::Error::new_spanned(
@@ -118,12 +118,12 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                         syn::LitStr::new(&ser_string.to_ascii_uppercase(), serialization.span());
                     phf_exact_match_arms.push(quote! { #lower => #name::#ident #params, });
                     phf_exact_match_arms.push(quote! { #upper => #name::#ident #params, });
-                    standard_match_arms.push(quote! { __strum_input if __strum_input.eq_ignore_ascii_case(#serialization) => #name::#ident #params, });
+                    standard_match_arms.push(quote! { __input if __input.eq_ignore_ascii_case(#serialization) => #name::#ident #params, });
                 }
             } else if !is_ascii_case_insensitive {
                 standard_match_arms.push(quote! { #serialization => #name::#ident #params, });
             } else {
-                standard_match_arms.push(quote! { __strum_input if __strum_input.eq_ignore_ascii_case(#serialization) => #name::#ident #params, });
+                standard_match_arms.push(quote! { __input if __input.eq_ignore_ascii_case(#serialization) => #name::#ident #params, });
             }
         }
     }
@@ -145,7 +145,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let default_match_arm = if let Some(default_match_arm) = default_match_arm {
         default_match_arm
     } else if let Some(f) = type_properties.parse_err_fn {
-        quote! { return ::core::result::Result::Err(#f(__strum_input)) }
+        quote! { return ::core::result::Result::Err(#f(__input)) }
     } else if has_custom_err_ty {
         // The user defined a custom error type, but not a custom error function. This is an error
         // if the method isn't infallible.
@@ -158,7 +158,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         default_match_arm
     } else {
         quote! {
-            match __strum_input {
+            match __input {
                 #(#standard_match_arms)*
                 _ => #default_match_arm,
             }
@@ -172,7 +172,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 #(#phf_exact_match_arms)*
             };
 
-            if let Some(value) = PHF.get(__strum_input).cloned() {
+            if let Some(value) = PHF.get(__input).cloned() {
                 value
             } else {
                 #match_expression
@@ -186,7 +186,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             #[automatically_derived]
             impl #impl_generics ::core::convert::From<&str> for #name #ty_generics #where_clause {
                 #[inline]
-                fn from(__strum_input: &str) -> #name #ty_generics {
+                fn from(__input: &str) -> #name #ty_generics {
                     #match_expression
                 }
             }
@@ -199,7 +199,7 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 type Error = #err_ty;
 
                 #[inline]
-                fn try_from(__strum_input: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<&str>>::Error> {
+                fn try_from(__input: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::convert::TryFrom<&str>>::Error> {
                     Ok({
                         #match_expression
                     })
@@ -215,8 +215,8 @@ pub fn from_string_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             type Err = #err_ty;
 
             #[inline]
-            fn from_str(__strum_input: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
-                <Self as ::core::convert::TryFrom<&str>>::try_from(__strum_input)
+            fn from_str(__input: &str) -> ::core::result::Result< #name #ty_generics , <Self as ::core::str::FromStr>::Err> {
+                <Self as ::core::convert::TryFrom<&str>>::try_from(__input)
             }
         }
     };
