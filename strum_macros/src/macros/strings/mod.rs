@@ -5,6 +5,7 @@ use syn::{Fields, Ident, Variant};
 pub mod as_ref_str;
 pub mod display;
 pub mod from_string;
+pub mod from_string_const;
 pub mod to_string;
 
 struct NonSingleFieldEnum;

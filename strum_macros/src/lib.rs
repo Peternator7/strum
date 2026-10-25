@@ -140,6 +140,56 @@ pub fn from_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     toks.into()
 }
 
+/// Converts strings to enum variants based on their name in a const context.
+///
+/// This is the const counterpart to [`EnumString`]. Trait implementations can't be `const`
+/// yet, so instead of implementing `FromStr`, this generates an inherent method on the enum:
+///
+/// ```text
+/// const fn from_str_const(s: &str) -> Result<Self, strum::ParseError>
+/// ```
+///
+/// Strings are matched using the same rules as `EnumString`, so `serialize`, `to_string`,
+/// `serialize_all`, `ascii_case_insensitive` and `disabled` all behave the way they do there.
+/// The enum must consist entirely of unit variants since there's no way to construct variants
+/// with additional data in a const fn. For the same reason, `default` is not supported.
+/// `parse_err_ty` and `parse_err_fn` can be used to return a custom error type, but the given
+/// function must be a `const fn`.
+///
+/// # Example how to use `EnumStringConst`
+/// ```
+/// use strum_macros::EnumStringConst;
+///
+/// #[derive(Debug, PartialEq, EnumStringConst)]
+/// enum Color {
+///     Red,
+///     // We can match on multiple different patterns.
+///     #[strum(serialize = "blue", serialize = "b")]
+///     Blue,
+///     // Comparisons can be case insensitive (ASCII only).
+///     #[strum(ascii_case_insensitive)]
+///     Black,
+/// }
+///
+/// const RED: Color = match Color::from_str_const("Red") {
+///     Ok(color) => color,
+///     Err(_) => panic!("invalid color"),
+/// };
+/// assert_eq!(Color::Red, RED);
+/// assert_eq!(Ok(Color::Blue), Color::from_str_const("b"));
+/// assert_eq!(Ok(Color::Black), Color::from_str_const("bLACk"));
+/// assert!(Color::from_str_const("Yellow").is_err());
+/// ```
+#[proc_macro_derive(EnumStringConst, attributes(strum))]
+pub fn from_string_const(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = syn::parse_macro_input!(input as DeriveInput);
+
+    let toks = macros::from_string_const::from_string_const_inner(&ast)
+        .unwrap_or_else(|err| err.to_compile_error());
+    debug_print_generated(&ast, &toks);
+    toks.into()
+}
+
 /// Converts enum variants to `&'a str`, where `'a` is the lifetime of the input enum reference.
 ///
 /// Implements `AsRef<str>` on your enum using the same rules as
