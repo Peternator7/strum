@@ -36,6 +36,17 @@ enum Color2 {
     Purple { inner: String },
 }
 
+#[allow(non_upper_case_globals)]
+const s: &str = "module constant";
+
+#[derive(Debug, Eq, PartialEq, EnumString)]
+#[strum(ascii_case_insensitive)]
+enum LowercaseConstantCollision {
+    Red,
+    #[strum(default)]
+    Unknown(String),
+}
+
 fn assert_from_str<'a, T>(a: T, from: &'a str)
 where
     T: PartialEq + std::str::FromStr + std::convert::TryFrom<&'a str> + std::fmt::Debug,
@@ -96,6 +107,16 @@ fn color2_default() {
             inner: String::from("test")
         }
         .to_string()
+    );
+}
+
+#[test]
+fn lowercase_constant_collision() {
+    assert_eq!(s, "module constant");
+    assert_from_str(LowercaseConstantCollision::Red, "rEd");
+    assert_eq!(
+        LowercaseConstantCollision::Unknown("unknown".to_string()),
+        LowercaseConstantCollision::from("unknown")
     );
 }
 
@@ -273,8 +294,8 @@ impl std::fmt::Display for CaseCustomParseErrorNotFoundError {
     }
 }
 impl std::error::Error for CaseCustomParseErrorNotFoundError {}
-fn some_enum_not_found_err(s: &str) -> CaseCustomParseErrorNotFoundError {
-    CaseCustomParseErrorNotFoundError(s.to_string())
+fn some_enum_not_found_err(input: &str) -> CaseCustomParseErrorNotFoundError {
+    CaseCustomParseErrorNotFoundError(input.to_string())
 }
 
 #[test]
