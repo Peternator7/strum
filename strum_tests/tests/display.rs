@@ -180,3 +180,76 @@ fn transparent_string_named_field() {
         )
     );
 }
+
+// Regression tests for https://github.com/Peternator7/strum/issues/363 and
+// https://github.com/Peternator7/strum/issues/361: unit variants have no fields to
+// interpolate, so their `to_string`/`serialize` values are plain strings and any
+// curly braces in them must be emitted verbatim (as they were in 0.25).
+#[derive(Debug, Eq, PartialEq, EnumString, strum::Display)]
+enum Brace {
+    #[strum(serialize = "{")]
+    Open,
+    #[strum(to_string = "}")]
+    Close,
+    #[strum(to_string = "{}")]
+    Empty,
+    #[strum(to_string = "{{}}")]
+    Doubled,
+    #[strum(serialize = "}}", serialize = "{close}")]
+    SerializeMulti,
+}
+
+#[test]
+fn unit_variant_braces_are_literal() {
+    assert_eq!("{", Brace::Open.to_string());
+    assert_eq!("}", Brace::Close.to_string());
+    assert_eq!("{}", Brace::Empty.to_string());
+    assert_eq!("{{}}", Brace::Doubled.to_string());
+    assert_eq!("{close}", Brace::SerializeMulti.to_string());
+}
+
+#[test]
+fn unit_variant_braces_respect_formatter_flags() {
+    assert_eq!("  }", format!("{:>3}", Brace::Close));
+    assert_eq!("{}  ", format!("{:<4}", Brace::Empty));
+}
+
+#[test]
+fn unit_variant_braces_round_trip() {
+    for variant in [
+        Brace::Open,
+        Brace::Close,
+        Brace::Empty,
+        Brace::Doubled,
+        Brace::SerializeMulti,
+    ] {
+        let parsed = variant.to_string().parse::<Brace>();
+        assert_eq!(Ok(variant), parsed);
+    }
+    assert_eq!(Ok(Brace::SerializeMulti), "}}".parse::<Brace>());
+}
+
+// Variants with fields keep format-string semantics: `{{`/`}}` are escapes and
+// `{name}` / `{0}` are interpolated.
+#[derive(Debug, Eq, PartialEq, strum::Display)]
+enum BraceWithFields {
+    #[strum(to_string = "{{literal}} {sat}")]
+    Named { sat: usize },
+    #[strum(to_string = "{{{0}}}")]
+    Unnamed(usize),
+    #[strum(to_string = "{{}}")]
+    NamedNoPlaceholder { unused: usize },
+}
+
+#[test]
+fn field_variant_braces_are_escapes() {
+    assert_eq!(
+        "{literal} 10",
+        BraceWithFields::Named { sat: 10 }.to_string()
+    );
+    assert_eq!("{5}", BraceWithFields::Unnamed(5).to_string());
+    assert_eq!(
+        "{{}}",
+        BraceWithFields::NamedNoPlaceholder { unused: 0 }.to_string()
+    );
+}

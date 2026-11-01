@@ -409,6 +409,7 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///    to the serialization.
 /// 6. Enums with fields support string interpolation.
 ///    Note this means the variant will not "round trip" if you then deserialize the string.
+///    As with `format!`, write `{{` and `}}` to produce literal curly braces in these variants.
 ///
 ///    ```rust
 ///    #[derive(strum_macros::Display)]
@@ -417,8 +418,13 @@ pub fn to_string(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///        Red { sat: usize },
 ///        #[strum(to_string = "hue is {1}, saturation is {0}")]
 ///        Blue(usize, usize),
+///        #[strum(to_string = "{{{0}}}")] // prints `{10}` for `Braced(10)`
+///        Braced(usize),
 ///    }
 ///    ```
+///
+///    Unit variants have no fields, so their strings are never treated as format strings and
+///    are emitted verbatim. `#[strum(to_string = "}")]` on a unit variant simply prints `}`.
 ///
 /// ```
 /// // You need to bring the ToString trait into scope to use it
