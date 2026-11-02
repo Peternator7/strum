@@ -87,6 +87,8 @@ pub fn enum_properties_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     );
 
     Ok(quote! {
+        #[allow(deprecated)]
+        #[allow(unreachable_code)]
         #[automatically_derived]
         impl #impl_generics #strum_module_path::EnumProperty for #name #ty_generics #where_clause {
             #[inline]

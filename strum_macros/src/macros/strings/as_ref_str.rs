@@ -74,6 +74,8 @@ pub fn as_ref_str_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     })?;
 
     Ok(quote! {
+        #[allow(deprecated)]
+        #[allow(unreachable_code)]
         #[automatically_derived]
         impl #impl_generics ::core::convert::AsRef<str> for #name #ty_generics #where_clause {
             #[inline]
@@ -114,6 +116,8 @@ pub fn as_static_str_inner(
 
     Ok(match trait_variant {
         GenerateTraitVariant::AsStaticStr => quote! {
+            #[allow(deprecated)]
+            #[allow(unreachable_code)]
             #[automatically_derived]
             impl #impl_generics #strum_module_path::AsStaticRef<str> for #name #ty_generics #where_clause {
                 #[inline]
@@ -125,6 +129,8 @@ pub fn as_static_str_inner(
             }
         },
         GenerateTraitVariant::From if !type_properties.const_into_str => quote! {
+            #[allow(deprecated)]
+            #[allow(unreachable_code)]
             #[automatically_derived]
             impl #impl_generics ::core::convert::From<#name #ty_generics> for &'static str #where_clause {
                 #[inline]
@@ -134,6 +140,8 @@ pub fn as_static_str_inner(
                     }
                 }
             }
+            #[allow(deprecated)]
+            #[allow(unreachable_code)]
             #[automatically_derived]
             impl #impl_generics2 ::core::convert::From<&'_derivative_strum #name #ty_generics> for &'static str #where_clause {
                 #[inline]
@@ -145,6 +153,8 @@ pub fn as_static_str_inner(
             }
         },
         GenerateTraitVariant::From => quote! {
+            #[allow(deprecated)]
+            #[allow(unreachable_code)]
             #[automatically_derived]
             impl #impl_generics #name #ty_generics #where_clause {
                 pub const fn into_str(&self) -> &'static str {
@@ -153,6 +163,8 @@ pub fn as_static_str_inner(
                     }
                 }
             }
+            #[allow(deprecated)]
+            #[allow(unreachable_code)]
             #[automatically_derived]
             impl #impl_generics ::core::convert::From<#name #ty_generics> for &'static str #where_clause {
                 fn from(x: #name #ty_generics) -> &'static str {
@@ -161,6 +173,8 @@ pub fn as_static_str_inner(
                     }
                 }
             }
+            #[allow(deprecated)]
+            #[allow(unreachable_code)]
             #[automatically_derived]
             impl #impl_generics2 ::core::convert::From<&'_derivative_strum #name #ty_generics> for &'static str #where_clause {
                 fn from(x: &'_derivative_strum #name #ty_generics) -> &'static str {

@@ -132,6 +132,8 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
+        #[allow(deprecated)]
+        #[allow(unreachable_code)]
         #[automatically_derived]
         impl<T> #table_name<T> {
             #[doc = #doc_new]
@@ -163,6 +165,8 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         }
 
+        #[allow(deprecated)]
+        #[allow(unreachable_code)]
         #[automatically_derived]
         impl<T> ::core::ops::Index<#name> for #table_name<T> {
             type Output = T;
@@ -176,6 +180,8 @@ pub fn enum_table_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         }
 
+        #[allow(deprecated)]
+        #[allow(unreachable_code)]
         #[automatically_derived]
         impl<T> ::core::ops::IndexMut<#name> for #table_name<T> {
             #[inline]
