@@ -40,6 +40,24 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let mut has_additional_data = false;
     let mut prev_const_var_ident = None;
     for variant in variants {
+        let const_var_str = format!("{}_DISCRIMINANT", variant.ident);
+        let const_var_ident = format_ident!("{}", const_var_str);
+
+        let const_val_expr = match &variant.discriminant {
+            Some((_, expr)) => quote! { #expr },
+            None => match &prev_const_var_ident {
+                Some(prev) => quote! { #prev + 1 },
+                None => quote! { 0 },
+            },
+        };
+
+        constant_defs.push(quote! {
+            #[allow(non_upper_case_globals)]
+            const #const_var_ident: #discriminant_type = #const_val_expr;
+        });
+        prev_const_var_ident = Some(const_var_ident.clone());
+
+        // Disabled variants still take up a discriminant value, so they only skip the match arm.
         if variant.get_variant_properties()?.disabled.is_some() {
             continue;
         }
@@ -63,24 +81,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             }
         };
 
-        let const_var_str = format!("{}_DISCRIMINANT", variant.ident);
-        let const_var_ident = format_ident!("{}", const_var_str);
-
-        let const_val_expr = match &variant.discriminant {
-            Some((_, expr)) => quote! { #expr },
-            None => match &prev_const_var_ident {
-                Some(prev) => quote! { #prev + 1 },
-                None => quote! { 0 },
-            },
-        };
-
-        constant_defs.push(quote! {
-            #[allow(non_upper_case_globals)]
-            const #const_var_ident: #discriminant_type = #const_val_expr;
-        });
         arms.push(quote! {v if v == #const_var_ident => ::core::option::Option::Some(#name::#ident #params)});
-
-        prev_const_var_ident = Some(const_var_ident);
     }
 
     arms.push(quote! { _ => ::core::option::Option::None });
