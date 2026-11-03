@@ -80,3 +80,29 @@ fn lifetime_test() {
     assert_eq!(Data::from_repr(2), Some(Data::Payload("")));
     assert_eq!(Data::from_repr(3), None);
 }
+
+#[allow(dead_code)]
+#[derive(Debug, FromRepr, PartialEq)]
+#[repr(u8)]
+enum Status {
+    Active,
+    #[strum(disabled)]
+    Reserved,
+    Inactive,
+    #[strum(disabled)]
+    Retired,
+}
+
+#[test]
+fn disabled_variant_keeps_discriminants_test() {
+    assert_eq!(
+        Status::from_repr(Status::Active as u8),
+        Some(Status::Active)
+    );
+    assert_eq!(Status::from_repr(1), None);
+    assert_eq!(
+        Status::from_repr(Status::Inactive as u8),
+        Some(Status::Inactive)
+    );
+    assert_eq!(Status::from_repr(3), None);
+}
