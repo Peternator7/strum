@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use std::default::Default;
-use syn::{parse_quote, DeriveInput, Ident, LitStr, Meta, Path, Visibility};
+use syn::{parse_quote, DeriveInput, Ident, LitStr, Meta, MetaList, Path, Visibility};
 
 use super::case_style::CaseStyle;
 use super::metadata::{DeriveInputExt, EnumDiscriminantsMeta, EnumMeta};
@@ -21,6 +21,7 @@ pub struct StrumTypeProperties {
     pub discriminant_name: Option<Ident>,
     pub discriminant_others: Vec<Meta>,
     pub discriminant_vis: Option<Visibility>,
+    pub discriminant_attributes: Vec<MetaList>,
     pub use_phf: bool,
     pub prefix: Option<LitStr>,
     pub suffix: Option<LitStr>,
@@ -147,6 +148,9 @@ impl HasTypeProperties for DeriveInput {
 
                     vis_kw = Some(kw);
                     output.discriminant_vis = Some(vis);
+                }
+                EnumDiscriminantsMeta::Attributes { attributes, .. } => {
+                    output.discriminant_attributes.extend(attributes);
                 }
                 EnumDiscriminantsMeta::Other { passthrough_meta } => {
                     output.discriminant_others.push(passthrough_meta);
