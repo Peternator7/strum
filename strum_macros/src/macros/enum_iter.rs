@@ -62,6 +62,12 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     }
 
     let variant_count = arms.len();
+    if variant_count >= usize::MAX / 2 {
+        return Err(syn::Error::new(
+            Span::call_site(),
+            "This enum has too many variants. The maximum number of variants is `usize::MAX / 2`",
+        ));
+    }
     arms.push(quote! { _ => ::core::option::Option::None });
     let iter_name = syn::parse_str::<Ident>(&format!("{}Iter", name)).unwrap();
 
