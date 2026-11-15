@@ -50,6 +50,50 @@ fn test_formatters() {
 }
 
 #[test]
+fn test_interpolated_formatters() {
+    assert_eq!(
+        String::from("  saturation is 7"),
+        format!("{:>17}", Color::Purple { sat: 7 })
+    );
+    assert_eq!(
+        String::from("Orange(7)--"),
+        format!("{:-<11}", Color::Orange(7))
+    );
+    assert_eq!(
+        String::from("*Orange(7)**"),
+        format!("{:*^12}", Color::Orange(7))
+    );
+    assert_eq!(
+        String::from("satur"),
+        format!("{:.5}", Color::Purple { sat: 7 })
+    );
+    assert_eq!(String::from("Or   "), format!("{:5.2}", Color::Orange(7)));
+    assert_eq!(String::from("Orange(7)"), format!("{:3}", Color::Orange(7)));
+    assert_eq!(
+        String::from("Orange(42)"),
+        format!("{:.20}", Color::Orange(42))
+    );
+}
+
+#[derive(strum::Display)]
+enum Unicode {
+    #[strum(to_string = "\u{e9}t\u{e9} {0}")]
+    Summer(u8),
+}
+
+#[test]
+fn test_interpolated_formatters_count_chars() {
+    assert_eq!(
+        String::from("  \u{e9}t\u{e9} 1"),
+        format!("{:>7}", Unicode::Summer(1))
+    );
+    assert_eq!(
+        String::from("\u{e9}t"),
+        format!("{:.2}", Unicode::Summer(1))
+    );
+}
+
+#[test]
 fn to_yellow_string() {
     assert_eq!(String::from("yellow"), format!("{}", Color::Yellow));
 }
