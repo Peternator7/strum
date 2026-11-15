@@ -123,14 +123,24 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 self.nth(0)
             }
 
+            #[allow(unexpected_cfgs)]
             #[inline]
             fn size_hint(&self) -> (usize, ::core::option::Option<usize>) {
+                #[cfg(kani)]
+                kani::assume(
+                    self.idx <= #variant_count && self.back_idx <= #variant_count && #variant_count < usize::MAX / 2
+                );
                 let t = if self.idx + self.back_idx >= #variant_count { 0 } else { #variant_count - self.idx - self.back_idx };
                 (t, ::core::option::Option::Some(t))
             }
 
+            #[allow(unexpected_cfgs)]
             #[inline]
             fn nth(&mut self, n: usize) -> ::core::option::Option<<Self as Iterator>::Item> {
+                #[cfg(kani)]
+                kani::assume(
+                    self.idx <= #variant_count && self.back_idx <= #variant_count && #variant_count < usize::MAX / 2
+                );
                 if n > #variant_count {
                     return ::core::option::Option::None;
                 }
@@ -158,8 +168,13 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         #[automatically_derived]
         impl #impl_generics ::core::iter::DoubleEndedIterator for #iter_name #ty_generics #where_clause {
+            #[allow(unexpected_cfgs)]
             #[inline]
             fn next_back(&mut self) -> ::core::option::Option<<Self as Iterator>::Item> {
+                #[cfg(kani)]
+                kani::assume(
+                    self.idx <= #variant_count && self.back_idx <= #variant_count && #variant_count < usize::MAX / 2
+                );
                 let back_idx = self.back_idx + 1;
 
                 if self.idx + back_idx > #variant_count {
