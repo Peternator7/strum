@@ -62,6 +62,12 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     }
 
     let variant_count = arms.len();
+    if variant_count >= usize::MAX / 2 {
+        return Err(syn::Error::new(
+            Span::call_site(),
+            "This enum has too many variants. The maximum number of variants is `usize::MAX / 2`",
+        ));
+    }
     arms.push(quote! { _ => ::core::option::Option::None });
     let iter_name = syn::parse_str::<Ident>(&format!("{}Iter", name)).unwrap();
 
@@ -75,8 +81,8 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             missing_copy_implementations,
         )]
         #vis struct #iter_name #impl_generics {
-            idx: usize,
-            back_idx: usize,
+            idx: usize, // must always be <= #variant_count
+            back_idx: usize, // must always be <= #variant_count
             marker: ::core::marker::PhantomData #phantom_data,
         }
 
@@ -123,14 +129,27 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 self.nth(0)
             }
 
+            #[allow(unexpected_cfgs)]
             #[inline]
             fn size_hint(&self) -> (usize, ::core::option::Option<usize>) {
+                #[cfg(kani)]
+                kani::assume(
+                    self.idx <= #variant_count && self.back_idx <= #variant_count && #variant_count < usize::MAX / 2
+                );
                 let t = if self.idx + self.back_idx >= #variant_count { 0 } else { #variant_count - self.idx - self.back_idx };
                 (t, ::core::option::Option::Some(t))
             }
 
+            #[allow(unexpected_cfgs)]
             #[inline]
             fn nth(&mut self, n: usize) -> ::core::option::Option<<Self as Iterator>::Item> {
+                #[cfg(kani)]
+                kani::assume(
+                    self.idx <= #variant_count && self.back_idx <= #variant_count && #variant_count < usize::MAX / 2
+                );
+                if n > #variant_count {
+                    return ::core::option::Option::None;
+                }
                 let idx = self.idx + n + 1;
                 if idx + self.back_idx > #variant_count {
                     // We went past the end of the iterator. Freeze idx at #variant_count
@@ -155,8 +174,13 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
         #[automatically_derived]
         impl #impl_generics ::core::iter::DoubleEndedIterator for #iter_name #ty_generics #where_clause {
+            #[allow(unexpected_cfgs)]
             #[inline]
             fn next_back(&mut self) -> ::core::option::Option<<Self as Iterator>::Item> {
+                #[cfg(kani)]
+                kani::assume(
+                    self.idx <= #variant_count && self.back_idx <= #variant_count && #variant_count < usize::MAX / 2
+                );
                 let back_idx = self.back_idx + 1;
 
                 if self.idx + back_idx > #variant_count {
