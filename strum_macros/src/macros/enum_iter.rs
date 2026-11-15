@@ -75,8 +75,8 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
             missing_copy_implementations,
         )]
         #vis struct #iter_name #impl_generics {
-            idx: usize,
-            back_idx: usize,
+            idx: usize, // must always be <= #variant_count
+            back_idx: usize, // must always be <= #variant_count
             marker: ::core::marker::PhantomData #phantom_data,
         }
 
