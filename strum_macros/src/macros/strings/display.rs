@@ -17,6 +17,7 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let type_properties = ast.get_type_properties()?;
 
     let mut arms = Vec::new();
+    let mut interpolates = false;
     for variant in variants {
         let ident = &variant.ident;
         let variant_properties = variant.get_variant_properties()?;
@@ -110,9 +111,10 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                         })
                         .collect();
 
+                    interpolates = true;
                     quote! {
                         #[allow(unused_variables)]
-                        #name::#ident #params => ::core::fmt::Display::fmt(&format_args!(#output, #args), f)
+                        #name::#ident #params => __strum_pad(f, format_args!(#output, #args))
                     }
                 }
             }
@@ -136,9 +138,10 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                             syn::parse_str::<Ident>(format!("field{}", index).as_str()).unwrap()
                         })
                         .collect();
+                    interpolates = true;
                     quote! {
                         #[allow(unused_variables)]
-                        #name::#ident #params => ::core::fmt::Display::fmt(&format!(#output, #args), f)
+                        #name::#ident #params => __strum_pad(f, format_args!(#output, #args))
                     }
                 }
             }
@@ -162,16 +165,94 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         arms.push(quote! { _ => panic!("fmt() called on disabled variant.") });
     }
 
+    let pad = interpolates.then(pad_fn);
+
     Ok(quote! {
         #[automatically_derived]
         impl #impl_generics ::core::fmt::Display for #name #ty_generics #where_clause {
             fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::result::Result<(), ::core::fmt::Error> {
+                #pad
                 match *self {
                     #(#arms),*
                 }
             }
         }
     })
+}
+
+/// Writes `args` honoring the width, fill, alignment and precision of `f`,
+/// the same way `Formatter::pad` does for a `&str`, without buffering.
+fn pad_fn() -> TokenStream {
+    quote! {
+        fn __strum_pad(
+            f: &mut ::core::fmt::Formatter,
+            args: ::core::fmt::Arguments,
+        ) -> ::core::fmt::Result {
+            struct Sink;
+
+            impl ::core::fmt::Write for Sink {
+                fn write_str(&mut self, _: &str) -> ::core::fmt::Result {
+                    ::core::result::Result::Ok(())
+                }
+            }
+
+            struct Truncate<W> {
+                out: W,
+                chars_left: ::core::primitive::usize,
+            }
+
+            impl<W: ::core::fmt::Write> ::core::fmt::Write for Truncate<W> {
+                fn write_str(&mut self, s: &str) -> ::core::fmt::Result {
+                    let mut end = 0;
+                    for c in s.chars() {
+                        if self.chars_left == 0 {
+                            break;
+                        }
+                        self.chars_left -= 1;
+                        end += c.len_utf8();
+                    }
+                    self.out.write_str(&s[..end])
+                }
+            }
+
+            let (width, precision) = (f.width(), f.precision());
+            if width.is_none() && precision.is_none() {
+                return f.write_fmt(args);
+            }
+
+            let chars_max = precision.unwrap_or(::core::primitive::usize::MAX);
+            let padding = match width {
+                ::core::option::Option::Some(width) => {
+                    let mut counter = Truncate { out: Sink, chars_left: chars_max };
+                    ::core::fmt::write(&mut counter, args)?;
+                    width.saturating_sub(chars_max - counter.chars_left)
+                }
+                ::core::option::Option::None => 0,
+            };
+            let (before, after) = match f.align() {
+                ::core::option::Option::Some(::core::fmt::Alignment::Right) => (padding, 0),
+                ::core::option::Option::Some(::core::fmt::Alignment::Center) => {
+                    (padding / 2, (padding + 1) / 2)
+                }
+                _ => (0, padding),
+            };
+
+            let fill = f.fill();
+            for _ in 0..before {
+                ::core::fmt::Write::write_char(f, fill)?;
+            }
+            match precision {
+                ::core::option::Option::Some(chars_left) => {
+                    ::core::fmt::write(&mut Truncate { out: &mut *f, chars_left }, args)?
+                }
+                ::core::option::Option::None => f.write_fmt(args)?,
+            }
+            for _ in 0..after {
+                ::core::fmt::Write::write_char(f, fill)?;
+            }
+            ::core::result::Result::Ok(())
+        }
+    }
 }
 
 fn capture_format_string_idents(string_literal: &LitStr) -> syn::Result<Vec<Ident>> {
