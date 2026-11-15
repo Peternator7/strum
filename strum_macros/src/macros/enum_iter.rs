@@ -131,6 +131,9 @@ pub fn enum_iter_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
 
             #[inline]
             fn nth(&mut self, n: usize) -> ::core::option::Option<<Self as Iterator>::Item> {
+                if n > #variant_count {
+                    return ::core::option::Option::None;
+                }
                 let idx = self.idx + n + 1;
                 if idx + self.back_idx > #variant_count {
                     // We went past the end of the iterator. Freeze idx at #variant_count
