@@ -1,4 +1,4 @@
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{Data, DeriveInput, Fields, Type};
 
@@ -6,8 +6,7 @@ use crate::helpers::{non_enum_error, HasStrumVariantProperties, HasTypePropertie
 
 pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &ast.ident;
-    let gen = &ast.generics;
-    let (impl_generics, ty_generics, where_clause) = gen.split_for_impl();
+    let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
     let vis = &ast.vis;
 
     let mut discriminant_type: Type = syn::parse("usize".parse().unwrap()).unwrap();
@@ -29,14 +28,6 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                 }
             }
         }
-    }
-
-    if gen.lifetimes().count() > 0 {
-        return Err(syn::Error::new(
-            Span::call_site(),
-            "This macro doesn't support enums with lifetimes. \
-             The resulting enums would be unbounded.",
-        ));
     }
 
     let variants = match &ast.data {
@@ -106,7 +97,7 @@ pub fn from_repr_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
         impl #impl_generics #name #ty_generics #where_clause {
             #[doc = "Try to create [Self] from the raw representation"]
             #[inline]
-            #vis #const_if_possible fn from_repr(discriminant: #discriminant_type) -> Option<#name #ty_generics> {
+            #vis #const_if_possible fn from_repr(discriminant: #discriminant_type) -> ::core::option::Option<#name #ty_generics> {
                 #(#constant_defs)*
                 match discriminant {
                     #(#arms),*

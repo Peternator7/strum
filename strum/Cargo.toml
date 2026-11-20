@@ -22,9 +22,6 @@ phf = { version = "0.13", features = ["macros"], optional = true }
 [dev-dependencies]
 strum_macros = { path = "../strum_macros" }
 
-[badges]
-travis-ci = { repository = "Peternator7/strum" }
-
 [features]
 default = ["std"]
 derive = ["strum_macros"]

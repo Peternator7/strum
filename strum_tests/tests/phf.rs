@@ -3,6 +3,9 @@ mod core {} // ensure macros call `::core`
 #[cfg(feature = "test_phf")]
 #[test]
 fn from_str_with_phf() {
+    #[allow(non_upper_case_globals)]
+    const s: &str = "local constant";
+
     #[derive(Debug, PartialEq, Eq, Clone, strum::EnumString)]
     #[strum(use_phf)]
     enum Color {
@@ -12,6 +15,19 @@ fn from_str_with_phf() {
     }
     assert_eq!("Red".parse::<Color>().unwrap(), Color::Red);
     assert_eq!("bLuE".parse::<Color>().unwrap(), Color::Blue);
+
+    #[derive(Debug, PartialEq, Eq, Clone, strum::EnumString)]
+    #[strum(use_phf)]
+    enum CollisionColor {
+        Red,
+        #[strum(default)]
+        Unknown(String),
+    }
+    assert_eq!(s, "local constant");
+    assert_eq!(
+        CollisionColor::Unknown("other".to_string()),
+        CollisionColor::from("other")
+    );
 }
 
 #[cfg(feature = "test_phf")]
