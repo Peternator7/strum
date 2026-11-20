@@ -142,15 +142,10 @@ pub fn display_inner(ast: &DeriveInput) -> syn::Result<TokenStream> {
                     }
                 }
             }
+            // Unit variants have no fields to interpolate, so the string is not a format
+            // string: emit it verbatim so that curly braces (e.g. `to_string = "}"`) work and
+            // the value round-trips through `EnumString`. See issues #361 and #363.
             Fields::Unit => {
-                let used_vars = capture_format_strings(&output)?;
-                if !used_vars.is_empty() {
-                    return Err(syn::Error::new_spanned(
-                        &output,
-                        "Unit variants do not support interpolation",
-                    ));
-                }
-
                 quote! { #name::#ident #params => ::core::fmt::Display::fmt(#output, f) }
             }
         };

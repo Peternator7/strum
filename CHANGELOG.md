@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+* Fix `Display` failing to compile when a unit variant's
+  `to_string` / `serialize` value contains curly braces (e.g. `#[strum(to_string = "}")]`). Unit variants have no
+  fields to interpolate, so their strings are now emitted verbatim again, as they were in `0.25`, and round trip
+  through `EnumString`. Fixes [#363](https://github.com/Peternator7/strum/issues/363) and
+  [#361](https://github.com/Peternator7/strum/issues/361).
+
 ## 0.28.0
 
 * [#461](https://github.com/Peternator7/strum/pull/461): Allow any kind of passthrough attributes on `EnumDiscriminants`.
